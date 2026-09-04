@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { getToken, setToken as persistToken } from "../api/http.js";
-import { registerRequest, loginRequest, meRequest } from "../api/auth.js";
+import { registerRequest, loginRequest, refreshRequest, logoutRequest } from "../api/auth.js";
 
 const AuthContext = createContext(null);
 
@@ -14,16 +14,18 @@ export function AuthProvider({ children }) {
     setEmail(data.email);
   }, []);
 
+  const clearSession = useCallback(() => {
+    persistToken(null);
+    setTokenState(null);
+    setEmail(null);
+  }, []);
+
+  // Silently exchange the httpOnly refresh cookie (if any) for a fresh access token on load,
+  // so a page reload doesn't require re-login just because the short-lived token expired.
   useEffect(() => {
-    if (!token || email) return;
-    meRequest()
-      .then((data) => setEmail(data.email))
-      .catch(() => {
-        persistToken(null);
-        setTokenState(null);
-      });
+    refreshRequest().then(applySession).catch(clearSession);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
   const register = useCallback(
     async (emailInput, password) => {
@@ -42,10 +44,9 @@ export function AuthProvider({ children }) {
   );
 
   const logout = useCallback(() => {
-    persistToken(null);
-    setTokenState(null);
-    setEmail(null);
-  }, []);
+    logoutRequest().catch(() => {});
+    clearSession();
+  }, [clearSession]);
 
   return (
     <AuthContext.Provider value={{ token, email, register, login, logout }}>

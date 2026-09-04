@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import daysRoutes from "./routes/days.routes.js";
@@ -12,8 +14,10 @@ if (!MONGO_URI) throw new Error("MONGO_URI is not set — copy server/.env.examp
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not set — copy server/.env.example to server/.env");
 
 const app = express();
-app.use(cors({ origin: CORS_ORIGIN || "http://localhost:5173" }));
+app.use(helmet());
+app.use(cors({ origin: CORS_ORIGIN || "http://localhost:5173", credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRoutes);

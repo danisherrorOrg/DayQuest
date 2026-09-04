@@ -24,28 +24,30 @@ feature ideas and code-review fixes already tracked in `README.md`.
 
 ## Security
 
-- [ ] **No rate limiting** on `POST /auth/login` or `/auth/register`
-      (`server/src/routes/auth.routes.js`) — brute-force/credential-stuffing
-      exposure. _Small-medium — add `express-rate-limit`._
-- [ ] **No security headers middleware** (e.g. `helmet`) in
-      `server/src/index.js`. _Small._
-- [ ] **No server-side email format validation.** `auth.controller.js`
-      only checks `email` is truthy; format is enforced solely by the client's
-      `<input type="email">`, which a direct API call bypasses. `User` model
-      has no format validator either. _Small._
-- [ ] **Long-lived JWTs with no refresh/revocation.** Tokens are signed for
-      7 days (`signToken` in `auth.controller.js`) with no refresh-token
-      mechanism and no server-side logout/revocation — a stolen token stays
-      valid for a week. _Medium._
+- [x] ~~No rate limiting on `POST /auth/login` or `/auth/register`.~~ Fixed:
+      added an `express-rate-limit` limiter (`server/src/middleware/rateLimit.js`,
+      20 requests / 15 min) applied to both routes in `auth.routes.js`.
+- [x] ~~No security headers middleware.~~ Fixed: `helmet()` wired in as the
+      first middleware in `server/src/index.js`.
+- [x] ~~No server-side email format validation.~~ Fixed: `auth.controller.js`
+      now validates format with a regex before hitting the DB, and the `User`
+      model has a matching Mongoose `match` validator as defense in depth.
+- [x] ~~Long-lived JWTs with no refresh/revocation.~~ Fixed: access tokens
+      now expire in 15 minutes; a separate opaque refresh token (stored only
+      as a SHA-256 hash on the `User` doc) is issued as an httpOnly, rotated
+      cookie via new `POST /auth/refresh` and `POST /auth/logout` endpoints,
+      the latter revoking the stored hash server-side. Client
+      (`client/src/api/http.js`) transparently refreshes on a 401 and retries.
 - [ ] **No password-reset or email-verification flow.** Register/login only.
       _Medium-large._
 
 ## Code quality / client robustness
 
-- [ ] **No handling for expired/invalid tokens mid-session.** `apiRequest`
-      (`client/src/api/http.js`) doesn't special-case `401` — an expired JWT
-      just throws a generic error instead of logging the user out / redirecting
-      to login. _Small._
+- [x] ~~No handling for expired/invalid tokens mid-session.~~ Fixed as part
+      of the refresh-token work above: `apiRequest` now retries a `401` once
+      via `POST /auth/refresh` before surfacing an error, so a mid-session
+      access-token expiry is transparent as long as the refresh cookie is
+      still valid.
 - [ ] **No offline/network-failure handling.** A failed `fetch` (network
       down) surfaces the same generic error path as any other failure — no
       retry or offline messaging.
