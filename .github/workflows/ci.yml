@@ -28,5 +28,4 @@ jobs:
 
       - run: npm run build -w client
 
-      # No `npm test` yet — no test framework is wired up in this repo
-      # (tracked in TODO.md). Add a test job here once one exists.
+      - run: npm test

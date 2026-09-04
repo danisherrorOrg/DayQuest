@@ -5,11 +5,19 @@ feature ideas and code-review fixes already tracked in `README.md`.
 
 ## Testing
 
-- [ ] **No test framework at all.** No `jest`/`vitest`/`mocha` in any of the
-      3 `package.json` files, no `test` script, no `*.test.js`/`*.spec.js`/
-      `__tests__`. Zero coverage on auth, day-save logic, or level-building math.
-      _Medium-large lift — pick a framework, wire up scripts, write an initial
-      suite for `levelBuilder.js` and the auth/day controllers._
+- [x] ~~No test framework at all.~~ Fixed: added Vitest (root
+      `vitest.config.js`, `npm test` / `test:watch` at the root and
+      `npm run test -w client` / `-w server` per workspace; `run.sh test` /
+      `test:watch` forward too). Initial suite: `levelBuilder.js` (pure level-
+      building math — durations, timeline merging, segment/coin layout,
+      summary phrasing), `server/src/middleware/auth.js` (JWT verification),
+      and the auth/day controllers (`auth.controller.js`,
+      `days.controller.js`) — the latter mock the Mongoose models via
+      `vi.mock` and call the controller functions directly with a fake
+      `res`, so they run without a real MongoDB (required inside a sandbox
+      anyway — see `CLAUDE.md`). Still no coverage on the client parsing
+      (`parse.js`) or React components — a reasonable next slice, not
+      required to close this gap.
 
 ## Tooling
 

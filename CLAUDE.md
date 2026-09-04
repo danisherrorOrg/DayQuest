@@ -47,7 +47,9 @@ sandboxed environment.** Two independent things break it:
 verified with a real end-to-end run (register → login → save a day, etc.)
 from inside a sandbox. Verify what you can instead:
 
-- `node --check <file>` for syntax, `npm run lint`, `npm run build -w client`.
+- `node --check <file>` for syntax, `npm run lint`, `npm run build -w client`,
+  `npm test` (the server suite mocks Mongoose models, so it runs fine without
+  a DB — see "Coding standards" below).
 - Pure-logic checks that don't need a DB: stub `fetch`/`navigator`/
   `localStorage` and exercise `client/src/api/http.js` directly in a `node -e`
   script (this is how the retry/offline-error logic was verified — see the
@@ -79,8 +81,16 @@ from inside a sandbox. Verify what you can instead:
   failure (see `client/src/api/http.js`) is tagged `.isNetworkError = true`
   so callers that care (e.g. `GameScreen`'s save button) can special-case it
   without string-matching the message.
-- No test framework is set up yet (tracked in `TODO.md`) — don't assume
-  `npm test` exists.
+- Tests use Vitest (`npm test` / `npm run test:watch` at the root, or
+  `npm run test -w client` / `-w server` to scope to one workspace) — config
+  is the root `vitest.config.js`, test files live next to the code they
+  cover as `*.test.js`. Server tests mock the Mongoose models (`vi.mock` on
+  `../models/*.js`) rather than hitting a real MongoDB — this is required
+  inside a sandbox anyway (see above) but is the pattern everywhere,
+  including outside one. See `server/src/controllers/auth.controller.test.js`
+  for the shape: a mocked model, a fake `res` with `status`/`json`/`cookie`
+  spies, and the controller function called directly (no Express app, no
+  supertest).
 
 ## Docs upkeep
 

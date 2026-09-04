@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "lint": "cd .. && eslint server"
+    "lint": "cd .. && eslint server",
+    "test": "cd .. && vitest run server/src"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

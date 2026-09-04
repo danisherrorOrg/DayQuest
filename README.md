@@ -56,14 +56,26 @@ npm run format           # Prettier, writes changes
 npm run format:check     # Prettier, check only (CI-friendly)
 ```
 
+### Tests
+
+```bash
+npm test                 # Vitest, runs once (client + server)
+npm run test:watch       # Vitest in watch mode
+npm run test -w client   # just the client suite
+npm run test -w server   # just the server suite
+```
+
+Server tests mock the Mongoose models rather than needing a real MongoDB —
+see `server/src/controllers/auth.controller.test.js` for the pattern.
+
 ## Production / deployment
 
 `npm run dev` above is local-dev only (hot reload, no build). For building
 the client, running the server in production, containerizing with Docker,
 and configuring MongoDB/env vars for a real deployment, see `DEPLOY.md`.
 
-CI (`.github/workflows/ci.yml`) runs `format:check`, `lint`, and the client
-build on every push/PR to `main`.
+CI (`.github/workflows/ci.yml`) runs `format:check`, `lint`, the client
+build, and the test suite on every push/PR to `main`.
 
 ## Input modes
 

@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "cd .. && eslint client"
+    "lint": "cd .. && eslint client",
+    "test": "cd .. && vitest run client/src"
   },
   "dependencies": {
     "react": "^18.3.1",

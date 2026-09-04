@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Starts both the client (Vite, :5173) and server (Express, :4000) together.
-# Usage: ./run.sh [lint|lint:fix|format|format:check]
+# Usage: ./run.sh [lint|lint:fix|format|format:check|test|test:watch]
 set -e
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -11,14 +11,14 @@ if [ ! -d node_modules ]; then
 fi
 
 case "$1" in
-  lint|lint:fix|format|format:check)
+  lint|lint:fix|format|format:check|test|test:watch)
     exec npm run "$1"
     ;;
   "")
     ;;
   *)
     echo "Unknown option: $1" >&2
-    echo "Usage: ./run.sh [lint|lint:fix|format|format:check]" >&2
+    echo "Usage: ./run.sh [lint|lint:fix|format|format:check|test|test:watch]" >&2
     exit 1
     ;;
 esac
