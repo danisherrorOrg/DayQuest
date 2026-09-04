@@ -1,0 +1,47 @@
+# Local/production-like orchestration: MongoDB + API + static client behind
+# nginx. See DEPLOY.md for details.
+#
+# Usage:
+#   echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
+#   docker compose up --build
+# Then open http://localhost:8080
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://mongo:27017/day-story
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in a .env file next to docker-compose.yml}
+      PORT: 4000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Day Story <no-reply@dayquest.local>}
+    depends_on:
+      - mongo
+    ports:
+      - "4000:4000"
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "8080:80"
+
+volumes:
+  mongo-data:

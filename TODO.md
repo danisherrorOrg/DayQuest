@@ -72,16 +72,26 @@ feature ideas and code-review fixes already tracked in `README.md`.
 
 ## Docs / Config / DevOps
 
-- [ ] **No CI.** No `.github/workflows` — nothing runs build/lint/test on
-      PRs.
-- [ ] **No containerization.** No Dockerfile anywhere in the repo.
-- [ ] **No production deployment docs.** README only covers local dev
-      (`npm run dev`); nothing on building the client for prod, serving it, or
-      deploying the server/Mongo.
-- [ ] **No responsive/mobile layout.** `client/src/index.css` has zero
-      `@media` queries; the viewport meta tag also sets `user-scalable=no`,
-      so small screens get a fixed, non-adapting layout with no manual zoom
-      fallback.
+- [x] ~~No CI.~~ Fixed: `.github/workflows/ci.yml` runs `format:check`,
+      `lint`, and the client build on push/PR to `main` (Node 18.x and
+      20.x). No test job yet since there's still no test framework (see
+      "Testing" above).
+- [x] ~~No containerization.~~ Fixed: `server/Dockerfile` and
+      `client/Dockerfile` (multi-stage, built from the repo root for the npm
+      workspaces to resolve), `client/nginx.conf` for serving the static
+      build and proxying `/api`, and a root `docker-compose.yml` wiring both
+      up with a `mongo` service for local/single-host use.
+- [x] ~~No production deployment docs.~~ Fixed: added `DEPLOY.md` covering
+      Docker Compose, deploying the client/server/Mongo separately, required
+      env vars, and the client's `/api` proxy requirement; linked from
+      `README.md`.
+- [x] ~~No responsive/mobile layout.~~ Fixed: `client/index.html`'s viewport
+      meta no longer sets `maximum-scale=1.0`/`user-scalable=no` (pinch-zoom
+      now works) and adds `viewport-fit=cover`; `client/src/index.css` now
+      centers the phone-width layout with a max-width on wider viewports
+      instead of stretching it edge-to-edge, adds a small-screen (`<340px`)
+      breakpoint, and pads the offline banner/bottom controls for
+      `env(safe-area-inset-*)` on notched phones.
 
 ## Verified fine (not gaps)
 

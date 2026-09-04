@@ -16,6 +16,18 @@ body,
   background: #2b2140;
   overflow: hidden;
 }
+/* On phones #app/.screen naturally fill the viewport. On wider viewports
+   (tablet/desktop) center a phone-width column instead of stretching the
+   layout edge to edge. */
+#root {
+  display: flex;
+  justify-content: center;
+}
+#app,
+.screen {
+  width: 100%;
+  max-width: 480px;
+}
 #app {
   display: flex;
   flex-direction: column;
@@ -29,6 +41,30 @@ body,
 }
 .screen.active {
   display: flex;
+}
+
+@media (min-width: 480px) {
+  #app,
+  .screen.active {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+}
+
+@media (max-width: 340px) {
+  .panel {
+    padding: 14px 14px 10px;
+  }
+  .panel h1 {
+    font-size: 19px;
+  }
+  .ctrlBtn {
+    width: 50px;
+    height: 46px;
+  }
+  #jumpBtn {
+    width: 72px;
+    height: 54px;
+  }
 }
 
 /* ---- Shared light panel style ---- */
@@ -141,7 +177,7 @@ body,
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 8px 14px;
+  padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
   background: #c1502e;
   color: #fff8ec;
   font-size: 12.5px;
@@ -447,7 +483,7 @@ canvas {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px 22px;
+  padding: 12px 16px calc(22px + env(safe-area-inset-bottom));
   background: #201936;
   gap: 12px;
 }

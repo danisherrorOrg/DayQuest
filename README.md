@@ -56,6 +56,15 @@ npm run format           # Prettier, writes changes
 npm run format:check     # Prettier, check only (CI-friendly)
 ```
 
+## Production / deployment
+
+`npm run dev` above is local-dev only (hot reload, no build). For building
+the client, running the server in production, containerizing with Docker,
+and configuring MongoDB/env vars for a real deployment, see `DEPLOY.md`.
+
+CI (`.github/workflows/ci.yml`) runs `format:check`, `lint`, and the client
+build on every push/PR to `main`.
+
 ## Input modes
 
 1. **Write it out** — type lines like `06:30-07:00 gym`. Gaps between lines
