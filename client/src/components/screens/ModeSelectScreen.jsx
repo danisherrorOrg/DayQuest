@@ -25,8 +25,11 @@ export default function ModeSelectScreen({ onPick }) {
           </p>
         </div>
         <div className="modeCard" onClick={() => onPick("timeline")}>
-          <h3>🕒 Build it on a timeline</h3>
-          <p>Go through 0–24 hours and tap in what you were doing, half hour by half hour.</p>
+          <h3>🕒 Drag it on a timeline</h3>
+          <p>
+            Drag across a 0–24 ruler to block out time for something, resize or move blocks after,
+            and leave the rest as black box.
+          </p>
         </div>
         <div className="modeCard" onClick={() => onPick("moments")}>
           <h3>📝 List your moments in order</h3>

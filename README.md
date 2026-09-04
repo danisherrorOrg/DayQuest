@@ -84,20 +84,21 @@ build, and the test suite on every push/PR to `main`.
    and free-form tags with autocomplete. Cards stack in entry order and are
    editable/deletable; a running total shows how much of the 24h is still
    unaccounted for.
-2. **Build it on a timeline** — pick an activity, tap the half-hour slots you
-   spent on it, 00:00 to 24:00. Untapped slots stay black box.
+2. **Drag it on a timeline** — drag across a 0–24 ruler to block out time for
+   something; a popup lets you add a title, note, category, and tags (all
+   optional). Blocks can be moved or resized afterward by dragging their
+   body or edges. Untouched time stays black box.
 3. **List your moments in order** — add what you did, one at a time, top to
    bottom. A time is optional per moment; order is what matters.
 
 All three feed the same platformer engine and the same end-of-run recap and
 save flow.
 
-**Modes 2 and 3 are still slated for replacement.** The agreed next design
-drops the timeline-tap and moments-list modes for a drag-to-block timeline
-builder, and adds two review modes (a Pokémon-dialogue-style recap, and a
-day/night "chrono bar" timeline) alongside the platformer run — see
-`TODO.md` → "Feature: entry & review redesign" for the full spec. Mode 1
-above (log cards) is that redesign's first entry mode, already built.
+**Mode 3 is still slated for replacement.** The agreed next design adds two
+review modes (a Pokémon-dialogue-style recap, and a day/night "chrono bar"
+timeline) alongside the platformer run, and drops the moments-list mode —
+see `TODO.md` → "Feature: entry & review redesign" for the full spec. Modes
+1 and 2 above are that redesign's two entry modes, already built.
 
 ## Saving days
 

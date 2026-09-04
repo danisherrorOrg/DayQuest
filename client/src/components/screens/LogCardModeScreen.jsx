@@ -41,10 +41,7 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
   const durationMins = (Number(form.hours) || 0) * 60 + (Number(form.minutes) || 0);
   const isEditing = form.id !== null;
 
-  const totalLoggedMins = useMemo(
-    () => cards.reduce((sum, c) => sum + c.durationMins, 0),
-    [cards],
-  );
+  const totalLoggedMins = useMemo(() => cards.reduce((sum, c) => sum + c.durationMins, 0), [cards]);
   const remainingMins = DAY_MINUTES - totalLoggedMins;
 
   const suggestionPool = useMemo(() => {
@@ -142,11 +139,7 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
           {cards.map((card) => {
             const act = ACTIVITIES.find((a) => a.key === card.categoryKey) || ACTIVITIES[0];
             return (
-              <div
-                className="logCard"
-                key={card.id}
-                style={{ borderLeftColor: act.color }}
-              >
+              <div className="logCard" key={card.id} style={{ borderLeftColor: act.color }}>
                 <div className="logCardHead">
                   <span className="logCardTitle">
                     {act.emoji} {card.title}

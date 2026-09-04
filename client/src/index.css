@@ -344,74 +344,128 @@ body,
   resize: vertical;
 }
 
-/* ---- Timeline builder ---- */
-#palette {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 10px 0 12px;
+/* ---- Timeline builder (drag-select) ---- */
+.builderTotals {
+  font-size: 12px;
+  color: #7a5a42;
+  background: #f3e4c8;
+  border-radius: 8px;
+  padding: 7px 10px;
+  margin-bottom: 10px;
 }
-.chip {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 7px 9px;
+.builderTrack {
+  position: relative;
+  width: 100%;
+  background: #2a2438;
   border-radius: 10px;
-  border: 2px solid transparent;
-  background: #fffefb;
-  cursor: pointer;
-  font-size: 10px;
-  color: #3f2b1d;
+  overflow: hidden;
+  user-select: none;
+  cursor: crosshair;
 }
-.chip .em {
-  font-size: 17px;
+.builderHourTick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.12);
 }
-.chip.selected {
-  border-color: #c1502e;
-  background: #fbe2d6;
+.builderHourLabel {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
 }
-#timelineList {
-  flex: 1;
-  overflow-y: auto;
-  border: 1.5px solid #e8d2b0;
-  border-radius: 12px;
-  background: #fffefb;
-}
-.slotRow {
+.builderBlock {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 12px;
-  border-bottom: 1px solid #f0e3cc;
-  cursor: pointer;
+  overflow: hidden;
+  cursor: grab;
 }
-.slotRow:last-child {
-  border-bottom: none;
+.builderBlock.untitled {
+  background: #2a2438;
+  border-style: dashed;
 }
-.slotTime {
-  width: 58px;
-  flex: none;
+.builderBlock.ghost {
+  background: rgba(193, 80, 46, 0.35);
+  border: 1.5px dashed #c1502e;
+  pointer-events: none;
+}
+.builderBlockLabel {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #fff8ec;
+  padding: 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.builderEdgeHandle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+}
+.builderEdgeHandle.left {
+  left: 0;
+}
+.builderEdgeHandle.right {
+  right: 0;
+}
+.builderStatusLine {
   font-size: 11.5px;
   color: #9a7a56;
+  text-align: center;
+  margin-top: 6px;
   font-variant-numeric: tabular-nums;
 }
-.slotFill {
-  flex: 1;
-  height: 26px;
-  border-radius: 7px;
+.builderPopupBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 33, 64, 0.55);
   display: flex;
-  align-items: center;
-  padding: 0 10px;
-  font-size: 12px;
-  font-weight: 600;
-  gap: 6px;
-  background: #efe3cc;
-  color: #b0956f;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 20;
 }
-.slotFill.filled {
-  color: #fff8ec;
+.builderPopupSheet {
+  width: 100%;
+  max-width: 480px;
+  background: #fff8ec;
+  border-radius: 16px 16px 0 0;
+  padding: 16px 18px calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
+}
+.builderPopupHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 700;
+  color: #3f2b1d;
+  font-family: Georgia, serif;
+}
+.builderPopupSheet input[type="text"],
+.builderPopupSheet textarea,
+.builderPopupSheet select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #e8d2b0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fffefb;
+  color: #3f2b1d;
+}
+.builderPopupSheet textarea {
+  resize: vertical;
 }
 
 /* ---- Moments mode (vertical line) ---- */

@@ -7,8 +7,6 @@ import {
 } from "./activities.js";
 import { GROUND_Y } from "./constants.js";
 
-export const SLOT_COUNT = 48; // 30-min slots across 24h
-
 export function pxForDuration(mins) {
   return Math.max(140, Math.min(460, mins * 3.4));
 }
@@ -16,44 +14,6 @@ export function pxForDuration(mins) {
 function finishLevel(segments, x, finalLen = 260) {
   segments.push({ x1: x, x2: x + finalLen });
   return { flagX: x + finalLen - 40, levelWidth: x + finalLen + 60 };
-}
-
-export function timelineFromSlots(slots) {
-  const segs = [];
-  for (let i = 0; i < SLOT_COUNT; i++) {
-    const act = slots[i] || BLACKBOX;
-    const start = i * 30,
-      end = start + 30;
-    if (segs.length && segs[segs.length - 1].act.key === act.key) {
-      segs[segs.length - 1].end = end;
-    } else {
-      segs.push({ start, end, act });
-    }
-  }
-  return segs;
-}
-
-export function buildLevelFromTimeline(timeline) {
-  const segments = [];
-  const coins = [];
-  let x = 40;
-  timeline.forEach((seg, i) => {
-    if (i > 0) x += 70 + Math.random() * 35; // physical gap for platforming
-    const len = pxForDuration(seg.end - seg.start);
-    segments.push({ x1: x, x2: x + len });
-    coins.push({
-      x: x + len * 0.35,
-      y: GROUND_Y - 78,
-      r: 14,
-      act: seg.act,
-      collected: false,
-      bob: Math.random() * 10,
-      timeLabel: minutesToLabel(seg.start) + "–" + minutesToLabel(seg.end),
-    });
-    x += len;
-  });
-  const { flagX, levelWidth } = finishLevel(segments, x);
-  return { segments, coins, flagX, levelWidth };
 }
 
 export function buildLevelFromMoments(list) {
@@ -121,6 +81,47 @@ export function buildLevelFromLogCards(cards) {
 
   const remaining = 1440 - totalMins;
   if (remaining > 0) pushCoin(BLACKBOX, remaining);
+
+  const { flagX, levelWidth } = finishLevel(segments, x);
+  return { segments, coins, flagX, levelWidth };
+}
+
+// Timeline-builder blocks carry explicit start/end minutes but, unlike the
+// tap-slot timeline this replaced, don't have to cover the whole day —
+// gaps before/between/after them become black-box segments here, the same
+// "honest black box" framing as the other modes.
+export function buildLevelFromBuilderBlocks(blocks) {
+  const sorted = [...blocks].sort((a, b) => a.start - b.start);
+  const segments = [];
+  const coins = [];
+  let x = 40;
+  let cursor = 0;
+
+  function pushCoin(start, end, act, extra = {}) {
+    const len = pxForDuration(end - start);
+    if (coins.length) x += 70 + Math.random() * 35;
+    segments.push({ x1: x, x2: x + len });
+    coins.push({
+      x: x + len * 0.35,
+      y: GROUND_Y - 78,
+      r: 14,
+      act,
+      collected: false,
+      bob: Math.random() * 10,
+      timeLabel: `${minutesToLabel(start)}–${minutesToLabel(end)}`,
+      ...extra,
+    });
+    x += len;
+  }
+
+  for (const block of sorted) {
+    if (block.start > cursor) pushCoin(cursor, block.start, BLACKBOX);
+    const base = block.categoryKey ? findActivityByKey(block.categoryKey) : null;
+    const act = base ? { ...base, label: block.title || base.label } : BLACKBOX;
+    pushCoin(block.start, block.end, act, { log: block.log || "", tags: block.tags || [] });
+    cursor = Math.max(cursor, block.end);
+  }
+  if (cursor < 1440) pushCoin(cursor, 1440, BLACKBOX);
 
   const { flagX, levelWidth } = finishLevel(segments, x);
   return { segments, coins, flagX, levelWidth };

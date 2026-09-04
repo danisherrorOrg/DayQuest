@@ -7,9 +7,11 @@ export async function saveDay(req, res, next) {
     const { date } = req.params;
     if (!DATE_RE.test(date)) return res.status(400).json({ error: "date must be YYYY-MM-DD" });
 
-    const { mode, timeline, activities, moments, logCards, summary } = req.body;
-    if (!["timed", "legacy", "sequence", "cards"].includes(mode)) {
-      return res.status(400).json({ error: "mode must be timed, legacy, sequence, or cards" });
+    const { mode, timeline, activities, moments, logCards, timelineBlocks, summary } = req.body;
+    if (!["timed", "legacy", "sequence", "cards", "builder"].includes(mode)) {
+      return res
+        .status(400)
+        .json({ error: "mode must be timed, legacy, sequence, cards, or builder" });
     }
 
     const day = await Day.findOneAndUpdate(
@@ -20,6 +22,7 @@ export async function saveDay(req, res, next) {
         activities: activities ?? null,
         moments: moments ?? null,
         logCards: logCards ?? null,
+        timelineBlocks: timelineBlocks ?? null,
         summary,
         savedAt: new Date(),
       },

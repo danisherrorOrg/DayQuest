@@ -3,7 +3,7 @@ import { GameEngine } from "../../game/engine.js";
 import { buildSummary } from "../../game/levelBuilder.js";
 import { saveDay } from "../../api/days.js";
 
-export default function GameScreen({ mode, timeline, cards, moments, builtLevel, onRestart }) {
+export default function GameScreen({ mode, cards, blocks, moments, builtLevel, onRestart }) {
   const canvasWrapRef = useRef(null);
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
@@ -90,17 +90,6 @@ export default function GameScreen({ mode, timeline, cards, moments, builtLevel,
       const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
       const entry = {
         mode,
-        timeline:
-          mode === "timed"
-            ? timeline.map((s) => ({
-                start: s.start,
-                end: s.end,
-                key: s.act.key,
-                label: s.act.label,
-                emoji: s.act.emoji,
-                color: s.act.color,
-              }))
-            : null,
         moments: mode === "sequence" ? moments : null,
         logCards:
           mode === "cards"
@@ -110,6 +99,17 @@ export default function GameScreen({ mode, timeline, cards, moments, builtLevel,
                 categoryKey: c.categoryKey,
                 tags: c.tags,
                 durationMins: c.durationMins,
+              }))
+            : null,
+        timelineBlocks:
+          mode === "builder"
+            ? blocks.map((b) => ({
+                start: b.start,
+                end: b.end,
+                title: b.title,
+                log: b.log,
+                categoryKey: b.categoryKey,
+                tags: b.tags,
               }))
             : null,
         summary: finished.summaryText,

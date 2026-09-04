@@ -20,46 +20,66 @@ and both review modes so an activity's color is consistent everywhere.
 - [x] ~~Structured fields instead of a free-text paragraph, one card per
       logged activity.~~ Fixed: `LogCardModeScreen.jsx` replaces the old
       `TextModeScreen.jsx`/`parse.js` free-text flow entirely (both deleted,
-      along with the now-dead `buildLevelLegacy`). New "cards" mode (App.jsx,
-      `buildLevelFromLogCards` in `levelBuilder.js`) with:
-      - **Duration** — two small number inputs (h / m) combined into total
-        minutes, not a start/end clock pair.
-      - **What you did** — short title, required.
-      - **Log** — optional free-text note, scoped to one activity.
-      - **Category** — single-select from the existing `ACTIVITIES` fixed
-        set (`activities.js`); drives the card's left-border accent color.
-      - **Tags** — free-form multi-tag chip input (Enter/comma to add,
-        backspace to pop the last one), with autocomplete suggestions
-        pooled from tags used earlier in the session *and* from previously
-        saved "cards"-mode days (via `GET /api/days`).
-      - Cards stack in entry order, each editable/deletable; a running
-        total shows minutes logged vs. how much of the 24h is still a
-        black box.
-      - Server: `Day` model gained a `logCards` field and `"cards"` mode
-        value (`server/src/models/Day.js`, `days.controller.js`) so this
-        mode can actually be saved.
-      - Not done here (left for the other planned pieces): the level built
-        from cards lays them out end-to-end with a trailing black-box
-        segment, but the card's `log`/`tags` aren't surfaced anywhere in
-        the platformer recap yet — they're only persisted. That's for
-        review mode 1/2 below to make use of.
+      along with the now-dead `buildLevelLegacy`). New "cards" mode
+      (`App.jsx`, `buildLevelFromLogCards` in `levelBuilder.js`) has duration
+      as two small h/m number inputs combined into total minutes (not a
+      start/end clock pair); a required short title; an optional free-text
+      log; a category single-select from the existing `ACTIVITIES` fixed set
+      (`activities.js`, drives the card's left-border accent color); and a
+      free-form multi-tag chip input (Enter/comma to add, backspace to pop
+      the last one) with autocomplete pooled from tags used earlier in the
+      session and from previously saved "cards"-mode days (via
+      `GET /api/days`). Cards stack in entry order, each editable/deletable,
+      with a running total of minutes logged vs. how much of the 24h is
+      still a black box. Server: `Day` model gained a `logCards` field and
+      `"cards"` mode value (`server/src/models/Day.js`,
+      `days.controller.js`) so this mode can actually be saved. Not done
+      here (left for the other planned pieces): the level built from cards
+      lays them out end-to-end with a trailing black-box segment, but the
+      card's `log`/`tags` aren't surfaced anywhere in the platformer recap
+      yet — they're only persisted. That's for review mode 1/2 below to
+      make use of.
 
 ### Entry mode 2 — timeline builder (replaces `TimelineModeScreen`)
 
-- [ ] A single 0:00–24:00 ruler (horizontal on mobile, can be vertical on
-      wide screens). Replace the fixed 30-min tap-slots with a drag-select:
-      click/touch-drag across the ruler to carve out a block of arbitrary
-      length (snap to 5 or 15 min, not 30).
-- [ ] On drag release, open a popup anchored to the new block with the
-      *same field set* as the manual log card (title, log, category, tags),
-      all optional except the block's time range, which is already set by
-      the drag. User can fill in as much as they want, or dismiss the popup
-      to keep the block as an untitled/black-box span.
-- [ ] Existing blocks are draggable (move) and resizable (drag an edge);
-      overlap either clamps the neighboring block or is disallowed —
-      pick one during implementation, don't allow silent double-booking.
-- [ ] Untouched time stays visually distinct as black box, consistent with
-      the app's existing "honest black box" framing.
+- [x] ~~A single 0:00–24:00 ruler ... drag-select ... snap to 5 or 15
+      min.~~ Fixed: `TimelineBuilderScreen.jsx` replaces the old tap-slot
+      `TimelineModeScreen.jsx` (deleted). The ruler is a single horizontal
+      track sized to the panel width (no fixed px/min and no scrolling, so
+      it works at any viewport width without a scroll-vs-drag conflict);
+      pointer drag-select snaps to 15-minute increments. A plain tap (no
+      real drag) still creates a minimum 15-minute block, if there's room.
+      The clamping/snapping math lives in the new `builderGeometry.js`
+      (`snapMinutes`, `clamp`, `neighborBounds`) and is unit-tested there —
+      pointer-drag interaction itself isn't (no component tests exist
+      anywhere in this repo yet; see `client/CLAUDE.md`).
+- [x] ~~On drag release, open a popup ... same field set as the manual log
+      card ... or dismiss to keep the block as an untitled/black-box
+      span.~~ Fixed: releasing a drag immediately adds the block (with
+      `categoryKey: null`, i.e. black box) and opens a bottom-sheet popup
+      with title/log/category/tags — the same fields as the log card, all
+      optional. Closing the popup (the "Done" button or tapping the
+      backdrop) always commits whatever's in the fields, so leaving them
+      blank really does just keep the block as an untitled black-box span,
+      per spec; a "Remove" button deletes the block outright, for undoing a
+      mis-drag.
+- [x] ~~Existing blocks are draggable (move) and resizable (drag an edge);
+      overlap ... disallowed.~~ Fixed: dragging a block's body moves it,
+      dragging a thin strip at either edge resizes it. Chose **disallow**
+      over clamp-into-a-smaller-block: bounds are computed once per drag
+      from the immediately neighboring blocks (`neighborBounds`) and every
+      move/resize is clamped inside that window, so a block can never be
+      dragged or resized into a neighbor — no silent double-booking is
+      possible by construction, not by after-the-fact validation. A tap
+      (no real movement) on a block's body reopens the popup to edit it
+      instead of committing a no-op move.
+- [x] ~~Untouched time stays visually distinct as black box.~~ Fixed: the
+      ruler's own background is the black-box color; a block left without
+      a category renders identically (dashed border only, for a click
+      target) so "never touched" and "touched but not categorized" both
+      read as the same honest black box, per the app's existing framing.
+      Not done here: the "can be vertical on wide screens" option
+      mentioned in the original ask — only the horizontal ruler is built.
 
 ### Review mode 1 — dialogue recap (replaces the `GameScreen` platformer run)
 

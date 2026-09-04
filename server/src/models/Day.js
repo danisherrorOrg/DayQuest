@@ -31,15 +31,32 @@ const logCardSchema = new mongoose.Schema(
   { _id: false },
 );
 
+const timelineBlockSchema = new mongoose.Schema(
+  {
+    start: Number,
+    end: Number,
+    title: String,
+    log: String,
+    categoryKey: { type: String, default: null },
+    tags: { type: [String], default: [] },
+  },
+  { _id: false },
+);
+
 const daySchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     date: { type: String, required: true }, // YYYY-MM-DD
-    mode: { type: String, enum: ["timed", "legacy", "sequence", "cards"], required: true },
+    mode: {
+      type: String,
+      enum: ["timed", "legacy", "sequence", "cards", "builder"],
+      required: true,
+    },
     timeline: { type: [timelineSegmentSchema], default: null },
     activities: { type: [String], default: null },
     moments: { type: [momentSchema], default: null },
     logCards: { type: [logCardSchema], default: null },
+    timelineBlocks: { type: [timelineBlockSchema], default: null },
     summary: String,
     savedAt: { type: Date, default: Date.now },
   },

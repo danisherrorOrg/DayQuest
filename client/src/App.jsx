@@ -11,28 +11,26 @@ import VerifyEmailBanner from "./components/auth/VerifyEmailBanner.jsx";
 import OfflineBanner from "./components/OfflineBanner.jsx";
 import ModeSelectScreen from "./components/screens/ModeSelectScreen.jsx";
 import LogCardModeScreen from "./components/screens/LogCardModeScreen.jsx";
-import TimelineModeScreen from "./components/screens/TimelineModeScreen.jsx";
+import TimelineBuilderScreen from "./components/screens/TimelineBuilderScreen.jsx";
 import MomentsModeScreen from "./components/screens/MomentsModeScreen.jsx";
 import GameScreen from "./components/screens/GameScreen.jsx";
 import {
-  buildLevelFromTimeline,
   buildLevelFromMoments,
   buildLevelFromLogCards,
-  timelineFromSlots,
+  buildLevelFromBuilderBlocks,
 } from "./game/levelBuilder.js";
 
 function GameApp() {
   const [screen, setScreen] = useState("mode");
-  const [run, setRun] = useState(null); // { mode, timeline, cards, moments, builtLevel }
+  const [run, setRun] = useState(null); // { mode, cards, blocks, moments, builtLevel }
 
   function handleBuildFromLogCards(cards) {
     setRun({ mode: "cards", cards, builtLevel: buildLevelFromLogCards(cards) });
     setScreen("game");
   }
 
-  function handleBuildFromTimeline(slots) {
-    const tl = timelineFromSlots(slots);
-    setRun({ mode: "timed", timeline: tl, builtLevel: buildLevelFromTimeline(tl) });
+  function handleBuildFromBuilderBlocks(blocks) {
+    setRun({ mode: "builder", blocks, builtLevel: buildLevelFromBuilderBlocks(blocks) });
     setScreen("game");
   }
 
@@ -54,7 +52,10 @@ function GameApp() {
         <LogCardModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromLogCards} />
       )}
       {screen === "timeline" && (
-        <TimelineModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromTimeline} />
+        <TimelineBuilderScreen
+          onBack={() => setScreen("mode")}
+          onBuild={handleBuildFromBuilderBlocks}
+        />
       )}
       {screen === "moments" && (
         <MomentsModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromMoments} />
@@ -62,8 +63,8 @@ function GameApp() {
       {screen === "game" && run && (
         <GameScreen
           mode={run.mode}
-          timeline={run.timeline}
           cards={run.cards}
+          blocks={run.blocks}
           moments={run.moments}
           builtLevel={run.builtLevel}
           onRestart={handleRestart}

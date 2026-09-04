@@ -1,14 +1,12 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
-  SLOT_COUNT,
   pxForDuration,
-  timelineFromSlots,
-  buildLevelFromTimeline,
   buildLevelFromMoments,
   buildLevelFromLogCards,
+  buildLevelFromBuilderBlocks,
   buildSummary,
 } from "./levelBuilder.js";
-import { BLACKBOX, findActivityByKey } from "./activities.js";
+import { BLACKBOX } from "./activities.js";
 
 describe("pxForDuration", () => {
   it("clamps very short durations to a minimum width", () => {
@@ -21,71 +19,6 @@ describe("pxForDuration", () => {
 
   it("scales linearly between the clamps", () => {
     expect(pxForDuration(60)).toBe(204); // 60 * 3.4
-  });
-});
-
-describe("timelineFromSlots", () => {
-  it("fills every unfilled slot with the black-box activity as one segment", () => {
-    const slots = new Array(SLOT_COUNT).fill(null);
-    const segs = timelineFromSlots(slots);
-    expect(segs).toEqual([{ start: 0, end: 1440, act: BLACKBOX }]);
-  });
-
-  it("merges consecutive slots for the same activity into one segment", () => {
-    const gym = findActivityByKey("gym");
-    const slots = new Array(SLOT_COUNT).fill(null);
-    slots[0] = gym;
-    slots[1] = gym;
-    const segs = timelineFromSlots(slots);
-    expect(segs[0]).toEqual({ start: 0, end: 60, act: gym });
-  });
-
-  it("starts a new segment when the activity changes", () => {
-    const gym = findActivityByKey("gym");
-    const food = findActivityByKey("food");
-    const slots = new Array(SLOT_COUNT).fill(null);
-    slots[0] = gym;
-    slots[1] = food;
-    const segs = timelineFromSlots(slots);
-    expect(segs[0]).toEqual({ start: 0, end: 30, act: gym });
-    expect(segs[1].start).toBe(30);
-    expect(segs[1].act).toBe(food);
-  });
-});
-
-describe("buildLevelFromTimeline", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it("lays out one segment/coin per timeline entry plus a finish segment", () => {
-    const gym = findActivityByKey("gym");
-    const timeline = [{ start: 0, end: 30, act: gym }];
-    const { segments, coins, flagX, levelWidth } = buildLevelFromTimeline(timeline);
-
-    expect(segments).toHaveLength(2); // activity segment + finish segment
-    expect(coins).toHaveLength(1);
-    expect(coins[0].act).toBe(gym);
-    expect(coins[0].timeLabel).toBe("12:00 AM–12:30 AM");
-
-    const [activitySeg, finishSeg] = segments;
-    expect(activitySeg.x1).toBe(40);
-    expect(activitySeg.x2).toBe(40 + pxForDuration(30));
-    expect(finishSeg.x1).toBe(activitySeg.x2); // no gap before the finish segment
-    expect(flagX).toBe(finishSeg.x2 - 40);
-    expect(levelWidth).toBe(finishSeg.x2 + 60);
-  });
-
-  it("adds a random physical gap between successive segments", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.5);
-    const gym = findActivityByKey("gym");
-    const timeline = [
-      { start: 0, end: 30, act: gym },
-      { start: 30, end: 60, act: gym },
-    ];
-    const { segments } = buildLevelFromTimeline(timeline);
-    const gap = segments[1].x1 - segments[0].x2;
-    expect(gap).toBe(70 + 0.5 * 35);
   });
 });
 
@@ -141,7 +74,13 @@ describe("buildLevelFromLogCards", () => {
 
   it("carries the card's log and tags onto the coin", () => {
     const cards = [
-      { title: "Deep work", categoryKey: "work", durationMins: 1440, log: "Shipped the feature", tags: ["focus", "sprint"] },
+      {
+        title: "Deep work",
+        categoryKey: "work",
+        durationMins: 1440,
+        log: "Shipped the feature",
+        tags: ["focus", "sprint"],
+      },
     ];
     const { coins } = buildLevelFromLogCards(cards);
     expect(coins).toHaveLength(1); // fills the full day, no black-box segment
@@ -153,6 +92,54 @@ describe("buildLevelFromLogCards", () => {
     const cards = [{ title: "", categoryKey: "gym", durationMins: 1440, log: "", tags: [] }];
     const { coins } = buildLevelFromLogCards(cards);
     expect(coins[0].act.label).toBe("Gym");
+  });
+});
+
+describe("buildLevelFromBuilderBlocks", () => {
+  it("fills untouched time around a single block with black box", () => {
+    const blocks = [{ start: 60, end: 90, categoryKey: "gym", title: "Gym", log: "", tags: [] }];
+    const { coins } = buildLevelFromBuilderBlocks(blocks);
+
+    // black box before, the block itself, black box after
+    expect(coins).toHaveLength(3);
+    expect(coins[0].act).toBe(BLACKBOX);
+    expect(coins[0].timeLabel).toBe("12:00 AM–1:00 AM");
+    expect(coins[1].act.key).toBe("gym");
+    expect(coins[1].act.label).toBe("Gym");
+    expect(coins[1].timeLabel).toBe("1:00 AM–1:30 AM");
+    expect(coins[2].act).toBe(BLACKBOX);
+  });
+
+  it("does not add a black-box gap between two back-to-back blocks", () => {
+    const blocks = [
+      { start: 0, end: 720, categoryKey: "work", title: "Work", log: "", tags: [] },
+      { start: 720, end: 1440, categoryKey: "sleep", title: "Sleep", log: "", tags: [] },
+    ];
+    const { coins } = buildLevelFromBuilderBlocks(blocks);
+    expect(coins).toHaveLength(2);
+    expect(coins[0].act.key).toBe("work");
+    expect(coins[1].act.key).toBe("sleep");
+  });
+
+  it("treats a block with no category as a black box, keeping its title/log/tags", () => {
+    const blocks = [
+      { start: 0, end: 1440, categoryKey: null, title: "", log: "napped?", tags: ["maybe"] },
+    ];
+    const { coins } = buildLevelFromBuilderBlocks(blocks);
+    expect(coins).toHaveLength(1);
+    expect(coins[0].act).toBe(BLACKBOX);
+    expect(coins[0].log).toBe("napped?");
+    expect(coins[0].tags).toEqual(["maybe"]);
+  });
+
+  it("sorts out-of-order blocks before laying them out", () => {
+    const blocks = [
+      { start: 700, end: 740, categoryKey: "food", title: "Lunch", log: "", tags: [] },
+      { start: 0, end: 30, categoryKey: "gym", title: "Gym", log: "", tags: [] },
+    ];
+    const { coins } = buildLevelFromBuilderBlocks(blocks);
+    const labeled = coins.filter((c) => c.act.key);
+    expect(labeled.map((c) => c.act.key)).toEqual(["gym", "food"]);
   });
 });
 
