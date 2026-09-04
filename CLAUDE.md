@@ -2,7 +2,7 @@
 
 Context and conventions for working on this repo. See `README.md` for the
 full feature/product description and `TODO.md` for tracked gaps — this file
-is about *how* to work here, not what the app does.
+is about _how_ to work here, not what the app does.
 
 ## Overview
 
@@ -54,8 +54,8 @@ from inside a sandbox. Verify what you can instead:
   `localStorage` and exercise `client/src/api/http.js` directly in a `node -e`
   script (this is how the retry/offline-error logic was verified — see the
   git history around the offline-handling commit for the exact approach).
-- A careful manual read of any Mongoose usage, especially around `select:
-  false` fields (`refreshTokenHash`, `verificationTokenHash`,
+- A careful manual read of any Mongoose usage, especially around
+  `select: false` fields (`refreshTokenHash`, `verificationTokenHash`,
   `resetTokenHash`, `resetTokenExpiresAt`) — prefer the codebase's existing
   `User.updateOne(..., { $unset: {...} })` idiom (see `logout()` in
   `auth.controller.js`) over `doc.field = undefined; doc.save()` for clearing
