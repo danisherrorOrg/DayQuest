@@ -35,6 +35,13 @@ npm run dev                       # runs server (:4000) and client (:5173) toget
 
 Then open `http://localhost:5173`, register an account, and play.
 
+Registration sends a verification email and "Forgot your password?" sends a reset
+email; leave `SMTP_HOST` unset in `server/.env` for local dev and both just log the
+link to the server console instead of actually sending mail. Set `SMTP_HOST` /
+`SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `EMAIL_FROM` to send for real. Neither
+flow blocks registering or logging in — an unverified email is tracked but not
+enforced.
+
 `run.sh` is a convenience wrapper around the same `npm run dev` that also
 installs dependencies on first run. It also forwards to the lint/format
 scripts below: `./run.sh lint`, `./run.sh lint:fix`, `./run.sh format`,

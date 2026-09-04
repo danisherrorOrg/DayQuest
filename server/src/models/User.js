@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema(
     passwordHash: { type: String, required: true },
     refreshTokenHash: { type: String, select: false },
     refreshTokenExpiresAt: { type: Date, select: false },
+    emailVerified: { type: Boolean, default: false },
+    verificationTokenHash: { type: String, select: false },
+    verificationTokenExpiresAt: { type: Date, select: false },
+    resetTokenHash: { type: String, select: false },
+    resetTokenExpiresAt: { type: Date, select: false },
   },
   { timestamps: true },
 );

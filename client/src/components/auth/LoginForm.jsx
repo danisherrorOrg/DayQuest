@@ -61,6 +61,9 @@ export default function LoginForm() {
         <p className="sub" style={{ marginTop: 14 }}>
           No account yet? <Link to="/register">Register</Link>
         </p>
+        <p className="sub" style={{ marginTop: -8 }}>
+          <Link to="/forgot-password">Forgot your password?</Link>
+        </p>
       </div>
     </div>
   );

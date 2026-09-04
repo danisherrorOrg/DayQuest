@@ -38,8 +38,19 @@ feature ideas and code-review fixes already tracked in `README.md`.
       cookie via new `POST /auth/refresh` and `POST /auth/logout` endpoints,
       the latter revoking the stored hash server-side. Client
       (`client/src/api/http.js`) transparently refreshes on a 401 and retries.
-- [ ] **No password-reset or email-verification flow.** Register/login only.
-      _Medium-large._
+- [x] ~~No password-reset or email-verification flow.~~ Fixed: registration now
+      sends a verification email (hashed, expiring token) and exposes
+      `POST /auth/verify-email` + `POST /auth/resend-verification`; a
+      `POST /auth/forgot-password` / `POST /auth/reset-password` pair handles
+      resets (both return a generic message regardless of whether the account
+      exists, to avoid email enumeration; a reset also revokes the existing
+      refresh session). Emails go through `server/src/utils/mailer.js`
+      (`nodemailer`), which logs to the console instead of sending when
+      `SMTP_HOST` isn't configured, so it works out of the box in local dev.
+      Client adds `/forgot-password`, `/reset-password`, `/verify-email`
+      screens and an in-app "verify your email" banner with a resend button.
+      Login/registration remain unblocked by an unverified email — it's
+      tracked, not enforced.
 
 ## Code quality / client robustness
 

@@ -19,3 +19,19 @@ export function logoutRequest() {
 export function meRequest() {
   return apiRequest("/auth/me");
 }
+
+export function verifyEmailRequest(token) {
+  return apiRequest("/auth/verify-email", { method: "POST", body: { token } });
+}
+
+export function resendVerificationRequest(email) {
+  return apiRequest("/auth/resend-verification", { method: "POST", body: { email } });
+}
+
+export function forgotPasswordRequest(email) {
+  return apiRequest("/auth/forgot-password", { method: "POST", body: { email } });
+}
+
+export function resetPasswordRequest(token, password) {
+  return apiRequest("/auth/reset-password", { method: "POST", body: { token, password } });
+}

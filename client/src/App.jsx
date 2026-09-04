@@ -4,6 +4,10 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import LoginForm from "./components/auth/LoginForm.jsx";
 import RegisterForm from "./components/auth/RegisterForm.jsx";
+import ForgotPasswordForm from "./components/auth/ForgotPasswordForm.jsx";
+import ResetPasswordForm from "./components/auth/ResetPasswordForm.jsx";
+import VerifyEmailScreen from "./components/auth/VerifyEmailScreen.jsx";
+import VerifyEmailBanner from "./components/auth/VerifyEmailBanner.jsx";
 import ModeSelectScreen from "./components/screens/ModeSelectScreen.jsx";
 import TextModeScreen from "./components/screens/TextModeScreen.jsx";
 import TimelineModeScreen from "./components/screens/TimelineModeScreen.jsx";
@@ -50,6 +54,7 @@ function GameApp() {
 
   return (
     <div id="app">
+      <VerifyEmailBanner />
       {screen === "mode" && <ModeSelectScreen onPick={setScreen} />}
       {screen === "text" && (
         <TextModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromText} />
@@ -80,6 +85,9 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/reset-password" element={<ResetPasswordForm />} />
+        <Route path="/verify-email" element={<VerifyEmailScreen />} />
         <Route
           path="/"
           element={

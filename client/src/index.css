@@ -119,6 +119,22 @@ body,
   font-size: 13px;
   margin: -2px 0 10px;
 }
+.authSuccess {
+  color: #3f7a4a;
+  font-size: 13.5px;
+  line-height: 1.4;
+  margin: 0 0 10px;
+}
+.verifyBanner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #fbeecb;
+  color: #6b4a1f;
+  font-size: 12.5px;
+}
 
 /* ---- Mode select ---- */
 .modeCard {

@@ -1,23 +1,32 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { getToken, setToken as persistToken } from "../api/http.js";
-import { registerRequest, loginRequest, refreshRequest, logoutRequest } from "../api/auth.js";
+import {
+  registerRequest,
+  loginRequest,
+  refreshRequest,
+  logoutRequest,
+  resendVerificationRequest,
+} from "../api/auth.js";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [token, setTokenState] = useState(getToken());
   const [email, setEmail] = useState(null);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const applySession = useCallback((data) => {
     persistToken(data.token);
     setTokenState(data.token);
     setEmail(data.email);
+    setEmailVerified(Boolean(data.emailVerified));
   }, []);
 
   const clearSession = useCallback(() => {
     persistToken(null);
     setTokenState(null);
     setEmail(null);
+    setEmailVerified(false);
   }, []);
 
   // Silently exchange the httpOnly refresh cookie (if any) for a fresh access token on load,
@@ -48,8 +57,15 @@ export function AuthProvider({ children }) {
     clearSession();
   }, [clearSession]);
 
+  const resendVerification = useCallback(() => {
+    if (!email) return Promise.reject(new Error("Not logged in"));
+    return resendVerificationRequest(email);
+  }, [email]);
+
   return (
-    <AuthContext.Provider value={{ token, email, register, login, logout }}>
+    <AuthContext.Provider
+      value={{ token, email, emailVerified, register, login, logout, resendVerification }}
+    >
       {children}
     </AuthContext.Provider>
   );

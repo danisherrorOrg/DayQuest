@@ -1,5 +1,13 @@
 const TOKEN_KEY = "dayStory.token";
-const NO_REFRESH_PATHS = new Set(["/auth/login", "/auth/register", "/auth/refresh"]);
+const NO_REFRESH_PATHS = new Set([
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/verify-email",
+  "/auth/resend-verification",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+]);
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
