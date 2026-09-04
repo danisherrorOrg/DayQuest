@@ -150,6 +150,15 @@ export function guessActivityFromText(text) {
   };
 }
 
+export function formatDuration(mins) {
+  const total = Math.max(0, Math.round(mins));
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 export function minutesToLabel(mins) {
   mins = ((mins % 1440) + 1440) % 1440;
   let h = Math.floor(mins / 60);

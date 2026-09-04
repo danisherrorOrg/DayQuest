@@ -5,7 +5,7 @@ import {
   timelineFromSlots,
   buildLevelFromTimeline,
   buildLevelFromMoments,
-  buildLevelLegacy,
+  buildLevelFromLogCards,
   buildSummary,
 } from "./levelBuilder.js";
 import { BLACKBOX, findActivityByKey } from "./activities.js";
@@ -120,13 +120,39 @@ describe("buildLevelFromMoments", () => {
   });
 });
 
-describe("buildLevelLegacy", () => {
-  it("produces one segment/coin per activity plus a finish segment", () => {
-    const activities = [findActivityByKey("gym"), findActivityByKey("food")];
-    const { segments, coins } = buildLevelLegacy(activities);
-    expect(segments).toHaveLength(3);
-    expect(coins).toHaveLength(2);
-    expect(coins.map((c) => c.act)).toEqual(activities);
+describe("buildLevelFromLogCards", () => {
+  it("lays out one segment/coin per card using its own duration, plus a finish segment", () => {
+    const cards = [
+      { title: "Leg day", categoryKey: "gym", durationMins: 30, log: "", tags: [] },
+      { title: "Lunch", categoryKey: "food", durationMins: 30, log: "", tags: [] },
+    ];
+    const { segments, coins } = buildLevelFromLogCards(cards);
+
+    // 2 activity segments + 1 trailing black-box segment (23h left) + 1 finish segment
+    expect(segments).toHaveLength(4);
+    expect(coins).toHaveLength(3);
+    expect(coins[0].act.key).toBe("gym");
+    expect(coins[0].act.label).toBe("Leg day");
+    expect(coins[0].timeLabel).toBe("30m");
+    expect(coins[1].act.label).toBe("Lunch");
+    expect(coins[2].act).toBe(BLACKBOX);
+    expect(coins[2].timeLabel).toBe("23h");
+  });
+
+  it("carries the card's log and tags onto the coin", () => {
+    const cards = [
+      { title: "Deep work", categoryKey: "work", durationMins: 1440, log: "Shipped the feature", tags: ["focus", "sprint"] },
+    ];
+    const { coins } = buildLevelFromLogCards(cards);
+    expect(coins).toHaveLength(1); // fills the full day, no black-box segment
+    expect(coins[0].log).toBe("Shipped the feature");
+    expect(coins[0].tags).toEqual(["focus", "sprint"]);
+  });
+
+  it("falls back to the category label when no title is given", () => {
+    const cards = [{ title: "", categoryKey: "gym", durationMins: 1440, log: "", tags: [] }];
+    const { coins } = buildLevelFromLogCards(cards);
+    expect(coins[0].act.label).toBe("Gym");
   });
 });
 

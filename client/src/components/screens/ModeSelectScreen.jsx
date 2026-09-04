@@ -17,9 +17,12 @@ export default function ModeSelectScreen({ onPick }) {
           Choose how you want to log today. Either way, unlogged time just becomes a black box in
           the level — no pressure to remember everything.
         </p>
-        <div className="modeCard" onClick={() => onPick("text")}>
-          <h3>✍️ Write it out</h3>
-          <p>Type your day using a simple time format, minute by minute or task by task.</p>
+        <div className="modeCard" onClick={() => onPick("cards")}>
+          <h3>📇 Log it as cards</h3>
+          <p>
+            Add each activity as its own card — duration, what you did, a note, a category, and
+            tags.
+          </p>
         </div>
         <div className="modeCard" onClick={() => onPick("timeline")}>
           <h3>🕒 Build it on a timeline</h3>

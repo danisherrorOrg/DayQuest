@@ -17,22 +17,32 @@ and both review modes so an activity's color is consistent everywhere.
 
 ### Entry mode 1 — manual log card (replaces `WriteModeScreen`)
 
-Structured fields instead of a free-text paragraph, one card per logged
-activity:
-
-- [ ] **Duration** — a single `H:MM` field (spinner or two small number
-      inputs), not a start/end clock pair — matches how people actually
-      think about "I spent 45 min on X."
-- [ ] **What you did** — short title, required.
-- [ ] **Log** — optional free-text description (this replaces the old
-      paragraph, now scoped to one activity instead of the whole day).
-- [ ] **Category** — single-select from the fixed set; drives the card's
-      left-border/accent color.
-- [ ] **Tags** — free-form multi-tag chip input, autocomplete from tags
-      used earlier in the same day/previous days.
-- [ ] Cards stack in entry order for the day; each is edit/delete-able.
-      Total logged duration for the day shown as a running sum so the user
-      can see how much of the 24h is still unaccounted for (black box).
+- [x] ~~Structured fields instead of a free-text paragraph, one card per
+      logged activity.~~ Fixed: `LogCardModeScreen.jsx` replaces the old
+      `TextModeScreen.jsx`/`parse.js` free-text flow entirely (both deleted,
+      along with the now-dead `buildLevelLegacy`). New "cards" mode (App.jsx,
+      `buildLevelFromLogCards` in `levelBuilder.js`) with:
+      - **Duration** — two small number inputs (h / m) combined into total
+        minutes, not a start/end clock pair.
+      - **What you did** — short title, required.
+      - **Log** — optional free-text note, scoped to one activity.
+      - **Category** — single-select from the existing `ACTIVITIES` fixed
+        set (`activities.js`); drives the card's left-border accent color.
+      - **Tags** — free-form multi-tag chip input (Enter/comma to add,
+        backspace to pop the last one), with autocomplete suggestions
+        pooled from tags used earlier in the session *and* from previously
+        saved "cards"-mode days (via `GET /api/days`).
+      - Cards stack in entry order, each editable/deletable; a running
+        total shows minutes logged vs. how much of the 24h is still a
+        black box.
+      - Server: `Day` model gained a `logCards` field and `"cards"` mode
+        value (`server/src/models/Day.js`, `days.controller.js`) so this
+        mode can actually be saved.
+      - Not done here (left for the other planned pieces): the level built
+        from cards lays them out end-to-end with a trailing black-box
+        segment, but the card's `log`/`tags` aren't surfaced anywhere in
+        the platformer recap yet — they're only persisted. That's for
+        review mode 1/2 below to make use of.
 
 ### Entry mode 2 — timeline builder (replaces `TimelineModeScreen`)
 

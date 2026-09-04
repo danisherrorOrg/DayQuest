@@ -10,30 +10,23 @@ import VerifyEmailScreen from "./components/auth/VerifyEmailScreen.jsx";
 import VerifyEmailBanner from "./components/auth/VerifyEmailBanner.jsx";
 import OfflineBanner from "./components/OfflineBanner.jsx";
 import ModeSelectScreen from "./components/screens/ModeSelectScreen.jsx";
-import TextModeScreen from "./components/screens/TextModeScreen.jsx";
+import LogCardModeScreen from "./components/screens/LogCardModeScreen.jsx";
 import TimelineModeScreen from "./components/screens/TimelineModeScreen.jsx";
 import MomentsModeScreen from "./components/screens/MomentsModeScreen.jsx";
 import GameScreen from "./components/screens/GameScreen.jsx";
-import { parseTimedText, detectActivitiesLegacy } from "./game/parse.js";
 import {
   buildLevelFromTimeline,
   buildLevelFromMoments,
-  buildLevelLegacy,
+  buildLevelFromLogCards,
   timelineFromSlots,
 } from "./game/levelBuilder.js";
 
 function GameApp() {
   const [screen, setScreen] = useState("mode");
-  const [run, setRun] = useState(null); // { mode, timeline, activities, moments, builtLevel }
+  const [run, setRun] = useState(null); // { mode, timeline, cards, moments, builtLevel }
 
-  function handleBuildFromText(raw) {
-    const timed = parseTimedText(raw);
-    if (timed) {
-      setRun({ mode: "timed", timeline: timed, builtLevel: buildLevelFromTimeline(timed) });
-    } else {
-      const acts = detectActivitiesLegacy(raw);
-      setRun({ mode: "legacy", activities: acts, builtLevel: buildLevelLegacy(acts) });
-    }
+  function handleBuildFromLogCards(cards) {
+    setRun({ mode: "cards", cards, builtLevel: buildLevelFromLogCards(cards) });
     setScreen("game");
   }
 
@@ -57,8 +50,8 @@ function GameApp() {
     <div id="app">
       <VerifyEmailBanner />
       {screen === "mode" && <ModeSelectScreen onPick={setScreen} />}
-      {screen === "text" && (
-        <TextModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromText} />
+      {screen === "cards" && (
+        <LogCardModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromLogCards} />
       )}
       {screen === "timeline" && (
         <TimelineModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromTimeline} />
@@ -70,7 +63,7 @@ function GameApp() {
         <GameScreen
           mode={run.mode}
           timeline={run.timeline}
-          activities={run.activities}
+          cards={run.cards}
           moments={run.moments}
           builtLevel={run.builtLevel}
           onRestart={handleRestart}

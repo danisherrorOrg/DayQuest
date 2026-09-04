@@ -20,14 +20,26 @@ const momentSchema = new mongoose.Schema(
   { _id: false },
 );
 
+const logCardSchema = new mongoose.Schema(
+  {
+    title: String,
+    log: String,
+    categoryKey: String,
+    tags: { type: [String], default: [] },
+    durationMins: Number,
+  },
+  { _id: false },
+);
+
 const daySchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     date: { type: String, required: true }, // YYYY-MM-DD
-    mode: { type: String, enum: ["timed", "legacy", "sequence"], required: true },
+    mode: { type: String, enum: ["timed", "legacy", "sequence", "cards"], required: true },
     timeline: { type: [timelineSegmentSchema], default: null },
     activities: { type: [String], default: null },
     moments: { type: [momentSchema], default: null },
+    logCards: { type: [logCardSchema], default: null },
     summary: String,
     savedAt: { type: Date, default: Date.now },
   },

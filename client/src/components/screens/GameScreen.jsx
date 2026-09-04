@@ -3,7 +3,7 @@ import { GameEngine } from "../../game/engine.js";
 import { buildSummary } from "../../game/levelBuilder.js";
 import { saveDay } from "../../api/days.js";
 
-export default function GameScreen({ mode, timeline, activities, moments, builtLevel, onRestart }) {
+export default function GameScreen({ mode, timeline, cards, moments, builtLevel, onRestart }) {
   const canvasWrapRef = useRef(null);
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
@@ -101,8 +101,17 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
                 color: s.act.color,
               }))
             : null,
-        activities: mode === "legacy" ? activities.map((a) => a.key) : null,
         moments: mode === "sequence" ? moments : null,
+        logCards:
+          mode === "cards"
+            ? cards.map((c) => ({
+                title: c.title,
+                log: c.log,
+                categoryKey: c.categoryKey,
+                tags: c.tags,
+                durationMins: c.durationMins,
+              }))
+            : null,
         summary: finished.summaryText,
       };
       await saveDay(date, entry);

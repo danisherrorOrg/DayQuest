@@ -1,4 +1,10 @@
-import { BLACKBOX, guessActivityFromText, minutesToLabel } from "./activities.js";
+import {
+  BLACKBOX,
+  findActivityByKey,
+  formatDuration,
+  guessActivityFromText,
+  minutesToLabel,
+} from "./activities.js";
 import { GROUND_Y } from "./constants.js";
 
 export const SLOT_COUNT = 48; // 30-min slots across 24h
@@ -79,25 +85,43 @@ export function buildLevelFromMoments(list) {
   return { segments, coins, flagX, levelWidth };
 }
 
-export function buildLevelLegacy(activities) {
+// A log card only carries a duration (no absolute clock time), so each one
+// simply lays out end-to-end in entry order; any time left under 24h becomes
+// one trailing black-box segment, same "honest black box" framing as the
+// other modes.
+export function buildLevelFromLogCards(cards) {
   const segments = [];
   const coins = [];
   let x = 40;
-  activities.forEach((act, i) => {
-    if (i > 0) x += 70 + Math.random() * 40;
-    const len = 260 + Math.random() * 90;
+  let totalMins = 0;
+
+  function pushCoin(act, mins, extra) {
+    const len = pxForDuration(mins);
+    if (coins.length) x += 70 + Math.random() * 35;
     segments.push({ x1: x, x2: x + len });
     coins.push({
-      x: x + 70,
+      x: x + len * 0.35,
       y: GROUND_Y - 78,
       r: 14,
       act,
       collected: false,
       bob: Math.random() * 10,
-      timeLabel: null,
+      timeLabel: formatDuration(mins),
+      ...extra,
     });
     x += len;
+  }
+
+  cards.forEach((card) => {
+    const base = findActivityByKey(card.categoryKey) || BLACKBOX;
+    const act = { ...base, label: card.title || base.label };
+    pushCoin(act, card.durationMins, { log: card.log || "", tags: card.tags || [] });
+    totalMins += card.durationMins;
   });
+
+  const remaining = 1440 - totalMins;
+  if (remaining > 0) pushCoin(BLACKBOX, remaining);
+
   const { flagX, levelWidth } = finishLevel(segments, x);
   return { segments, coins, flagX, levelWidth };
 }

@@ -79,9 +79,11 @@ build, and the test suite on every push/PR to `main`.
 
 ## Input modes (current)
 
-1. **Write it out** — type lines like `06:30-07:00 gym`. Gaps between lines
-   become black-box time automatically. Plain text with no timestamps also
-   works; it falls back to keyword detection across the whole day.
+1. **Log it as cards** — one card per activity: duration (h/m), a short
+   title, an optional note, a category (drives the card's accent color),
+   and free-form tags with autocomplete. Cards stack in entry order and are
+   editable/deletable; a running total shows how much of the 24h is still
+   unaccounted for.
 2. **Build it on a timeline** — pick an activity, tap the half-hour slots you
    spent on it, 00:00 to 24:00. Untapped slots stay black box.
 3. **List your moments in order** — add what you did, one at a time, top to
@@ -90,12 +92,12 @@ build, and the test suite on every push/PR to `main`.
 All three feed the same platformer engine and the same end-of-run recap and
 save flow.
 
-**This is being replaced.** The agreed next design drops these three modes
-for two structured entry modes (a manual log-card form, and a drag-to-block
-timeline builder) plus two review modes (a Pokémon-dialogue-style recap, and
-a day/night "chrono bar" timeline) — see `TODO.md` → "Feature: entry &
-review redesign" for the full spec. Nothing there is built yet; the modes
-above are still what's live.
+**Modes 2 and 3 are still slated for replacement.** The agreed next design
+drops the timeline-tap and moments-list modes for a drag-to-block timeline
+builder, and adds two review modes (a Pokémon-dialogue-style recap, and a
+day/night "chrono bar" timeline) alongside the platformer run — see
+`TODO.md` → "Feature: entry & review redesign" for the full spec. Mode 1
+above (log cards) is that redesign's first entry mode, already built.
 
 ## Saving days
 
