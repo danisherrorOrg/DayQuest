@@ -1,105 +1,100 @@
 # TODO / Pending Work
 
-Gaps and unfinished work identified via project audit (2026-09-04), beyond the
-feature ideas and code-review fixes already tracked in `README.md`.
+Everything from the initial project audit (tests, lint/format, security
+hardening, offline handling, CI, Docker, deploy docs, responsive layout) is
+done — see git history for the individual fixes. What's left is the feature
+work below.
 
-## Testing
+## Feature: entry & review redesign (planned, not started)
 
-- [x] ~~No test framework at all.~~ Fixed: added Vitest (root
-      `vitest.config.js`, `npm test` / `test:watch` at the root and
-      `npm run test -w client` / `-w server` per workspace; `run.sh test` /
-      `test:watch` forward too). Initial suite: `levelBuilder.js` (pure level-
-      building math — durations, timeline merging, segment/coin layout,
-      summary phrasing), `server/src/middleware/auth.js` (JWT verification),
-      and the auth/day controllers (`auth.controller.js`,
-      `days.controller.js`) — the latter mock the Mongoose models via
-      `vi.mock` and call the controller functions directly with a fake
-      `res`, so they run without a real MongoDB (required inside a sandbox
-      anyway — see `CLAUDE.md`). Still no coverage on the client parsing
-      (`parse.js`) or React components — a reasonable next slice, not
-      required to close this gap.
+This replaces the current three input modes (`WriteModeScreen`,
+`TimelineModeScreen`, `MomentsModeScreen`) and the platformer
+(`GameScreen`) recap with **two entry modes** and **two review modes**.
+Nothing here is implemented yet — this is the agreed shape to build against.
+"Category" below means a small fixed set (e.g. Work, Health, Social, Chores,
+Learning, Rest) each with an assigned color, reused across both entry modes
+and both review modes so an activity's color is consistent everywhere.
 
-## Tooling
+### Entry mode 1 — manual log card (replaces `WriteModeScreen`)
 
-- [x] ~~No lint/format tooling.~~ Fixed: added a shared ESLint 9 flat config
-      (`eslint.config.js`) covering both workspaces, plus Prettier
-      (`.prettierrc.json`); `npm run lint`/`lint:fix`/`format`/`format:check`
-      at the root, and `npm run -w client lint`.
-- [x] ~~No `engines` field.~~ Fixed: `"node": ">=18.0.0"` added to the root,
-      `client`, and `server` `package.json`.
-- [x] ~~No `LICENSE` file / `license` field.~~ Fixed: added `LICENSE` (MIT)
-      and `"license": "MIT"` to all three `package.json` files.
+Structured fields instead of a free-text paragraph, one card per logged
+activity:
 
-## Security
+- [ ] **Duration** — a single `H:MM` field (spinner or two small number
+      inputs), not a start/end clock pair — matches how people actually
+      think about "I spent 45 min on X."
+- [ ] **What you did** — short title, required.
+- [ ] **Log** — optional free-text description (this replaces the old
+      paragraph, now scoped to one activity instead of the whole day).
+- [ ] **Category** — single-select from the fixed set; drives the card's
+      left-border/accent color.
+- [ ] **Tags** — free-form multi-tag chip input, autocomplete from tags
+      used earlier in the same day/previous days.
+- [ ] Cards stack in entry order for the day; each is edit/delete-able.
+      Total logged duration for the day shown as a running sum so the user
+      can see how much of the 24h is still unaccounted for (black box).
 
-- [x] ~~No rate limiting on `POST /auth/login` or `/auth/register`.~~ Fixed:
-      added an `express-rate-limit` limiter (`server/src/middleware/rateLimit.js`,
-      20 requests / 15 min) applied to both routes in `auth.routes.js`.
-- [x] ~~No security headers middleware.~~ Fixed: `helmet()` wired in as the
-      first middleware in `server/src/index.js`.
-- [x] ~~No server-side email format validation.~~ Fixed: `auth.controller.js`
-      now validates format with a regex before hitting the DB, and the `User`
-      model has a matching Mongoose `match` validator as defense in depth.
-- [x] ~~Long-lived JWTs with no refresh/revocation.~~ Fixed: access tokens
-      now expire in 15 minutes; a separate opaque refresh token (stored only
-      as a SHA-256 hash on the `User` doc) is issued as an httpOnly, rotated
-      cookie via new `POST /auth/refresh` and `POST /auth/logout` endpoints,
-      the latter revoking the stored hash server-side. Client
-      (`client/src/api/http.js`) transparently refreshes on a 401 and retries.
-- [x] ~~No password-reset or email-verification flow.~~ Fixed: registration now
-      sends a verification email (hashed, expiring token) and exposes
-      `POST /auth/verify-email` + `POST /auth/resend-verification`; a
-      `POST /auth/forgot-password` / `POST /auth/reset-password` pair handles
-      resets (both return a generic message regardless of whether the account
-      exists, to avoid email enumeration; a reset also revokes the existing
-      refresh session). Emails go through `server/src/utils/mailer.js`
-      (`nodemailer`), which logs to the console instead of sending when
-      `SMTP_HOST` isn't configured, so it works out of the box in local dev.
-      Client adds `/forgot-password`, `/reset-password`, `/verify-email`
-      screens and an in-app "verify your email" banner with a resend button.
-      Login/registration remain unblocked by an unverified email — it's
-      tracked, not enforced.
+### Entry mode 2 — timeline builder (replaces `TimelineModeScreen`)
 
-## Code quality / client robustness
+- [ ] A single 0:00–24:00 ruler (horizontal on mobile, can be vertical on
+      wide screens). Replace the fixed 30-min tap-slots with a drag-select:
+      click/touch-drag across the ruler to carve out a block of arbitrary
+      length (snap to 5 or 15 min, not 30).
+- [ ] On drag release, open a popup anchored to the new block with the
+      *same field set* as the manual log card (title, log, category, tags),
+      all optional except the block's time range, which is already set by
+      the drag. User can fill in as much as they want, or dismiss the popup
+      to keep the block as an untitled/black-box span.
+- [ ] Existing blocks are draggable (move) and resizable (drag an edge);
+      overlap either clamps the neighboring block or is disallowed —
+      pick one during implementation, don't allow silent double-booking.
+- [ ] Untouched time stays visually distinct as black box, consistent with
+      the app's existing "honest black box" framing.
 
-- [x] ~~No handling for expired/invalid tokens mid-session.~~ Fixed as part
-      of the refresh-token work above: `apiRequest` now retries a `401` once
-      via `POST /auth/refresh` before surfacing an error, so a mid-session
-      access-token expiry is transparent as long as the refresh cookie is
-      still valid.
-- [x] ~~No offline/network-failure handling.~~ Fixed: `client/src/api/http.js`
-      now retries a request twice (short backoff) when `fetch` itself rejects
-      — i.e. the request never reached the server — before giving up with a
-      clear "you're offline" / "couldn't reach the server" message instead of
-      the raw browser error; an HTTP error response (4xx/5xx) is left alone
-      and handled as before. A fixed `OfflineBanner` (via a small
-      `useOnlineStatus` hook on the browser `online`/`offline` events) shows
-      proactively across every screen while the connection is down, and
-      `GameScreen`'s save button now shows "Offline — try again" instead of
-      the generic "Could not save" when the failure was a network one.
+### Review mode 1 — dialogue recap (replaces the `GameScreen` platformer run)
 
-## Docs / Config / DevOps
+A Pokémon-NPC-style text-box walkthrough of the day instead of running a
+level:
 
-- [x] ~~No CI.~~ Fixed: `.github/workflows/ci.yml` runs `format:check`,
-      `lint`, and the client build on push/PR to `main` (Node 18.x and
-      20.x). No test job yet since there's still no test framework (see
-      "Testing" above).
-- [x] ~~No containerization.~~ Fixed: `server/Dockerfile` and
-      `client/Dockerfile` (multi-stage, built from the repo root for the npm
-      workspaces to resolve), `client/nginx.conf` for serving the static
-      build and proxying `/api`, and a root `docker-compose.yml` wiring both
-      up with a `mongo` service for local/single-host use.
-- [x] ~~No production deployment docs.~~ Fixed: added `DEPLOY.md` covering
-      Docker Compose, deploying the client/server/Mongo separately, required
-      env vars, and the client's `/api` proxy requirement; linked from
-      `README.md`.
-- [x] ~~No responsive/mobile layout.~~ Fixed: `client/index.html`'s viewport
-      meta no longer sets `maximum-scale=1.0`/`user-scalable=no` (pinch-zoom
-      now works) and adds `viewport-fit=cover`; `client/src/index.css` now
-      centers the phone-width layout with a max-width on wider viewports
-      instead of stretching it edge-to-edge, adds a small-screen (`<340px`)
-      breakpoint, and pads the offline banner/bottom controls for
-      `env(safe-area-inset-*)` on notched phones.
+- [ ] Retro dialogue box docked at the bottom of the screen with a
+      typewriter text-reveal; "▼ press to continue" advances one entry at a
+      time, chronologically from the day's first logged activity to its
+      last.
+- [ ] One "page" per activity: time range, title, category, and the log
+      text if present (e.g. "6:30–7:00 · GYM — leg day 💪"). Black-box gaps
+      between activities get their own filler page (e.g. "...the rest is a
+      mystery.") so unrecorded time is still acknowledged, not silently
+      skipped.
+- [ ] Reuse the existing platformer sprite/tile assets for a small
+      backdrop or avatar that swaps per category (home, gym, office, etc.)
+      instead of building new art from scratch.
+- [ ] End-of-day summary screen in the same visual style as the existing
+      end-of-run recap (total tracked hours, breakdown by category) instead
+      of a "level complete" screen.
+
+### Review mode 2 — day/night chrono bar
+
+A single line, 0:00 on one end to 24:00 on the other (horizontal by
+default; vertical as a later option), used as a full-day visualization:
+
+- [ ] Background of the line renders a day/night gradient along its length
+      — dark at both ends (midnight), brightening through sunrise (~6am),
+      brightest at noon, dimming through sunset (~6pm), dark again at the
+      far end — plus a small sun/moon glyph that moves along an arc above
+      the line to mark current time-of-day (sun while it's day, moon while
+      it's night). This is a visual echo of the 0–24 axis, not a literal
+      clock.
+- [ ] Logged activities render as colored segments overlaid on the line
+      (color = category), each with a small marker pin at its start point
+      and its end point.
+- [ ] Hover (desktop) or tap (mobile) on a segment opens a popup with that
+      activity's full info (title, time range, log, tags) — same info
+      shown in the dialogue recap, different presentation.
+- [ ] Untouched stretches of the line stay as plain day/night gradient with
+      no segment — the black box, shown honestly rather than hidden.
+- [ ] Nice-to-have, not required for a first pass: clicking empty space on
+      the bar jumps into entry mode 2 (timeline builder) pre-positioned at
+      that time.
 
 ## Verified fine (not gaps)
 
@@ -111,5 +106,5 @@ feature ideas and code-review fixes already tracked in `README.md`.
 
 ---
 
-See also `README.md` → "Ideas for next steps" (feature backlog) and
-"Known issues (from code review)" (already fixed).
+See also `README.md` → "Ideas for next steps" for smaller, unrelated
+feature ideas.

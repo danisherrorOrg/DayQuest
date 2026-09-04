@@ -77,7 +77,7 @@ and configuring MongoDB/env vars for a real deployment, see `DEPLOY.md`.
 CI (`.github/workflows/ci.yml`) runs `format:check`, `lint`, the client
 build, and the test suite on every push/PR to `main`.
 
-## Input modes
+## Input modes (current)
 
 1. **Write it out** — type lines like `06:30-07:00 gym`. Gaps between lines
    become black-box time automatically. Plain text with no timestamps also
@@ -90,37 +90,31 @@ build, and the test suite on every push/PR to `main`.
 All three feed the same platformer engine and the same end-of-run recap and
 save flow.
 
+**This is being replaced.** The agreed next design drops these three modes
+for two structured entry modes (a manual log-card form, and a drag-to-block
+timeline builder) plus two review modes (a Pokémon-dialogue-style recap, and
+a day/night "chrono bar" timeline) — see `TODO.md` → "Feature: entry &
+review redesign" for the full spec. Nothing there is built yet; the modes
+above are still what's live.
+
 ## Saving days
 
 "Save This Day" calls `PUT /api/days/:date` on the server (JWT-authenticated),
 which upserts a `Day` document scoped to your account — re-saving the same
 date overwrites rather than duplicating. Days are private per account.
 
-## Known issues (from code review)
+No open known issues from code review at the moment — see git history for
+past fixes (auth email resolution, error-message leakage, local-date save
+bug, JWT algorithm pinning, `levelBuilder.js` dedup).
 
-- ~~`AuthContext` never re-resolves `email` after a page reload with a persisted
-  token, so the top bar shows a blank email until the next login.~~ Fixed:
-  added `GET /auth/me` and resolve it on mount.
-- ~~The generic error handler returned raw `err.message` to clients on every
-  500, leaking internal details (e.g. Mongo error text).~~ Fixed: 500s now
-  return a generic message; only intentional 4xx messages pass through.
-- ~~`GameScreen.handleSave` computed the save date from UTC (`toISOString`)
-  instead of the user's local date, so evening play near a UTC day boundary
-  could save under the wrong date.~~ Fixed: now uses the local date.
-- ~~`jwt.verify()` didn't pin the accepted algorithms.~~ Fixed: now passes
-  `{ algorithms: ["HS256"] }` explicitly.
-- ~~`levelBuilder.js`'s three `buildLevelFrom*` functions duplicated the
-  finish-line (`finalLen`/`flagX`/`levelWidth`) logic.~~ Fixed: extracted into
-  a shared `finishLevel` helper.
-
-See also `TODO.md` for infra/tooling gaps (tests, lint, CI, security
-hardening, etc.) that don't fit here.
+See `TODO.md` for the entry/review redesign spec (the main thing planned
+next) and any other tracked gaps.
 
 ## Ideas for next steps
 
 - A "My Days" screen using the already-built `GET /api/days` list endpoint
-- Drag-to-reorder in the moments-list mode (currently uses up/down buttons)
-- Exact-minute dragging in the timeline builder (currently 30-min slots)
-- Obstacles/enemies for extra platforming challenge
-- Export a finished run as an image to share
 - A "replay a past saved day" mode, using `GET /api/days/:date`
+- Export a finished recap as an image to share
+- Obstacles/enemies for extra platforming challenge, if the platformer
+  recap survives the redesign in `TODO.md` (undecided — it may be fully
+  replaced by the dialogue recap described there)
