@@ -8,22 +8,12 @@ honest "black box" you still run past.
 
 ## How to run it
 
-`day_story.html` is a single self-contained file — no build step, no server.
+`index.html` is a single self-contained file — no build step, no server.
 Just double-click it (or open it in Chrome/Safari) and play.
 
-The `versions/` folder keeps the earlier iterations for reference:
-- `v1_scene_diary.jsx` — the original idea: a static illustrated scene + written
-  summary (React component, meant for an environment that can render `.jsx`,
-  e.g. a Claude.ai artifact).
-- `v2_platformer.html` — first platformer version: free-text input, run/jump,
-  collect activity coins, reach the flag.
-- `v3_timed_and_timeline.html` — added two structured input modes: a
-  timestamped text format (`06:30-07:00 gym`) and a tap-to-paint 24-hour
-  timeline, both with automatic "black box" filling for unrecorded time.
-
-`day_story.html` (the current version) adds a third input mode on top of v3:
-an ordered, time-optional list of "moments" with a vertical-timeline UI —
-for people who don't want to think in clock times at all.
+Earlier iterations of this project (a static-scene prototype, then two
+progressively more featured platformer versions) are available in the git
+history if you want to see how it evolved.
 
 ## Input modes
 
@@ -43,9 +33,9 @@ save flow.
 The game uses the artifact persistent-storage API (`window.storage`) to save
 each day under a `diary:YYYY-MM-DD` key, privately per user. This only works
 when the file is opened inside an environment that provides that API (e.g.
-as a Claude.ai artifact) — opening `day_story.html` directly in a plain
-browser will run the game fine, but the "Save This Day" button will fail
-silently since `window.storage` won't exist there.
+as a Claude.ai artifact) — opening `index.html` directly in a plain browser
+will run the game fine, but the "Save This Day" button will fail silently
+since `window.storage` won't exist there.
 
 ## Ideas for next steps
 
