@@ -36,7 +36,9 @@ npm run dev                       # runs server (:4000) and client (:5173) toget
 Then open `http://localhost:5173`, register an account, and play.
 
 `run.sh` is a convenience wrapper around the same `npm run dev` that also
-installs dependencies on first run.
+installs dependencies on first run. It also forwards to the lint/format
+scripts below: `./run.sh lint`, `./run.sh lint:fix`, `./run.sh format`,
+`./run.sh format:check`.
 
 ### Linting & formatting
 
