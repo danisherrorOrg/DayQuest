@@ -28,14 +28,33 @@ export default function LoginForm() {
     <div className="screen active">
       <div className="panel">
         <h1>Welcome Back</h1>
-        <p className="sub">Log in to run today's story and see your saved days.</p>
+        <p className="sub">Log in to run today&apos;s story and see your saved days.</p>
         <form onSubmit={handleSubmit}>
-          <input className="authInput" type="email" placeholder="Email" value={email}
-            onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-          <input className="authInput" type="password" placeholder="Password" value={password}
-            onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+          <input
+            className="authInput"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+          <input
+            className="authInput"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
           {error && <p className="authError">{error}</p>}
-          <button className="primaryBtn" type="submit" disabled={submitting} style={{ width: "100%", marginTop: 6 }}>
+          <button
+            className="primaryBtn"
+            type="submit"
+            disabled={submitting}
+            style={{ width: "100%", marginTop: 6 }}
+          >
             {submitting ? "Logging in…" : "Log In"}
           </button>
         </form>

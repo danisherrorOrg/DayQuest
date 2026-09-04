@@ -25,15 +25,21 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const register = useCallback(async (emailInput, password) => {
-    const data = await registerRequest(emailInput, password);
-    applySession(data);
-  }, [applySession]);
+  const register = useCallback(
+    async (emailInput, password) => {
+      const data = await registerRequest(emailInput, password);
+      applySession(data);
+    },
+    [applySession],
+  );
 
-  const login = useCallback(async (emailInput, password) => {
-    const data = await loginRequest(emailInput, password);
-    applySession(data);
-  }, [applySession]);
+  const login = useCallback(
+    async (emailInput, password) => {
+      const data = await loginRequest(emailInput, password);
+      applySession(data);
+    },
+    [applySession],
+  );
 
   const logout = useCallback(() => {
     persistToken(null);

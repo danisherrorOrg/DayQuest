@@ -14,8 +14,15 @@ export async function saveDay(req, res, next) {
 
     const day = await Day.findOneAndUpdate(
       { user: req.userId, date },
-      { mode, timeline: timeline ?? null, activities: activities ?? null, moments: moments ?? null, summary, savedAt: new Date() },
-      { new: true, upsert: true, runValidators: true }
+      {
+        mode,
+        timeline: timeline ?? null,
+        activities: activities ?? null,
+        moments: moments ?? null,
+        summary,
+        savedAt: new Date(),
+      },
+      { new: true, upsert: true, runValidators: true },
     );
 
     res.json(day);

@@ -38,6 +38,15 @@ Then open `http://localhost:5173`, register an account, and play.
 `run.sh` is a convenience wrapper around the same `npm run dev` that also
 installs dependencies on first run.
 
+### Linting & formatting
+
+```bash
+npm run lint            # ESLint across client/ and server/
+npm run lint:fix
+npm run format           # Prettier, writes changes
+npm run format:check     # Prettier, check only (CI-friendly)
+```
+
 ## Input modes
 
 1. **Write it out** — type lines like `06:30-07:00 gym`. Gaps between lines

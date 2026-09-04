@@ -1,13 +1,19 @@
 import { ACTIVITIES, BLACKBOX, guessActivityFromText } from "./activities.js";
 
 export function parseTimedText(raw) {
-  const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   const found = [];
   const re = /^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})\s+(.+)$/;
   for (const line of lines) {
     const m = line.match(re);
     if (!m) continue;
-    const sh = parseInt(m[1], 10), sm = parseInt(m[2], 10), eh = parseInt(m[3], 10), em = parseInt(m[4], 10);
+    const sh = parseInt(m[1], 10),
+      sm = parseInt(m[2], 10),
+      eh = parseInt(m[3], 10),
+      em = parseInt(m[4], 10);
     const start = sh * 60 + sm;
     let end = eh * 60 + em;
     if (end <= start) end += 1440; // overnight wrap, clamp later

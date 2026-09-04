@@ -19,7 +19,10 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
       onPopup(msg) {
         clearTimeout(popupTimeoutRef.current);
         setPopup({ msg, visible: true });
-        popupTimeoutRef.current = setTimeout(() => setPopup((p) => ({ ...p, visible: false })), 1200);
+        popupTimeoutRef.current = setTimeout(
+          () => setPopup((p) => ({ ...p, visible: false })),
+          1200,
+        );
       },
       onCoinCollected(idx) {
         setGotIndices((prev) => new Set(prev).add(idx));
@@ -64,8 +67,14 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
       onMouseDown: () => engine().setInput(dir, true),
       onMouseUp: () => engine().setInput(dir, false),
       onMouseLeave: () => engine().setInput(dir, false),
-      onTouchStart: (e) => { e.preventDefault(); engine().setInput(dir, true); },
-      onTouchEnd: (e) => { e.preventDefault(); engine().setInput(dir, false); },
+      onTouchStart: (e) => {
+        e.preventDefault();
+        engine().setInput(dir, true);
+      },
+      onTouchEnd: (e) => {
+        e.preventDefault();
+        engine().setInput(dir, false);
+      },
     };
   }
 
@@ -81,9 +90,17 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
       const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
       const entry = {
         mode,
-        timeline: mode === "timed"
-          ? timeline.map((s) => ({ start: s.start, end: s.end, key: s.act.key, label: s.act.label, emoji: s.act.emoji, color: s.act.color }))
-          : null,
+        timeline:
+          mode === "timed"
+            ? timeline.map((s) => ({
+                start: s.start,
+                end: s.end,
+                key: s.act.key,
+                label: s.act.label,
+                emoji: s.act.emoji,
+                color: s.act.color,
+              }))
+            : null,
         activities: mode === "legacy" ? activities.map((a) => a.key) : null,
         moments: mode === "sequence" ? moments : null,
         summary: finished.summaryText,
@@ -97,48 +114,79 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
     }
   }
 
-  const saveLabel = { idle: "Save This Day", saving: "Saving...", saved: "Saved ✓", error: "Could not save" }[saveStatus];
+  const saveLabel = {
+    idle: "Save This Day",
+    saving: "Saving...",
+    saved: "Saved ✓",
+    error: "Could not save",
+  }[saveStatus];
 
   return (
     <div className="screen active" id="gameScreen">
       <div id="hud">
         {builtLevel.coins.map((c, idx) => (
-          <div key={idx} className={"badge" + (gotIndices.has(idx) ? " got" : "")}>{c.act.emoji}</div>
+          <div key={idx} className={"badge" + (gotIndices.has(idx) ? " got" : "")}>
+            {c.act.emoji}
+          </div>
         ))}
       </div>
       <div id="canvasWrap" ref={canvasWrapRef}>
         <canvas id="game" ref={canvasRef} />
-        <div id="popup" className={popup.visible ? "show" : ""}>{popup.msg}</div>
+        <div id="popup" className={popup.visible ? "show" : ""}>
+          {popup.msg}
+        </div>
         {finished && (
           <div id="completeOverlay" style={{ display: "flex" }}>
             <h2>Day Complete!</h2>
             <p className="desc">{finished.summaryText}</p>
             <div id="badgeRow">
               {finished.badgeItems.map((a, i) => (
-                <div key={i} className="cbadge" style={{ background: a.color }}>{a.emoji}</div>
+                <div key={i} className="cbadge" style={{ background: a.color }}>
+                  {a.emoji}
+                </div>
               ))}
             </div>
-            <div id="timelineRecap" style={{ display: finished.hasTimeLabels ? undefined : "none" }}>
+            <div
+              id="timelineRecap"
+              style={{ display: finished.hasTimeLabels ? undefined : "none" }}
+            >
               {finished.recapRows.map((row, i) => (
                 <div className="recapRow" key={i}>
                   <span className="rt">{row.timeLabel || ""}</span>
-                  <span className="rl">{row.act.emoji} {row.act.label}</span>
+                  <span className="rl">
+                    {row.act.emoji} {row.act.label}
+                  </span>
                 </div>
               ))}
             </div>
             <div className="endBtns">
-              <button className="endBtn" id="saveBtn" disabled={saveStatus === "saving"} onClick={handleSave}>{saveLabel}</button>
-              <button className="endBtn" id="againBtn" onClick={onRestart}>Start Over</button>
+              <button
+                className="endBtn"
+                id="saveBtn"
+                disabled={saveStatus === "saving"}
+                onClick={handleSave}
+              >
+                {saveLabel}
+              </button>
+              <button className="endBtn" id="againBtn" onClick={onRestart}>
+                Start Over
+              </button>
             </div>
           </div>
         )}
       </div>
       <div id="controls">
         <div id="dpad">
-          <button className="ctrlBtn" id="leftBtn" {...bindHoldProps("left")}>◀</button>
-          <button className="ctrlBtn" id="rightBtn" {...bindHoldProps("right")}>▶</button>
+          <button className="ctrlBtn" id="leftBtn" {...bindHoldProps("left")}>
+            ◀
+          </button>
+          <button className="ctrlBtn" id="rightBtn" {...bindHoldProps("right")}>
+            ▶
+          </button>
         </div>
-        <button className="ctrlBtn" id="jumpBtn" onClick={doJump} onTouchStart={doJump}>JUMP</button>
+        <button className="ctrlBtn" id="jumpBtn" onClick={doJump} onTouchStart={doJump}>
+          JUMP
+        </button>
       </div>
     </div>
   );

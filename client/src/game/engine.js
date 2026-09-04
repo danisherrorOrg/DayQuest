@@ -36,7 +36,17 @@ export class GameEngine {
 
   resetPlayer() {
     const f = this.level.segments[0];
-    this.player = { x: f.x1 + 30, y: GROUND_Y - 34, w: 22, h: 34, vx: 0, vy: 0, onGround: true, checkpoint: f.x1 + 30, facing: 1 };
+    this.player = {
+      x: f.x1 + 30,
+      y: GROUND_Y - 34,
+      w: 22,
+      h: 34,
+      vx: 0,
+      vy: 0,
+      onGround: true,
+      checkpoint: f.x1 + 30,
+      facing: 1,
+    };
   }
 
   resizeCanvas() {
@@ -73,8 +83,14 @@ export class GameEngine {
   update(dt) {
     const { player, level, input } = this;
     player.vx = 0;
-    if (input.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
-    if (input.right) { player.vx = MOVE_SPEED; player.facing = 1; }
+    if (input.left) {
+      player.vx = -MOVE_SPEED;
+      player.facing = -1;
+    }
+    if (input.right) {
+      player.vx = MOVE_SPEED;
+      player.facing = 1;
+    }
     player.x += player.vx * dt;
     if (player.x < 10) player.x = 10;
     player.vy += GRAVITY * dt;
@@ -103,10 +119,11 @@ export class GameEngine {
 
     level.coins.forEach((c, idx) => {
       if (c.collected) return;
-      const dx = (player.x + player.w / 2) - c.x, dy = (player.y + player.h / 2) - c.y;
+      const dx = player.x + player.w / 2 - c.x,
+        dy = player.y + player.h / 2 - c.y;
       if (Math.sqrt(dx * dx + dy * dy) < c.r + 18) {
         c.collected = true;
-        const msg = c.act.key ? (c.act.emoji + " " + c.act.label) : "❔ Black box — no record here";
+        const msg = c.act.key ? c.act.emoji + " " + c.act.label : "❔ Black box — no record here";
         this.onPopup?.(msg);
         this.onCoinCollected?.(idx);
       }
@@ -122,7 +139,9 @@ export class GameEngine {
 
   draw() {
     const { ctx, level, player } = this;
-    const w = this.cssW, h = this.cssH, dpr = window.devicePixelRatio || 1;
+    const w = this.cssW,
+      h = this.cssH,
+      dpr = window.devicePixelRatio || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     const grad = ctx.createLinearGradient(0, 0, 0, h);

@@ -1,11 +1,16 @@
 {
   "name": "day-story-server",
   "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "type": "module",
   "main": "src/index.js",
   "scripts": {
     "dev": "node --watch src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "lint": "cd .. && eslint server"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

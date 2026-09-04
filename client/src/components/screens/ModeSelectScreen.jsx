@@ -8,10 +8,15 @@ export default function ModeSelectScreen({ onPick }) {
       <div className="panel">
         <div className="topBar">
           <span className="topBarEmail">{email}</span>
-          <button className="backLink" onClick={logout}>Log out</button>
+          <button className="backLink" onClick={logout}>
+            Log out
+          </button>
         </div>
         <h1>Day Story: Run Your Day</h1>
-        <p className="sub">Choose how you want to log today. Either way, unlogged time just becomes a black box in the level — no pressure to remember everything.</p>
+        <p className="sub">
+          Choose how you want to log today. Either way, unlogged time just becomes a black box in
+          the level — no pressure to remember everything.
+        </p>
         <div className="modeCard" onClick={() => onPick("text")}>
           <h3>✍️ Write it out</h3>
           <p>Type your day using a simple time format, minute by minute or task by task.</p>

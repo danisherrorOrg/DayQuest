@@ -10,7 +10,12 @@ import TimelineModeScreen from "./components/screens/TimelineModeScreen.jsx";
 import MomentsModeScreen from "./components/screens/MomentsModeScreen.jsx";
 import GameScreen from "./components/screens/GameScreen.jsx";
 import { parseTimedText, detectActivitiesLegacy } from "./game/parse.js";
-import { buildLevelFromTimeline, buildLevelFromMoments, buildLevelLegacy, timelineFromSlots } from "./game/levelBuilder.js";
+import {
+  buildLevelFromTimeline,
+  buildLevelFromMoments,
+  buildLevelLegacy,
+  timelineFromSlots,
+} from "./game/levelBuilder.js";
 
 function GameApp() {
   const [screen, setScreen] = useState("mode");
@@ -46,9 +51,15 @@ function GameApp() {
   return (
     <div id="app">
       {screen === "mode" && <ModeSelectScreen onPick={setScreen} />}
-      {screen === "text" && <TextModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromText} />}
-      {screen === "timeline" && <TimelineModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromTimeline} />}
-      {screen === "moments" && <MomentsModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromMoments} />}
+      {screen === "text" && (
+        <TextModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromText} />
+      )}
+      {screen === "timeline" && (
+        <TimelineModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromTimeline} />
+      )}
+      {screen === "moments" && (
+        <MomentsModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromMoments} />
+      )}
       {screen === "game" && run && (
         <GameScreen
           mode={run.mode}
@@ -69,7 +80,14 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
-        <Route path="/" element={<RequireAuth><GameApp /></RequireAuth>} />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <GameApp />
+            </RequireAuth>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>

@@ -47,13 +47,19 @@ export default function MomentsModeScreen({ onBack, onBuild }) {
     <div className="screen active">
       <div className="panel" style={{ paddingBottom: 10 }}>
         <div className="backRow">
-          <button className="backLink" onClick={onBack}>← Back</button>
+          <button className="backLink" onClick={onBack}>
+            ← Back
+          </button>
         </div>
         <h1 style={{ marginBottom: 2 }}>Your Day, In Order</h1>
-        <p className="sub" style={{ marginBottom: 6 }}>Add what you did, top to bottom. A time is optional for each one.</p>
+        <p className="sub" style={{ marginBottom: 6 }}>
+          Add what you did, top to bottom. A time is optional for each one.
+        </p>
 
         <div id="momentsList" style={{ flex: 1, overflowY: "auto", marginBottom: 10 }}>
-          {moments.length === 0 && <div id="emptyMoments">No moments yet — add your first one below.</div>}
+          {moments.length === 0 && (
+            <div id="emptyMoments">No moments yet — add your first one below.</div>
+          )}
           {moments.map((m, i) => {
             const act = guessActivityFromText(m.text);
             return (
@@ -63,11 +69,17 @@ export default function MomentsModeScreen({ onBack, onBuild }) {
                   {i < moments.length - 1 && <div className="momentLine" />}
                 </div>
                 <div className="momentCard">
-                  <div className="mText">{act.emoji} {m.text}</div>
-                  <div className="mTime">{m.time != null ? minutesToLabel(m.time) : "no time noted"}</div>
+                  <div className="mText">
+                    {act.emoji} {m.text}
+                  </div>
+                  <div className="mTime">
+                    {m.time != null ? minutesToLabel(m.time) : "no time noted"}
+                  </div>
                   <div className="momentActions">
                     {i > 0 && <button onClick={() => moveUp(i)}>▲ move up</button>}
-                    {i < moments.length - 1 && <button onClick={() => moveDown(i)}>▼ move down</button>}
+                    {i < moments.length - 1 && (
+                      <button onClick={() => moveDown(i)}>▼ move down</button>
+                    )}
                     <button onClick={() => remove(i)}>✕ remove</button>
                   </div>
                 </div>
@@ -89,7 +101,12 @@ export default function MomentsModeScreen({ onBack, onBuild }) {
               {showTime ? "remove time" : "+ add a time"}
             </button>
             {showTime && (
-              <input type="time" id="momentTime" value={time} onChange={(e) => setTime(e.target.value)} />
+              <input
+                type="time"
+                id="momentTime"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
             )}
           </div>
           <button

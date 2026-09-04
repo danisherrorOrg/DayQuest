@@ -20,11 +20,14 @@ export default function TimelineModeScreen({ onBack, onBuild }) {
     <div className="screen active">
       <div className="panel" style={{ paddingBottom: 10 }}>
         <div className="backRow">
-          <button className="backLink" onClick={onBack}>← Back</button>
+          <button className="backLink" onClick={onBack}>
+            ← Back
+          </button>
         </div>
         <h1 style={{ marginBottom: 2 }}>Build Your Timeline</h1>
         <p className="sub" style={{ marginBottom: 6 }}>
-          Pick an activity below, then tap the half-hours you spent on it. Leave the rest blank — that's your black box time.
+          Pick an activity below, then tap the half-hours you spent on it. Leave the rest blank —
+          that&apos;s your black box time.
         </p>
 
         <div id="palette">
@@ -51,7 +54,14 @@ export default function TimelineModeScreen({ onBack, onBuild }) {
                   className={"slotFill" + (filled ? " filled" : "")}
                   style={filled ? { background: filled.color } : undefined}
                 >
-                  {filled ? <><span>{filled.emoji}</span><span>{filled.label}</span></> : "tap to fill"}
+                  {filled ? (
+                    <>
+                      <span>{filled.emoji}</span>
+                      <span>{filled.label}</span>
+                    </>
+                  ) : (
+                    "tap to fill"
+                  )}
                 </div>
               </div>
             );
@@ -59,7 +69,9 @@ export default function TimelineModeScreen({ onBack, onBuild }) {
         </div>
 
         <div style={{ height: 12 }} />
-        <button className="primaryBtn" onClick={() => onBuild(slots)}>Build My Level</button>
+        <button className="primaryBtn" onClick={() => onBuild(slots)}>
+          Build My Level
+        </button>
       </div>
     </div>
   );

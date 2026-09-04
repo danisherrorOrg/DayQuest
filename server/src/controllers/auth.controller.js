@@ -9,11 +9,14 @@ function signToken(user) {
 export async function register(req, res, next) {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
-    if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password are required" });
+    if (password.length < 8)
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
 
     const existing = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existing) return res.status(409).json({ error: "An account with that email already exists" });
+    if (existing)
+      return res.status(409).json({ error: "An account with that email already exists" });
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ email, passwordHash });
@@ -27,7 +30,8 @@ export async function register(req, res, next) {
 export async function login(req, res, next) {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password are required" });
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) return res.status(401).json({ error: "Invalid email or password" });
