@@ -74,6 +74,9 @@ date overwrites rather than duplicating. Days are private per account.
   finish-line (`finalLen`/`flagX`/`levelWidth`) logic.~~ Fixed: extracted into
   a shared `finishLevel` helper.
 
+See also `TODO.md` for infra/tooling gaps (tests, lint, CI, security
+hardening, etc.) that don't fit here.
+
 ## Ideas for next steps
 
 - A "My Days" screen using the already-built `GET /api/days` list endpoint
