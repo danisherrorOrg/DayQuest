@@ -8,6 +8,7 @@ import ForgotPasswordForm from "./components/auth/ForgotPasswordForm.jsx";
 import ResetPasswordForm from "./components/auth/ResetPasswordForm.jsx";
 import VerifyEmailScreen from "./components/auth/VerifyEmailScreen.jsx";
 import VerifyEmailBanner from "./components/auth/VerifyEmailBanner.jsx";
+import OfflineBanner from "./components/OfflineBanner.jsx";
 import ModeSelectScreen from "./components/screens/ModeSelectScreen.jsx";
 import TextModeScreen from "./components/screens/TextModeScreen.jsx";
 import TimelineModeScreen from "./components/screens/TimelineModeScreen.jsx";
@@ -82,6 +83,7 @@ function GameApp() {
 export default function App() {
   return (
     <AuthProvider>
+      <OfflineBanner />
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />

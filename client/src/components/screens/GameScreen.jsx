@@ -12,7 +12,7 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
   const [gotIndices, setGotIndices] = useState(() => new Set());
   const [popup, setPopup] = useState({ msg: "", visible: false });
   const [finished, setFinished] = useState(null); // { summaryText, badgeItems, recapRows, hasTimeLabels }
-  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved | error
+  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved | error | offline
 
   useEffect(() => {
     const engine = new GameEngine(canvasRef.current, canvasWrapRef.current, {
@@ -107,8 +107,8 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
       };
       await saveDay(date, entry);
       setSaveStatus("saved");
-    } catch {
-      setSaveStatus("error");
+    } catch (err) {
+      setSaveStatus(err.isNetworkError ? "offline" : "error");
     } finally {
       setTimeout(() => setSaveStatus("idle"), 1600);
     }
@@ -119,6 +119,7 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
     saving: "Saving...",
     saved: "Saved ✓",
     error: "Could not save",
+    offline: "Offline — try again",
   }[saveStatus];
 
   return (

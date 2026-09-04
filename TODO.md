@@ -59,9 +59,16 @@ feature ideas and code-review fixes already tracked in `README.md`.
       via `POST /auth/refresh` before surfacing an error, so a mid-session
       access-token expiry is transparent as long as the refresh cookie is
       still valid.
-- [ ] **No offline/network-failure handling.** A failed `fetch` (network
-      down) surfaces the same generic error path as any other failure — no
-      retry or offline messaging.
+- [x] ~~No offline/network-failure handling.~~ Fixed: `client/src/api/http.js`
+      now retries a request twice (short backoff) when `fetch` itself rejects
+      — i.e. the request never reached the server — before giving up with a
+      clear "you're offline" / "couldn't reach the server" message instead of
+      the raw browser error; an HTTP error response (4xx/5xx) is left alone
+      and handled as before. A fixed `OfflineBanner` (via a small
+      `useOnlineStatus` hook on the browser `online`/`offline` events) shows
+      proactively across every screen while the connection is down, and
+      `GameScreen`'s save button now shows "Offline — try again" instead of
+      the generic "Could not save" when the failure was a network one.
 
 ## Docs / Config / DevOps
 

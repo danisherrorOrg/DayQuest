@@ -18,11 +18,40 @@ export function setToken(token) {
   else localStorage.removeItem(TOKEN_KEY);
 }
 
+const NETWORK_RETRIES = 2;
+const NETWORK_RETRY_DELAY_MS = 600;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// fetch() rejects (rather than resolving with a bad status) when the request never reached the
+// server at all — no connection, DNS failure, timeout. That's the only case worth retrying or
+// relabeling; an HTTP error response is left alone and handled by the caller as usual.
+async function fetchWithRetry(url, options) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (attempt >= NETWORK_RETRIES) {
+        const message = navigator.onLine
+          ? "Couldn't reach the server. Check your connection and try again."
+          : "You're offline. Check your connection and try again.";
+        const networkError = new Error(message);
+        networkError.isNetworkError = true;
+        networkError.cause = err;
+        throw networkError;
+      }
+      await sleep(NETWORK_RETRY_DELAY_MS * (attempt + 1));
+    }
+  }
+}
+
 async function rawRequest(path, { method, body, token }) {
   const headers = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`/api${path}`, {
+  const res = await fetchWithRetry(`/api${path}`, {
     method,
     headers,
     credentials: "include",

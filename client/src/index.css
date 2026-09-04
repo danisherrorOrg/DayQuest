@@ -135,6 +135,18 @@ body,
   color: #6b4a1f;
   font-size: 12.5px;
 }
+.offlineBanner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 8px 14px;
+  background: #c1502e;
+  color: #fff8ec;
+  font-size: 12.5px;
+  text-align: center;
+}
 
 /* ---- Mode select ---- */
 .modeCard {
