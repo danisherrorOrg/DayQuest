@@ -1,0 +1,91 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+html, body, #root { margin: 0; padding: 0; height: 100%; font-family: 'Inter', -apple-system, sans-serif; background: #2B2140; overflow: hidden; }
+#app { display: flex; flex-direction: column; height: 100%; }
+.screen { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ---- Shared light panel style ---- */
+.panel { flex: 1; display: flex; flex-direction: column; padding: 18px 18px 14px; background: #FFF8EC; color: #3F2B1D; overflow-y: auto; }
+.panel h1 { font-family: Georgia, serif; font-size: 22px; margin: 2px 0 2px; font-weight: 700; }
+.panel .sub { margin: 0 0 14px; font-size: 13.5px; color: #7A5A42; line-height: 1.4; }
+.primaryBtn { border: none; border-radius: 10px; padding: 13px 18px; background: #C1502E; color: #FFF8EC; font-weight: 700; font-size: 15px; cursor: pointer; }
+.primaryBtn:disabled { background: #E8D2B0; }
+.ghostBtn { border: 1.5px solid #E8D2B0; background: transparent; color: #3F2B1D; border-radius: 10px; padding: 11px 16px; font-weight: 600; font-size: 14px; cursor: pointer; }
+.backRow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.backLink { background: none; border: none; color: #B0703F; font-size: 13px; font-weight: 600; padding: 4px 0; cursor: pointer; }
+
+/* ---- Auth ---- */
+.topBar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.topBarEmail { font-size: 12.5px; color: #9A7A56; }
+.authInput { width: 100%; padding: 12px 14px; border: 1.5px solid #E8D2B0; border-radius: 10px; font-size: 14px; font-family: inherit; background: #FFFEFB; color: #3F2B1D; margin-bottom: 10px; }
+.authError { color: #C1502E; font-size: 13px; margin: -2px 0 10px; }
+
+/* ---- Mode select ---- */
+.modeCard { border: 1.5px solid #E8D2B0; background: #FFFEFB; border-radius: 14px; padding: 16px; margin-bottom: 12px; text-align: left; cursor: pointer; }
+.modeCard h3 { margin: 0 0 4px; font-size: 16px; font-family: Georgia, serif; }
+.modeCard p { margin: 0; font-size: 13px; color: #7A5A42; line-height: 1.4; }
+
+/* ---- Text mode ---- */
+#dayText { width: 100%; min-height: 150px; border: 1.5px solid #E8D2B0; border-radius: 12px; padding: 12px 14px; font-size: 13.5px; font-family: 'SFMono-Regular', Menlo, monospace; resize: vertical; background: #FFFEFB; color: #3F2B1D; line-height: 1.6; }
+.formatBox { background: #F3E4C8; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #5A3E24; margin-bottom: 10px; line-height: 1.6; font-family: Menlo, monospace; }
+.formatBox b { font-family: Inter, sans-serif; display:block; margin-bottom:4px; color:#3F2B1D; font-size: 12.5px;}
+
+/* ---- Timeline builder ---- */
+#palette { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 12px; }
+.chip { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 9px; border-radius: 10px; border: 2px solid transparent; background: #FFFEFB; cursor: pointer; font-size: 10px; color: #3F2B1D; }
+.chip .em { font-size: 17px; }
+.chip.selected { border-color: #C1502E; background: #FBE2D6; }
+#timelineList { flex: 1; overflow-y: auto; border: 1.5px solid #E8D2B0; border-radius: 12px; background: #FFFEFB; }
+.slotRow { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-bottom: 1px solid #F0E3CC; cursor: pointer; }
+.slotRow:last-child { border-bottom: none; }
+.slotTime { width: 58px; flex: none; font-size: 11.5px; color: #9A7A56; font-variant-numeric: tabular-nums; }
+.slotFill { flex: 1; height: 26px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; gap: 6px; background: #EFE3CC; color: #B0956F; }
+.slotFill.filled { color: #FFF8EC; }
+
+/* ---- Moments mode (vertical line) ---- */
+.momentRow { display: flex; gap: 10px; position: relative; padding-bottom: 14px; }
+.momentTrack { display: flex; flex-direction: column; align-items: center; width: 18px; flex: none; }
+.momentDot { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #FFF8EC; flex: none; margin-top: 2px; }
+.momentLine { flex: 1; width: 2px; background: #E8D2B0; margin-top: 2px; }
+.momentCard { flex: 1; background: #FFFEFB; border: 1.5px solid #E8D2B0; border-radius: 10px; padding: 8px 10px; }
+.momentCard .mText { font-size: 13.5px; font-weight: 600; color: #3F2B1D; }
+.momentCard .mTime { font-size: 11.5px; color: #9A7A56; margin-top: 2px; }
+.momentActions { display: flex; gap: 6px; margin-top: 6px; }
+.momentActions button { border: none; background: #F3E4C8; color: #7A5A42; border-radius: 6px; font-size: 11px; padding: 3px 7px; cursor: pointer; }
+#momentForm { border-top: 1.5px solid #E8D2B0; padding-top: 10px; }
+#momentText { width: 100%; padding: 10px 12px; border: 1.5px solid #E8D2B0; border-radius: 10px; font-size: 14px; font-family: inherit; background: #FFFEFB; color: #3F2B1D; }
+#momentTimeRow { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+#momentTimeToggle { border: none; background: none; color: #B0703F; font-size: 12.5px; font-weight: 600; padding: 4px 0; cursor: pointer; }
+#momentTime { border: 1.5px solid #E8D2B0; border-radius: 8px; padding: 6px 8px; font-size: 13px; background: #FFFEFB; color: #3F2B1D; }
+#emptyMoments { font-size: 13px; color: #9A7A56; padding: 16px 4px; text-align: center; }
+
+/* ---- Game screen ---- */
+#gameScreen.screen { flex-direction: column; background: #2B2140; }
+#hud { display: flex; gap: 6px; padding: 10px 10px 6px; overflow-x: auto; background: #201936; }
+.badge { flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; opacity: 0.35; border: 2px solid rgba(255,255,255,0.15); transition: opacity 0.2s, transform 0.2s; }
+.badge.got { opacity: 1; transform: scale(1.08); border-color: rgba(255,255,255,0.6); }
+#canvasWrap { flex: 1; position: relative; background: #2B2140; }
+canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+#popup { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.68); color: #fff; padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s, top 0.3s; pointer-events: none; max-width: 82%; text-align: center; }
+#popup.show { opacity: 1; top: 26px; }
+#controls { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 22px; background: #201936; gap: 12px; }
+.ctrlBtn { border: none; border-radius: 14px; background: #3A2E56; color: #E8D2B0; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; width: 58px; height: 52px; touch-action: none; }
+.ctrlBtn:active { background: #C1502E; color: #fff; }
+#jumpBtn { width: 84px; height: 60px; border-radius: 30px; font-size: 15px; }
+#dpad { display: flex; gap: 8px; }
+
+/* ---- Complete overlay ---- */
+#completeOverlay { position: absolute; inset: 0; background: rgba(20,14,32,0.94); color: #FFF8EC; flex-direction: column; align-items: center; padding: 20px 20px 16px; text-align: center; overflow-y: auto; }
+#completeOverlay h2 { font-family: Georgia, serif; font-size: 24px; margin: 6px 0 4px; }
+#completeOverlay p.desc { font-size: 13.5px; color: #E8D2B0; max-width: 320px; line-height: 1.5; margin: 0 0 12px; }
+#badgeRow { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; max-width: 340px; }
+#badgeRow .cbadge { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid rgba(255,255,255,0.4); }
+#timelineRecap { width: 100%; max-width: 340px; text-align: left; background: rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 12px; margin-bottom: 16px; }
+.recapRow { display: flex; gap: 8px; font-size: 12.5px; padding: 3px 0; align-items: center; }
+.recapRow .rt { color: #B79F82; width: 92px; flex: none; font-variant-numeric: tabular-nums; }
+.recapRow .rl { color: #FFF8EC; }
+.endBtns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.endBtn { border: none; border-radius: 10px; padding: 12px 18px; font-weight: 700; font-size: 14.5px; cursor: pointer; }
+#saveBtn { background: #C1502E; color: #fff; }
+#againBtn { background: transparent; color: #E8D2B0; border: 1.5px solid #E8D2B0; }
+#saveBtn:disabled { opacity: 0.6; }
