@@ -57,6 +57,23 @@ save flow.
 which upserts a `Day` document scoped to your account — re-saving the same
 date overwrites rather than duplicating. Days are private per account.
 
+## Known issues (from code review)
+
+- ~~`AuthContext` never re-resolves `email` after a page reload with a persisted
+  token, so the top bar shows a blank email until the next login.~~ Fixed:
+  added `GET /auth/me` and resolve it on mount.
+- ~~The generic error handler returned raw `err.message` to clients on every
+  500, leaking internal details (e.g. Mongo error text).~~ Fixed: 500s now
+  return a generic message; only intentional 4xx messages pass through.
+- ~~`GameScreen.handleSave` computed the save date from UTC (`toISOString`)
+  instead of the user's local date, so evening play near a UTC day boundary
+  could save under the wrong date.~~ Fixed: now uses the local date.
+- ~~`jwt.verify()` didn't pin the accepted algorithms.~~ Fixed: now passes
+  `{ algorithms: ["HS256"] }` explicitly.
+- ~~`levelBuilder.js`'s three `buildLevelFrom*` functions duplicated the
+  finish-line (`finalLen`/`flagX`/`levelWidth`) logic.~~ Fixed: extracted into
+  a shared `finishLevel` helper.
+
 ## Ideas for next steps
 
 - A "My Days" screen using the already-built `GET /api/days` list endpoint

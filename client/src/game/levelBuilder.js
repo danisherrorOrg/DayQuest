@@ -7,6 +7,11 @@ export function pxForDuration(mins) {
   return Math.max(140, Math.min(460, mins * 3.4));
 }
 
+function finishLevel(segments, x, finalLen = 260) {
+  segments.push({ x1: x, x2: x + finalLen });
+  return { flagX: x + finalLen - 40, levelWidth: x + finalLen + 60 };
+}
+
 export function timelineFromSlots(slots) {
   const segs = [];
   for (let i = 0; i < SLOT_COUNT; i++) {
@@ -35,10 +40,8 @@ export function buildLevelFromTimeline(timeline) {
     });
     x += len;
   });
-  const finalLen = 260;
-  segments.push({ x1: x, x2: x + finalLen });
-  const flagX = x + finalLen - 40;
-  return { segments, coins, flagX, levelWidth: x + finalLen + 60 };
+  const { flagX, levelWidth } = finishLevel(segments, x);
+  return { segments, coins, flagX, levelWidth };
 }
 
 export function buildLevelFromMoments(list) {
@@ -61,10 +64,8 @@ export function buildLevelFromMoments(list) {
     });
     x += len;
   });
-  const finalLen = 260;
-  segments.push({ x1: x, x2: x + finalLen });
-  const flagX = x + finalLen - 40;
-  return { segments, coins, flagX, levelWidth: x + finalLen + 60 };
+  const { flagX, levelWidth } = finishLevel(segments, x);
+  return { segments, coins, flagX, levelWidth };
 }
 
 export function buildLevelLegacy(activities) {
@@ -78,10 +79,8 @@ export function buildLevelLegacy(activities) {
     coins.push({ x: x + 70, y: GROUND_Y - 78, r: 14, act, collected: false, bob: Math.random() * 10, timeLabel: null });
     x += len;
   });
-  const finalLen = 260;
-  segments.push({ x1: x, x2: x + finalLen });
-  const flagX = x + finalLen - 40;
-  return { segments, coins, flagX, levelWidth: x + finalLen + 60 };
+  const { flagX, levelWidth } = finishLevel(segments, x);
+  return { segments, coins, flagX, levelWidth };
 }
 
 export function buildSummary(items) {

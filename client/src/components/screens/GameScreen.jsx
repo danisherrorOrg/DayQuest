@@ -77,7 +77,8 @@ export default function GameScreen({ mode, timeline, activities, moments, builtL
   async function handleSave() {
     setSaveStatus("saving");
     try {
-      const date = new Date().toISOString().slice(0, 10);
+      const now = new Date();
+      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
       const entry = {
         mode,
         timeline: mode === "timed"

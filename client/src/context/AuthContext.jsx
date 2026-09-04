@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { getToken, setToken as persistToken } from "../api/http.js";
-import { registerRequest, loginRequest } from "../api/auth.js";
+import { registerRequest, loginRequest, meRequest } from "../api/auth.js";
 
 const AuthContext = createContext(null);
 
@@ -13,6 +13,17 @@ export function AuthProvider({ children }) {
     setTokenState(data.token);
     setEmail(data.email);
   }, []);
+
+  useEffect(() => {
+    if (!token || email) return;
+    meRequest()
+      .then((data) => setEmail(data.email))
+      .catch(() => {
+        persistToken(null);
+        setTokenState(null);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const register = useCallback(async (emailInput, password) => {
     const data = await registerRequest(emailInput, password);
