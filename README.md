@@ -69,6 +69,10 @@ npm run test -w server   # just the server suite
 
 Server tests mock the Mongoose models rather than needing a real MongoDB —
 see `server/src/controllers/auth.controller.test.js` for the pattern.
+Client component tests (`TimelineBuilderScreen`, `DialogueRecapScreen`,
+`ChronoBarScreen`) use `@testing-library/react` + `jsdom`, driving real
+pointer/keyboard events rather than calling internal functions directly —
+see `CLAUDE.md`.
 
 ## Production / deployment
 
@@ -195,5 +199,4 @@ through.
 installable ("Add to Home Screen" on mobile, or an install prompt on
 desktop Chrome/Edge) and keep already-visited pages available offline.
 
-See `TODO.md` for tracked gaps and planned feature work — component/UI
-tests and more.
+See `TODO.md` for tracked gaps and planned feature work.

@@ -182,10 +182,43 @@ index change, no new endpoint) and push the merge to the client, since
       "This Week" / "All Time" toggle and category-breakdown chips added to
       `MyDaysScreen`, reusing the list's already-fetched days instead of a
       separate endpoint or screen.
-- [ ] **Component/UI tests** — only pure-logic modules (`builderGeometry.js`,
+- [x] ~~**Component/UI tests** — only pure-logic modules (`builderGeometry.js`,
       `dayRecap.js`) are unit-tested; there are no tests for the
       pointer-drag timeline interactions, dialogue box, or chrono bar
-      components (see `client/CLAUDE.md`).
+      components (see `client/CLAUDE.md`).~~ Fixed — new
+      `TimelineBuilderScreen.test.jsx`, `DialogueRecapScreen.test.jsx`, and
+      `ChronoBarScreen.test.jsx` next to their components, using
+      `@testing-library/react` + `jsdom` (both new devDependencies, plus
+      `@testing-library/jest-dom`/`user-event`) rather than jest-style
+      snapshotting. `client/CLAUDE.md` didn't actually exist — the note here
+      predates it ever being written; nothing to reconcile.
+      `vitest.config.js` stayed `environment: "node"` by default (most
+      tests are pure-logic/server and don't need a DOM) and gained the
+      `@vitejs/plugin-react` plugin plus a `*.test.jsx` include pattern;
+      each component test opts into `// @vitest-environment jsdom` per
+      file. New `client/test/setup.js` (parallel to the existing
+      `server/test/setup.js`, both listed in `setupFiles`) registers
+      `@testing-library/jest-dom` matchers, an explicit
+      `afterEach(cleanup)` (needed because `test.globals` is intentionally
+      off, which is also what disables RTL's own auto-cleanup), and a
+      minimal stub `HTMLCanvasElement.prototype.getContext` — jsdom has no
+      real canvas backend, and `DialogueRecapScreen`'s stage backdrop draws
+      to one on every render. `TimelineBuilderScreen`'s tests drive real
+      `pointerdown`/`pointermove`/`pointerup` sequences (not `fireEvent.click`,
+      which the drag handlers don't listen for) against a track stubbed to
+      1px-per-minute via a global `getBoundingClientRect`/`clientWidth`
+      override, covering create-by-drag, tap-to-create-minimum, move,
+      resize, remove, tags, and that a drag can't be pulled into an
+      existing block's range. `DialogueRecapScreen`'s tests use
+      `vi.useFakeTimers()` to check the character-by-character reveal and
+      step through click/keyboard advancement to the end-of-day summary.
+      `ChronoBarScreen`'s tests cover segment hover/unhover, the
+      horizontal/vertical toggle, tap-to-jump-to-builder, and the
+      Save/replay flow on the shared `DayCompleteOverlay`. Not run in a
+      real browser — this sandbox can't render the client — so these are
+      jsdom's DOM/event semantics, not a substitute for a manual pass, but
+      `npm test` (111 tests, up from 51) and `npm run build -w client`
+      both pass.
 - [x] ~~**Vertical chrono-bar layout** — the original chrono-bar spec
       allowed a vertical option for wide/tall screens; only horizontal
       shipped.~~ Fixed, though the "spec" turned out to be seven words

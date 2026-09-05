@@ -91,6 +91,22 @@ from inside a sandbox. Verify what you can instead:
   for the shape: a mocked model, a fake `res` with `status`/`json`/`cookie`
   spies, and the controller function called directly (no Express app, no
   supertest).
+- Client component tests (interactive screens, not pure-logic modules) use
+  `@testing-library/react` + `jsdom` and live as `*.test.jsx` next to the
+  component. `vitest.config.js`'s default `environment` stays `"node"` —
+  each of these files opts in with a `// @vitest-environment jsdom` comment
+  at the top, so the (larger) set of pure-logic/server tests doesn't pay for
+  a DOM it doesn't need. `client/test/setup.js` (paired with the existing
+  `server/test/setup.js` in `vitest.config.js`'s `setupFiles`) registers
+  jest-dom matchers, an explicit `afterEach(cleanup)` (RTL's own
+  auto-cleanup needs `test.globals: true`, which is deliberately off here),
+  and a stub `HTMLCanvasElement.prototype.getContext` for components that
+  draw to a canvas — jsdom has no real canvas backend. See
+  `TimelineBuilderScreen.test.jsx` for the drag-interaction pattern: real
+  `pointerdown`/`pointermove`/`pointerup` sequences (not `fireEvent.click`,
+  which the drag handlers don't listen for) against a track stubbed to a
+  fixed px-per-minute via a global `getBoundingClientRect`/`clientWidth`
+  override.
 
 ## Docs upkeep
 
