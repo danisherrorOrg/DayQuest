@@ -1,296 +1,85 @@
 # TODO / Pending Work
 
-Everything from the initial project audit (tests, lint/format, security
-hardening, offline handling, CI, Docker, deploy docs, responsive layout)
-is done, as is most of the entry & review redesign (structured log cards
-and drag-to-block timeline replacing the old free-text/tap-slot modes; a
-dialogue recap and day/night chrono bar replacing the `GameScreen`
-platformer run) and the multiple-entries-per-day feature below — see git
-history for the individual fixes. What's left is the tracked gaps further
-down.
+Everything else (initial project audit, entry & review redesign,
+multiple-entries-per-day, My Days/replay/delete, image export, account
+management, stats, component tests, vertical chrono bar, offline-first
+saving, PWA support, reminder emails) is done — see git history for the
+individual fixes. What's left is tracked below.
 
-## Feature: multiple entries per day (done)
+## Navigation / routing
 
-`Day` currently has a unique `{user, date}` index
-(`server/src/models/Day.js`) and `PUT /api/days/:date`
-(`server/src/controllers/days.controller.js`) always upserts by fully
-replacing the document — saving the same date twice overwrites the first
-save instead of adding to it. Users should be able to log more than once
-for the same date (e.g. log the morning, come back later and log the
-afternoon) without losing what's already there.
+- [ ] **In-app screens aren't real routes — a refresh always drops you back
+      to mode-select.** Found during a manual UI pass (2026-09-05, temp
+      account register → verify → log card → build → save → My Days →
+      Settings → delete account — see git history/session notes for the
+      full walkthrough). `App.jsx`'s `<Routes>` only cover the auth screens
+      (`/login`, `/register`, etc.) plus a single catch-all `/` for the
+      entire logged-in app; everything inside it — mode-select, My Days,
+      Settings, Log Cards, Timeline Builder, the dialogue/chrono recap —
+      is just a `useState("screen")` value in `GameApp`, never reflected in
+      the URL. Confirmed two ways: navigating straight to `/days` bounces
+      through the `<Route path="*" element={<Navigate to="/" replace />}>`
+      catch-all back to mode-select instead of opening `MyDaysScreen`; and
+      clicking "My Days" (a `<button>`, not a `<Link>` — URL stays `/`)
+      then reloading the same URL also resets to mode-select, discarding
+      whatever screen the user was on. Same would apply mid-entry (Log
+      Cards/Timeline Builder) or mid-recap — a reload loses that screen's
+      state too, though the underlying data isn't lost since nothing is
+      saved until "Save This Day" is clicked. No fix attempted yet; likely
+      shape is giving each screen its own path under `/` (`/days`,
+      `/settings`, `/log`, `/timeline`) via nested `<Route>`s and swapping
+      the `useState("screen")` switch for `useNavigate`/`useParams`, but
+      that's a bigger refactor than this pass was scoped for.
 
-Decided shape — keep one `Day` document per `{user, date}` (no schema or
-index change, no new endpoint) and push the merge to the client, since
-`PUT` already just replaces with whatever full list it's sent:
+## UI/UX polish
 
-- [x] ~~On opening an entry mode for a date that already has a saved day,
-      `GET /api/days/:date` first and seed the screen's list state
-      (`logCards` / `timelineBlocks` / `moments`) with what's already
-      saved, instead of starting blank. "Save" then sends the same full
-      list `PUT` as today (old items + newly added ones together) — no
-      server-side change needed.~~ Fixed: new `useTodayEntry` hook
-      (`client/src/hooks/useTodayEntry.js`) fetches `GET /api/days/:date`
-      for today (`todayDateString()`, extracted from `useDaySave.js` into
-      the new `client/src/game/date.js`) once on mount and hands back
-      whatever's already saved, or `null` on a 404/offline/any other
-      failure — the screen just starts blank in that case, same as before.
-      `saveDay`/`PUT` itself is untouched.
-- [x] ~~**Log cards**: seed `LogCardModeScreen` with the existing
-      `logCards` on mount; new cards just extend the list (duration-based,
-      so no collision is possible).~~ Fixed: seeded once (a `seededRef`
-      guards against re-seeding over in-progress edits) when
-      `todayEntry.mode === "cards"`, with a fresh client-side `id` per
-      card since the server doesn't store one. A "Picking up where you
-      left off today" line appears when seeded, so the pre-filled list
-      doesn't look unexplained.
-- [x] ~~**Timeline builder**: seed `TimelineBuilderScreen` ... with the
-      existing `timelineBlocks`; the existing `neighborBounds` overlap
-      logic then naturally stops a new drag from overlapping something
-      logged earlier the same day.~~ Fixed, but _not_ via the existing
-      `initialBlocks` prop — that prop is reserved for the chrono-bar
-      "jump to builder" shortcut, which already carries this run's own
-      in-memory blocks (more current than the server copy) and must win
-      when both are present. Seeding from `todayEntry` only runs when
-      `initialBlocks`/`initialAnchorMinutes` are empty, i.e. a plain open
-      from `ModeSelectScreen`. Once seeded, `neighborBounds` treats the
-      loaded blocks as ordinary siblings, so a new drag can't overlap them
-      — no new validation code needed.
-- [x] ~~**Moments**: same seed-on-open treatment (simple append)~~ Fixed,
-      same pattern as the other two, despite this mode being separately
-      slated for removal (see "Other tracked gaps" below).
-- [x] ~~**Mode mismatch**: if the fetched day's `mode` differs from the entry
-      mode being opened (e.g. today was logged with cards, user opens the
-      timeline builder), don't attempt cross-mode merging — show a confirm
-      dialog ("You already logged today with Log Cards — switching to
-      Timeline Builder will replace that entry. Continue?"); confirmed →
-      today's existing overwrite behavior, unchanged.~~ Fixed:
-      `ModeSelectScreen` now calls `useTodayEntry()` itself and intercepts a
-      mode-card click — if today's saved `mode` differs from the picked
-      mode (mapped via `SCREEN_TO_MODE`, since the "timeline"/"moments"
-      screen names don't match their `builder`/`sequence` day-mode values),
-      it shows a confirm dialog (reusing the existing
-      `.builderPopupBackdrop`/`.builderPopupSheet` popup styling) before
-      navigating; canceling stays on `ModeSelectScreen`, confirming
-      navigates as before, where the picked entry screen's own
-      `useTodayEntry()` mode check already skips seeding and today's
-      existing full-replace `PUT` behavior takes over unchanged.
-- [x] ~~No change needed to `GET`/`PUT /api/days/:date` or to either review
-      mode (dialogue recap, chrono bar) — both still build from exactly
-      one document per date.~~ Confirmed: neither endpoint nor either
-      review builder was touched.
+From a manual design pass (2026-09-05, same session as the routing gap
+above). The core game moment (dialogue recap / chrono bar — pixel
+character, dialogue box, sky gradient) has real personality; everything
+around it currently reads as a plain, unstyled CRUD admin panel, and the
+two halves don't feel like the same product yet.
 
-## Other tracked gaps
-
-- [x] ~~**Drop the moments-list entry mode** — the redesign's agreed shape
-      was two entry modes (log cards, timeline builder) replacing all three
-      old modes, but `MomentsModeScreen` was never actually removed and is
-      still offered/used in `App.jsx` and `dayRecap.js` alongside the two
-      new modes.~~ Fixed: `MomentsModeScreen.jsx` deleted, along with its
-      `App.jsx` wiring, `ModeSelectScreen`'s third mode card, the
-      moments-specific paths in `dayRecap.js`
-      (`pagesFromMoments`/`segmentsFromMoments`) and `activities.js`
-      (`guessActivityFromText`, unused once those were gone), the `moments`
-      prop threaded through both review screens and `useDaySave`, and the
-      now-orphaned moments-mode CSS. The server keeps `"sequence"` in the
-      `Day` mode enum (`server/src/models/Day.js`,
-      `days.controller.js`) purely so a day saved before this change still
-      round-trips; `buildDayPages`/`buildDaySegments` render any day with a
-      mode that has no entry screen anymore (`"sequence"`, `"timed"`,
-      `"legacy"`) as a fully black-box day, and `ModeSelectScreen`'s
-      mode-mismatch dialog names all three generically ("an earlier version
-      of today's entry") since none of them can be picked again.
-- [x] ~~**"My Days" list screen** — `GET /api/days` (`listDays`) already
-      exists server-side but nothing in the client calls it; there's
-      currently no way to browse previously saved days.~~ Fixed: new
-      `MyDaysScreen` (`client/src/components/screens/MyDaysScreen.jsx`),
-      opened via a "My Days" link next to "Log out" on `ModeSelectScreen`.
-      Calls the already-existing `listDays()` (`client/src/api/days.js`,
-      already used elsewhere for tag-autocomplete seeding) and lists every
-      saved day newest-first (the server already sorts by `date desc`),
-      showing the date (new `formatDisplayDate` in `client/src/game/date.js`),
-      a mode badge, and the day's stored `summary` sentence — reusing that
-      already-saved text instead of recomputing a breakdown client-side, so
-      it works uniformly even for a day saved under a retired mode value.
-      Read-only for now — opening/replaying or deleting a listed day are
-      the next two tracked gaps below.
-- [x] ~~**Replay a past saved day** — `GET /api/days/:date` (`getDay`) is
-      also unused; no UI reopens an old day in either review mode.~~ Fixed,
-      though not via `getDay` — `MyDaysScreen` already has the full day from
-      `listDays()`, so its new "▶ view recap" button hands that straight to
-      a new `handleReplayDay` in `App.jsx`, which opens
-      `DialogueRecapScreen`/`ChronoBarScreen` exactly like a freshly-built
-      run, plus a new `replay` prop threaded through both (and
-      `DayCompleteOverlay`'s new `showSave`/`restartLabel` props) that hides
-      the Save button, relabels "Start Over" to "Back to My Days", drops the
-      chrono bar's "tap to jump into the builder" shortcut, and adds a
-      "← Back to My Days" link so you're not forced to page through a whole
-      day to leave. `useDaySave` still hardcodes today's date, so hiding
-      Save during replay isn't just cosmetic — clicking it would silently
-      overwrite today's entry with the replayed day's data.
-- [x] ~~**Delete a saved day** — no delete endpoint or UI exists.~~ Fixed:
-      new `DELETE /api/days/:date` (`deleteDay` in `days.controller.js`,
-      scoped to `req.userId` and 404ing like `getDay` when there's nothing
-      to delete for that date), wired up in `days.routes.js` and as
-      `deleteDay(date)` in `client/src/api/days.js`. `MyDaysScreen` gets a
-      "✕ delete" button per day alongside "▶ view recap", behind a confirm
-      dialog (the same `.builderPopupBackdrop`/`.builderPopupSheet` pattern
-      used for the mode-mismatch dialog) so a mis-tap can't lose a day;
-      confirming removes it from the list's local state on success without
-      a full re-fetch.
-- [x] ~~**Export a finished recap as an image**, to share outside the app.~~
-      Fixed: new pure-canvas `client/src/game/recapImage.js`
-      (`buildRecapCanvas`/`downloadRecapImage`) draws the same data
-      `DayCompleteOverlay` already shows — date, summary sentence, category
-      badges, per-category breakdown, total tracked — onto an offscreen
-      canvas styled to match the overlay's own colors/fonts, then triggers
-      a `day-story-<date>.png` download via a synchronous `toDataURL` +
-      temporary `<a download>`. No new dependency (no html2canvas/
-      dom-to-image) — same plain Canvas 2D approach `sprites.js` already
-      uses for the dialogue stage backdrop. A new "🖼️ Export Image" button
-      sits in `DayCompleteOverlay`'s `endBtns` row, available in both
-      review modes and during replay of a past day. Needed threading a
-      `date` prop down through `DialogueRecapScreen`/`ChronoBarScreen` from
-      `App.jsx`'s `run` state (`todayDateString()` for a fresh run, the
-      saved `day.date` for a replay), since neither screen previously
-      needed to know the date at all. Not visually verified in a real
-      browser — this sandbox can't render the client — so checking the
-      exported PNG's layout (text wrapping, badge-row wrapping for a day
-      with many categories) is worth doing before considering this fully
-      done.
-- [x] ~~**Account management** — no change-password-while-logged-in and no
-      delete-account/settings screen; only register/login/forgot-password/
-      reset-password/verify-email exist today (`auth.routes.js`).~~ Fixed:
-      new `POST /auth/change-password` and `DELETE /auth/account` (both
-      `requireAuth` + `authLimiter`, `auth.controller.js`/`auth.routes.js`),
-      a new `SettingsScreen` reachable via a "Settings" link next to
-      "My Days"/"Log out" on `ModeSelectScreen`. `changePassword` verifies
-      the current password with the same `bcrypt.compare` as `login`, then
-      calls the existing `issueSession` helper to rotate the (single, per
-      the schema) refresh token — same effect as `resetPassword`'s "revoke
-      everywhere" but without forcing a re-login, since the caller already
-      proved their identity. `deleteAccount` verifies the password, then
-      `Day.deleteMany({ user })` before `User.deleteOne` so no orphaned days
-      are left behind, and clears the session client-side so `RequireAuth`
-      redirects to `/login` on its own.
-- [x] ~~**Stats/trends across saved days** — each day gets a per-category
-      summary, but nothing aggregates across days (e.g. "this week you
-      spent most time on Work").~~ Fixed: new pure-logic
-      `client/src/game/dayStats.js` (`aggregateDays`, merging each day's
-      already-computed `buildDaySummary` breakdown into one running total;
-      `withinLastNDays`, filtering by `YYYY-MM-DD` string comparison the
-      same way the server's `listDays` sort already relies on) plus a
-      "This Week" / "All Time" toggle and category-breakdown chips added to
-      `MyDaysScreen`, reusing the list's already-fetched days instead of a
-      separate endpoint or screen.
-- [x] ~~**Component/UI tests** — only pure-logic modules (`builderGeometry.js`,
-      `dayRecap.js`) are unit-tested; there are no tests for the
-      pointer-drag timeline interactions, dialogue box, or chrono bar
-      components (see `client/CLAUDE.md`).~~ Fixed — new
-      `TimelineBuilderScreen.test.jsx`, `DialogueRecapScreen.test.jsx`, and
-      `ChronoBarScreen.test.jsx` next to their components, using
-      `@testing-library/react` + `jsdom` (both new devDependencies, plus
-      `@testing-library/jest-dom`/`user-event`) rather than jest-style
-      snapshotting. `client/CLAUDE.md` didn't actually exist — the note here
-      predates it ever being written; nothing to reconcile.
-      `vitest.config.js` stayed `environment: "node"` by default (most
-      tests are pure-logic/server and don't need a DOM) and gained the
-      `@vitejs/plugin-react` plugin plus a `*.test.jsx` include pattern;
-      each component test opts into `// @vitest-environment jsdom` per
-      file. New `client/test/setup.js` (parallel to the existing
-      `server/test/setup.js`, both listed in `setupFiles`) registers
-      `@testing-library/jest-dom` matchers, an explicit
-      `afterEach(cleanup)` (needed because `test.globals` is intentionally
-      off, which is also what disables RTL's own auto-cleanup), and a
-      minimal stub `HTMLCanvasElement.prototype.getContext` — jsdom has no
-      real canvas backend, and `DialogueRecapScreen`'s stage backdrop draws
-      to one on every render. `TimelineBuilderScreen`'s tests drive real
-      `pointerdown`/`pointermove`/`pointerup` sequences (not `fireEvent.click`,
-      which the drag handlers don't listen for) against a track stubbed to
-      1px-per-minute via a global `getBoundingClientRect`/`clientWidth`
-      override, covering create-by-drag, tap-to-create-minimum, move,
-      resize, remove, tags, and that a drag can't be pulled into an
-      existing block's range. `DialogueRecapScreen`'s tests use
-      `vi.useFakeTimers()` to check the character-by-character reveal and
-      step through click/keyboard advancement to the end-of-day summary.
-      `ChronoBarScreen`'s tests cover segment hover/unhover, the
-      horizontal/vertical toggle, tap-to-jump-to-builder, and the
-      Save/replay flow on the shared `DayCompleteOverlay`. Not run in a
-      real browser — this sandbox can't render the client — so these are
-      jsdom's DOM/event semantics, not a substitute for a manual pass, but
-      `npm test` (111 tests, up from 51) and `npm run build -w client`
-      both pass.
-- [x] ~~**Vertical chrono-bar layout** — the original chrono-bar spec
-      allowed a vertical option for wide/tall screens; only horizontal
-      shipped.~~ Fixed, though the "spec" turned out to be seven words
-      ("vertical as a later option") with no actual breakpoint or trigger
-      condition ever written down — rather than guess an aspect-ratio media
-      query, `ChronoBarScreen` now has a manual `↔`/`↕` toggle next to the
-      heading, so it works on any screen (including a phone turned
-      sideways) instead of only the guessed-right ones. Segments, pins,
-      ticks, the popup, and the sky gradient all get a `.vertical` CSS
-      variant and a top/height (vs. left/width) positioning branch in the
-      JSX; the sun/moon arc stage deliberately stays horizontal in both
-      modes, since it's a separate element above the bar, not the bar
-      itself. Not visually verified in a real browser — this sandbox can't
-      render the client — so a manual check of both orientations,
-      especially the vertical popup's placement on a narrow phone width,
-      is worth doing before considering this fully done.
-- [x] ~~**Offline-first draft saving** — `OfflineBanner`/`useOnlineStatus`
-      detect connectivity, but there's no local draft queue/retry; going
-      offline mid-entry just blocks the save.~~ Fixed, scoped to the actual
-      gap (entry-building itself makes no network calls, so nothing there
-      was ever "blocked" — it's specifically `useDaySave`'s final `PUT` that
-      was): a new single-slot `client/src/api/offlineQueue.js`
-      (`getPendingSave`/`setPendingSave`/`clearPendingSave`, backed by
-      `localStorage` so it survives a tab close) is written to whenever
-      `useDaySave`'s save fails with `isNetworkError`, and a new
-      `usePendingSaveFlush` hook — mounted once at the top of `GameApp` so
-      it runs regardless of which screen is active — retries it
-      automatically whenever `useOnlineStatus` flips back to `true`,
-      showing a brief green `.syncBanner` on success. One save slot, not a
-      general queue, since a user only ever has one day in flight; a later
-      save attempt naturally overwrites an unflushed one via the same
-      full-replace `PUT` semantics everything else already relies on.
-- [x] ~~**PWA support** — no manifest or service worker for a
-      mobile-friendly, daily-use app.~~ Fixed: `client/public/` now has a
-      `manifest.webmanifest` (name, icons, `display: standalone`, colors
-      matching the app's palette) linked from `index.html`, hand-generated
-      192/512px PNG icons (no image tooling in this sandbox, so they're a
-      simple cream-circle-on-dark-purple mark encoded directly via
-      `zlib.deflateSync`, not a proper illustration), and a minimal
-      `sw.js` registered from `main.jsx` (production builds only, so it
-      can't fight Vite's dev server over cached responses) — network-first
-      with cache-as-you-go fallback, since Vite's hashed build filenames
-      aren't known ahead of time for a real precache list. `nginx.conf`
-      gets an explicit `default_type` for `/manifest.webmanifest`, since
-      nginx's default `mime.types` has no `.webmanifest` entry and would
-      otherwise serve it as `application/octet-stream`. Not installed and
-      tested on an actual device from this sandbox — worth confirming
-      "Add to Home Screen" actually offers itself on a real phone.
-- [x] ~~**Reminders/notifications** to log the day — SMTP is already wired
-      up for verification/reset emails but nothing nudges users to log.~~
-      Fixed: a new `remindersEnabled` field on `User` (default `true`,
-      toggled via a new `PUT /auth/reminders` and a checkbox in
-      `SettingsScreen`), a new `sendDailyReminders` job
-      (`server/src/utils/reminders.js`) that emails every verified,
-      opted-in user who has no `Day` for "today" yet, and a `node-cron`
-      schedule in `server/src/index.js` (new `REMINDER_HOUR_UTC` env var,
-      default 20) that runs it once a day. "Today" is a single global UTC
-      calendar day, not per-user local time — there's no per-user timezone
-      stored anywhere in this app, so a user well east or west of UTC gets
-      reminded a bit early or late relative to their own midnight; adding
-      real per-user timezones is a bigger change than this gap called for.
-      Also flagged in code and `DEPLOY.md`: this scheduler runs in-process,
-      so a multi-replica deploy (not what this project's deploy docs
-      describe) would double-send reminders per extra replica.
-
-## Verified fine (not gaps)
-
-- `.gitignore` already covers `node_modules/`, `dist/`, `.env`.
-- `server/.env.example` matches the `process.env.*` vars actually read in
-  code (`MONGO_URI`, `JWT_SECRET`, `PORT`, `CORS_ORIGIN`).
-- Day-save input validation (`days.controller.js`) already checks date
-  format and the `mode` enum properly.
+- [ ] **Auth screens (Login/Register) have no branding** — just a heading,
+      two inputs, a button. No logo, tagline, or visual hint this is a
+      game about your day. Add a small logo/mark, a one-line tagline, and
+      maybe a sliver of the game's purple/gradient palette as a background
+      accent instead of flat cream.
+- [ ] **Native form controls clash with the custom theme** — the
+      "Reminder emails are on" checkbox (`SettingsScreen`) and the category
+      `<select>` (`LogCardModeScreen`) both render as unstyled browser
+      defaults against an otherwise custom cream/serif design. Restyle both
+      to match (custom checkbox, custom dropdown) — cheapest fix with the
+      biggest consistency payoff.
+- [ ] **No visible confirmation that "Save This Day" worked** — clicking it
+      gives no on-screen feedback (only visible via the network tab).
+      Add a toast/banner on save success (and ideally on Settings actions —
+      password change, reminder toggle) so actions feel acknowledged.
+- [ ] **Duration input is two bare number boxes** (`0 h` / `0 m` in
+      `LogCardModeScreen`) — no steppers, easy to mistype. Redesign as one
+      compact control (segmented stepper or slider).
+- [ ] **"My Days" has no visual identity** — just bordered rows of
+      date/badge/sentence/two text-link buttons, reads like a database
+      table. Give it more of a timeline feel — a colored strip or icon per
+      category, some sense of looking back through days, not rows.
+- [ ] **Settings screen is the plainest screen in the app** — bare stacked
+      labeled inputs, no visual hierarchy beyond section headings. Needs
+      the same design pass as the rest once the native-control fix above
+      lands.
+- [ ] **Empty states are just gray placeholder text** ("No cards yet — add
+      your first one below") — no illustration or personality in an app
+      whose whole premise is turning your day into something visually fun.
+      Worth a small illustration or the character sprite plus a short
+      prompt instead.
+- [ ] **Top nav reads as three stray links** ("My Days / Settings / Log
+      out") — no icons, no active-state, no visual weight. Add icons and
+      some visual grouping.
+- [ ] **Extend the game's mood into the surrounding chrome** — the dark
+      purple/warm-accent palette from the recap screens doesn't appear
+      anywhere in mode-select, nav, or forms, which is the main reason the
+      app currently feels like two products stitched together.
+- [ ] **Mobile responsiveness and dark-mode support are unverified** — this
+      pass was desktop-width, one theme only; worth a real check on a
+      narrow viewport and under `prefers-color-scheme: dark`.
 
 ---
 
