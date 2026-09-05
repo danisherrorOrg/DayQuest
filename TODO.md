@@ -5,10 +5,11 @@ hardening, offline handling, CI, Docker, deploy docs, responsive layout)
 is done, as is most of the entry & review redesign (structured log cards
 and drag-to-block timeline replacing the old free-text/tap-slot modes; a
 dialogue recap and day/night chrono bar replacing the `GameScreen`
-platformer run) — see git history for the individual fixes. What's left is
-the feature work below.
+platformer run) and the multiple-entries-per-day feature below — see git
+history for the individual fixes. What's left is the tracked gaps further
+down.
 
-## Feature: multiple entries per day (mostly built, one gap left)
+## Feature: multiple entries per day (done)
 
 `Day` currently has a unique `{user, date}` index
 (`server/src/models/Day.js`) and `PUT /api/days/:date`
@@ -57,12 +58,22 @@ index change, no new endpoint) and push the merge to the client, since
 - [x] ~~**Moments**: same seed-on-open treatment (simple append)~~ Fixed,
       same pattern as the other two, despite this mode being separately
       slated for removal (see "Other tracked gaps" below).
-- [ ] **Mode mismatch**: if the fetched day's `mode` differs from the entry
+- [x] ~~**Mode mismatch**: if the fetched day's `mode` differs from the entry
       mode being opened (e.g. today was logged with cards, user opens the
       timeline builder), don't attempt cross-mode merging — show a confirm
       dialog ("You already logged today with Log Cards — switching to
       Timeline Builder will replace that entry. Continue?"); confirmed →
-      today's existing overwrite behavior, unchanged.
+      today's existing overwrite behavior, unchanged.~~ Fixed:
+      `ModeSelectScreen` now calls `useTodayEntry()` itself and intercepts a
+      mode-card click — if today's saved `mode` differs from the picked
+      mode (mapped via `SCREEN_TO_MODE`, since the "timeline"/"moments"
+      screen names don't match their `builder`/`sequence` day-mode values),
+      it shows a confirm dialog (reusing the existing
+      `.builderPopupBackdrop`/`.builderPopupSheet` popup styling) before
+      navigating; canceling stays on `ModeSelectScreen`, confirming
+      navigates as before, where the picked entry screen's own
+      `useTodayEntry()` mode check already skips seeding and today's
+      existing full-replace `PUT` behavior takes over unchanged.
 - [x] ~~No change needed to `GET`/`PUT /api/days/:date` or to either review
       mode (dialogue recap, chrono bar) — both still build from exactly
       one document per date.~~ Confirmed: neither endpoint nor either

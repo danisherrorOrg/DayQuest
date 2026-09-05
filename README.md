@@ -134,13 +134,16 @@ hours, breakdown by category) with the same Save/Start Over flow.
 ## Saving days
 
 "Save This Day" calls `PUT /api/days/:date` on the server (JWT-authenticated),
-which upserts a `Day` document scoped to your account — re-saving the same
-date overwrites rather than duplicating (see `TODO.md` → "Feature: multiple
-entries per day" for the planned fix). Days are private per account.
+which upserts a `Day` document scoped to your account: one document per day,
+still fully replaced on every save. Opening an entry mode for a date you've
+already logged today seeds it with what's already saved, so a second
+session the same day adds to the first instead of losing it — picking a
+different entry mode than the one already saved warns you first, since the
+switch replaces rather than merges. Days are private per account.
 
 No open known issues from code review at the moment — see git history for
 past fixes (auth email resolution, error-message leakage, local-date save
 bug, JWT algorithm pinning, and the pre-removal `levelBuilder.js` dedup).
 
-See `TODO.md` for tracked gaps and planned feature work — multiple entries
-per day, a "My Days" list/replay/delete, account management, and more.
+See `TODO.md` for tracked gaps and planned feature work — a "My Days"
+list/replay/delete, account management, and more.
