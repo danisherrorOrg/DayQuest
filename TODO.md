@@ -127,7 +127,16 @@ index change, no new endpoint) and push the merge to the client, since
       day to leave. `useDaySave` still hardcodes today's date, so hiding
       Save during replay isn't just cosmetic — clicking it would silently
       overwrite today's entry with the replayed day's data.
-- [ ] **Delete a saved day** — no delete endpoint or UI exists.
+- [x] ~~**Delete a saved day** — no delete endpoint or UI exists.~~ Fixed:
+      new `DELETE /api/days/:date` (`deleteDay` in `days.controller.js`,
+      scoped to `req.userId` and 404ing like `getDay` when there's nothing
+      to delete for that date), wired up in `days.routes.js` and as
+      `deleteDay(date)` in `client/src/api/days.js`. `MyDaysScreen` gets a
+      "✕ delete" button per day alongside "▶ view recap", behind a confirm
+      dialog (the same `.builderPopupBackdrop`/`.builderPopupSheet` pattern
+      used for the mode-mismatch dialog) so a mis-tap can't lose a day;
+      confirming removes it from the list's local state on success without
+      a full re-fetch.
 - [ ] **Export a finished recap as an image**, to share outside the app.
 - [ ] **Account management** — no change-password-while-logged-in and no
       delete-account/settings screen; only register/login/forgot-password/

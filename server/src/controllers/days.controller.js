@@ -54,3 +54,14 @@ export async function getDay(req, res, next) {
     next(err);
   }
 }
+
+export async function deleteDay(req, res, next) {
+  try {
+    const { date } = req.params;
+    const day = await Day.findOneAndDelete({ user: req.userId, date });
+    if (!day) return res.status(404).json({ error: "No saved day for that date" });
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+}

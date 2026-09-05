@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listDays } from "../../api/days.js";
+import { listDays, deleteDay } from "../../api/days.js";
 import { formatDisplayDate } from "../../game/date.js";
 
 const MODE_BADGES = {
@@ -15,6 +15,9 @@ function modeBadge(mode) {
 export default function MyDaysScreen({ onBack, onSelectDay }) {
   const [days, setDays] = useState(null);
   const [error, setError] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,6 +32,26 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
       cancelled = true;
     };
   }, []);
+
+  function askDelete(day) {
+    setDeleteError(null);
+    setPendingDelete(day);
+  }
+
+  async function confirmDelete() {
+    const day = pendingDelete;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteDay(day.date);
+      setDays((prev) => prev.filter((d) => d.date !== day.date));
+      setPendingDelete(null);
+    } catch (err) {
+      setDeleteError(err.message);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <div className="screen active">
@@ -60,11 +83,44 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
                 {day.summary && <div className="logCardLog">{day.summary}</div>}
                 <div className="momentActions">
                   <button onClick={() => onSelectDay(day)}>▶ view recap</button>
+                  <button onClick={() => askDelete(day)}>✕ delete</button>
                 </div>
               </div>
             ))}
         </div>
       </div>
+
+      {pendingDelete && (
+        <div className="builderPopupBackdrop" onClick={() => !deleting && setPendingDelete(null)}>
+          <div className="builderPopupSheet" onClick={(e) => e.stopPropagation()}>
+            <div className="builderPopupHead">
+              <span>Delete this day?</span>
+            </div>
+            <p className="sub" style={{ marginTop: 8 }}>
+              This permanently deletes your {formatDisplayDate(pendingDelete.date)} entry. This
+              can&apos;t be undone.
+            </p>
+            {deleteError && <p className="authError">{deleteError}</p>}
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button
+                className="primaryBtn"
+                style={{ flex: 1 }}
+                disabled={deleting}
+                onClick={confirmDelete}
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+              <button
+                className="ghostBtn"
+                disabled={deleting}
+                onClick={() => setPendingDelete(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

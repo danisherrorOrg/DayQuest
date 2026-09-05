@@ -5,11 +5,12 @@ vi.mock("../models/Day.js", () => ({
     findOneAndUpdate: vi.fn(),
     find: vi.fn(),
     findOne: vi.fn(),
+    findOneAndDelete: vi.fn(),
   },
 }));
 
 import Day from "../models/Day.js";
-import { saveDay, listDays, getDay } from "./days.controller.js";
+import { saveDay, listDays, getDay, deleteDay } from "./days.controller.js";
 
 function mockRes() {
   const res = {};
@@ -117,5 +118,30 @@ describe("getDay", () => {
     await getDay({ params: { date: "2026-09-04" }, userId: "u1" }, res, vi.fn());
     expect(Day.findOne).toHaveBeenCalledWith({ user: "u1", date: "2026-09-04" });
     expect(res.json).toHaveBeenCalledWith(day);
+  });
+});
+
+describe("deleteDay", () => {
+  it("404s when the user has no saved day for that date", async () => {
+    Day.findOneAndDelete.mockResolvedValue(null);
+    const res = mockRes();
+    await deleteDay({ params: { date: "2026-09-04" }, userId: "u1" }, res, vi.fn());
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it("deletes the saved day scoped to the current user", async () => {
+    Day.findOneAndDelete.mockResolvedValue({ date: "2026-09-04" });
+    const res = mockRes();
+    await deleteDay({ params: { date: "2026-09-04" }, userId: "u1" }, res, vi.fn());
+    expect(Day.findOneAndDelete).toHaveBeenCalledWith({ user: "u1", date: "2026-09-04" });
+    expect(res.json).toHaveBeenCalledWith({ ok: true });
+  });
+
+  it("forwards unexpected errors to next() instead of throwing", async () => {
+    const err = new Error("db down");
+    Day.findOneAndDelete.mockRejectedValue(err);
+    const next = vi.fn();
+    await deleteDay({ params: { date: "2026-09-04" }, userId: "u1" }, mockRes(), next);
+    expect(next).toHaveBeenCalledWith(err);
   });
 });

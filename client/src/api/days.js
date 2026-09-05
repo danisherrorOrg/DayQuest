@@ -11,3 +11,7 @@ export function listDays() {
 export function getDay(date) {
   return apiRequest(`/days/${date}`);
 }
+
+export function deleteDay(date) {
+  return apiRequest(`/days/${date}`, { method: "DELETE" });
+}

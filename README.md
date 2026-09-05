@@ -148,7 +148,8 @@ every day you've saved (`GET /api/days`), showing the date and the summary
 line generated when it was saved. Tapping "▶ view recap" on any of them
 replays that day in either review mode (dialogue or chrono bar), same as a
 day you just finished logging — just without a Save button, since it's
-already saved. Deleting a listed day isn't built yet — see `TODO.md`.
+already saved. "✕ delete" permanently removes a day (`DELETE
+/api/days/:date`) after a confirm step.
 
-See `TODO.md` for tracked gaps and planned feature work — deleting a past
-day, account management, and more.
+See `TODO.md` for tracked gaps and planned feature work — account
+management, exporting a recap as an image, and more.
