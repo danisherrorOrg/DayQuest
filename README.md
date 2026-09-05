@@ -24,7 +24,7 @@ worked inside a Claude.ai artifact).
 
 ## Running it locally
 
-Requires Node 18+ and a MongoDB connection (local `mongod`/Docker, or an
+Requires Node 20.19+ and a MongoDB connection (local `mongod`/Docker, or an
 Atlas cluster).
 
 ```bash
