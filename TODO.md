@@ -8,7 +8,7 @@ dialogue recap and day/night chrono bar replacing the `GameScreen`
 platformer run) — see git history for the individual fixes. What's left is
 the feature work below.
 
-## Feature: multiple entries per day (design decided, not built)
+## Feature: multiple entries per day (mostly built, one gap left)
 
 `Day` currently has a unique `{user, date}` index
 (`server/src/models/Day.js`) and `PUT /api/days/:date`
@@ -22,33 +22,51 @@ Decided shape — keep one `Day` document per `{user, date}` (no schema or
 index change, no new endpoint) and push the merge to the client, since
 `PUT` already just replaces with whatever full list it's sent:
 
-- [ ] On opening an entry mode for a date that already has a saved day,
+- [x] ~~On opening an entry mode for a date that already has a saved day,
       `GET /api/days/:date` first and seed the screen's list state
       (`logCards` / `timelineBlocks` / `moments`) with what's already
       saved, instead of starting blank. "Save" then sends the same full
       list `PUT` as today (old items + newly added ones together) — no
-      server-side change needed.
-- [ ] **Log cards**: seed `LogCardModeScreen` with the existing `logCards`
-      on mount; new cards just extend the list (duration-based, so no
-      collision is possible).
-- [ ] **Timeline builder**: seed `TimelineBuilderScreen` via its existing
-      `initialBlocks` prop (already built for the chrono-bar "jump to
-      builder" feature) with the existing `timelineBlocks`; the existing
-      `neighborBounds` overlap logic then naturally stops a new drag from
-      overlapping something logged earlier the same day — no new
-      validation code needed.
-- [ ] **Moments**: same seed-on-open treatment (simple append), though low
-      priority since this mode is separately slated for removal (see
-      "Other tracked gaps" below).
+      server-side change needed.~~ Fixed: new `useTodayEntry` hook
+      (`client/src/hooks/useTodayEntry.js`) fetches `GET /api/days/:date`
+      for today (`todayDateString()`, extracted from `useDaySave.js` into
+      the new `client/src/game/date.js`) once on mount and hands back
+      whatever's already saved, or `null` on a 404/offline/any other
+      failure — the screen just starts blank in that case, same as before.
+      `saveDay`/`PUT` itself is untouched.
+- [x] ~~**Log cards**: seed `LogCardModeScreen` with the existing
+      `logCards` on mount; new cards just extend the list (duration-based,
+      so no collision is possible).~~ Fixed: seeded once (a `seededRef`
+      guards against re-seeding over in-progress edits) when
+      `todayEntry.mode === "cards"`, with a fresh client-side `id` per
+      card since the server doesn't store one. A "Picking up where you
+      left off today" line appears when seeded, so the pre-filled list
+      doesn't look unexplained.
+- [x] ~~**Timeline builder**: seed `TimelineBuilderScreen` ... with the
+      existing `timelineBlocks`; the existing `neighborBounds` overlap
+      logic then naturally stops a new drag from overlapping something
+      logged earlier the same day.~~ Fixed, but _not_ via the existing
+      `initialBlocks` prop — that prop is reserved for the chrono-bar
+      "jump to builder" shortcut, which already carries this run's own
+      in-memory blocks (more current than the server copy) and must win
+      when both are present. Seeding from `todayEntry` only runs when
+      `initialBlocks`/`initialAnchorMinutes` are empty, i.e. a plain open
+      from `ModeSelectScreen`. Once seeded, `neighborBounds` treats the
+      loaded blocks as ordinary siblings, so a new drag can't overlap them
+      — no new validation code needed.
+- [x] ~~**Moments**: same seed-on-open treatment (simple append)~~ Fixed,
+      same pattern as the other two, despite this mode being separately
+      slated for removal (see "Other tracked gaps" below).
 - [ ] **Mode mismatch**: if the fetched day's `mode` differs from the entry
       mode being opened (e.g. today was logged with cards, user opens the
       timeline builder), don't attempt cross-mode merging — show a confirm
       dialog ("You already logged today with Log Cards — switching to
       Timeline Builder will replace that entry. Continue?"); confirmed →
       today's existing overwrite behavior, unchanged.
-- [ ] No change needed to `GET`/`PUT /api/days/:date` or to either review
+- [x] ~~No change needed to `GET`/`PUT /api/days/:date` or to either review
       mode (dialogue recap, chrono bar) — both still build from exactly
-      one document per date.
+      one document per date.~~ Confirmed: neither endpoint nor either
+      review builder was touched.
 
 ## Other tracked gaps
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ACTIVITIES, formatDuration, minutesToLabel } from "../../game/activities.js";
 import { listDays } from "../../api/days.js";
 import { DAY_MINUTES, snapMinutes, clamp, neighborBounds } from "../../game/builderGeometry.js";
+import { useTodayEntry } from "../../hooks/useTodayEntry.js";
 
 const SNAP = 15; // minutes
 const MIN_LEN = SNAP;
@@ -28,8 +29,37 @@ export default function TimelineBuilderScreen({
   const [tagInput, setTagInput] = useState("");
   const [pastTags, setPastTags] = useState([]);
   const [trackWidth, setTrackWidth] = useState(320);
+  const [continuedFromToday, setContinuedFromToday] = useState(false);
   const trackRef = useRef(null);
   const dragStateRef = useRef(null);
+  const todayEntry = useTodayEntry();
+  const seededRef = useRef(false);
+
+  // If today already has a saved "builder" day, pick up where it left off
+  // instead of starting blank. Skipped when arriving via the chrono bar's
+  // "jump to builder" shortcut (initialBlocks/initialAnchorMinutes set) —
+  // that path already carries this run's own in-memory blocks, which are
+  // more current than whatever's saved on the server.
+  useEffect(() => {
+    if (seededRef.current) return;
+    if (initialBlocks.length > 0 || initialAnchorMinutes != null) return;
+    if (!todayEntry || todayEntry.mode !== "builder") return;
+    seededRef.current = true;
+    setBlocks(
+      (todayEntry.timelineBlocks || []).map((b) => ({
+        id: crypto.randomUUID(),
+        start: b.start,
+        end: b.end,
+        title: b.title || "",
+        log: b.log || "",
+        categoryKey: b.categoryKey ?? null,
+        tags: b.tags || [],
+      })),
+    );
+    setContinuedFromToday(true);
+    // initialBlocks/initialAnchorMinutes are stable for the life of this screen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todayEntry]);
 
   useEffect(() => {
     listDays()
@@ -320,6 +350,11 @@ export default function TimelineBuilderScreen({
           Drag across the ruler to block out time you spent on something. Tap a block to edit it, or
           drag its edges to resize. Anything you don&apos;t touch stays black box.
         </p>
+        {continuedFromToday && (
+          <p className="sub" style={{ marginBottom: 6 }}>
+            Picking up where you left off today.
+          </p>
+        )}
 
         <div className="builderTotals">
           {totalLoggedMins > 0

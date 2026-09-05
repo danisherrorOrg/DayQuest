@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { saveDay } from "../api/days.js";
+import { todayDateString } from "../game/date.js";
 
 const SAVE_LABELS = {
   idle: "Save This Day",
@@ -17,8 +18,7 @@ export function useDaySave({ mode, cards, blocks, moments, summaryText }) {
   async function handleSave() {
     setSaveStatus("saving");
     try {
-      const now = new Date();
-      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const date = todayDateString();
       const entry = {
         mode,
         moments: mode === "sequence" ? moments : null,

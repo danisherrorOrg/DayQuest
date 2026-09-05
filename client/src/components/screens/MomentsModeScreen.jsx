@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { guessActivityFromText, minutesToLabel } from "../../game/activities.js";
+import { useTodayEntry } from "../../hooks/useTodayEntry.js";
 
 export default function MomentsModeScreen({ onBack, onBuild }) {
   const [moments, setMoments] = useState([]);
   const [text, setText] = useState("");
   const [showTime, setShowTime] = useState(false);
   const [time, setTime] = useState("");
+  const [continuedFromToday, setContinuedFromToday] = useState(false);
+  const todayEntry = useTodayEntry();
+  const seededRef = useRef(false);
+
+  // If today already has a saved "sequence" (moments) day, pick up where it
+  // left off instead of starting blank.
+  useEffect(() => {
+    if (seededRef.current || !todayEntry || todayEntry.mode !== "sequence") return;
+    seededRef.current = true;
+    setMoments((todayEntry.moments || []).map((m) => ({ text: m.text, time: m.time ?? null })));
+    setContinuedFromToday(true);
+  }, [todayEntry]);
 
   function addMoment() {
     const trimmed = text.trim();
@@ -55,6 +68,11 @@ export default function MomentsModeScreen({ onBack, onBuild }) {
         <p className="sub" style={{ marginBottom: 6 }}>
           Add what you did, top to bottom. A time is optional for each one.
         </p>
+        {continuedFromToday && (
+          <p className="sub" style={{ marginBottom: 6 }}>
+            Picking up where you left off today.
+          </p>
+        )}
 
         <div id="momentsList" style={{ flex: 1, overflowY: "auto", marginBottom: 10 }}>
           {moments.length === 0 && (

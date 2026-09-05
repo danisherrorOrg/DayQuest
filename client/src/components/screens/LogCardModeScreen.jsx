@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ACTIVITIES, formatDuration } from "../../game/activities.js";
 import { listDays } from "../../api/days.js";
+import { useTodayEntry } from "../../hooks/useTodayEntry.js";
 
 const DAY_MINUTES = 1440;
 
@@ -21,6 +22,29 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
   const [form, setForm] = useState(emptyForm);
   const [tagInput, setTagInput] = useState("");
   const [pastTags, setPastTags] = useState([]);
+  const [continuedFromToday, setContinuedFromToday] = useState(false);
+  const todayEntry = useTodayEntry();
+  const seededRef = useRef(false);
+
+  // If today already has a saved "cards" day, pick up where it left off
+  // instead of starting blank — a second logging session the same day adds
+  // to the first rather than losing it on save. A day saved in a different
+  // mode has no `logCards` to seed from, so this is a no-op for it.
+  useEffect(() => {
+    if (seededRef.current || !todayEntry || todayEntry.mode !== "cards") return;
+    seededRef.current = true;
+    setCards(
+      (todayEntry.logCards || []).map((c) => ({
+        id: crypto.randomUUID(),
+        title: c.title,
+        log: c.log || "",
+        categoryKey: c.categoryKey,
+        tags: c.tags || [],
+        durationMins: c.durationMins,
+      })),
+    );
+    setContinuedFromToday(true);
+  }, [todayEntry]);
 
   // Best-effort: seed tag autocomplete from previously saved log-card days too.
   // Fine to silently no-op if this fails (offline, no saved days yet, etc).
@@ -131,6 +155,11 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
         <p className="sub" style={{ marginBottom: 6 }}>
           One card per activity — how long, what it was, and anything else worth remembering.
         </p>
+        {continuedFromToday && (
+          <p className="sub" style={{ marginBottom: 6 }}>
+            Picking up where you left off today.
+          </p>
+        )}
 
         <div id="logCardList" style={{ flex: 1, overflowY: "auto", marginBottom: 10 }}>
           {cards.length === 0 && (
