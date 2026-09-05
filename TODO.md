@@ -113,8 +113,20 @@ index change, no new endpoint) and push the merge to the client, since
       it works uniformly even for a day saved under a retired mode value.
       Read-only for now — opening/replaying or deleting a listed day are
       the next two tracked gaps below.
-- [ ] **Replay a past saved day** — `GET /api/days/:date` (`getDay`) is
-      also unused; no UI reopens an old day in either review mode.
+- [x] ~~**Replay a past saved day** — `GET /api/days/:date` (`getDay`) is
+      also unused; no UI reopens an old day in either review mode.~~ Fixed,
+      though not via `getDay` — `MyDaysScreen` already has the full day from
+      `listDays()`, so its new "▶ view recap" button hands that straight to
+      a new `handleReplayDay` in `App.jsx`, which opens
+      `DialogueRecapScreen`/`ChronoBarScreen` exactly like a freshly-built
+      run, plus a new `replay` prop threaded through both (and
+      `DayCompleteOverlay`'s new `showSave`/`restartLabel` props) that hides
+      the Save button, relabels "Start Over" to "Back to My Days", drops the
+      chrono bar's "tap to jump into the builder" shortcut, and adds a
+      "← Back to My Days" link so you're not forced to page through a whole
+      day to leave. `useDaySave` still hardcodes today's date, so hiding
+      Save during replay isn't just cosmetic — clicking it would silently
+      overwrite today's entry with the replayed day's data.
 - [ ] **Delete a saved day** — no delete endpoint or UI exists.
 - [ ] **Export a finished recap as an image**, to share outside the app.
 - [ ] **Account management** — no change-password-while-logged-in and no

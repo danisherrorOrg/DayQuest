@@ -60,6 +60,7 @@ export default function ChronoBarScreen({
   cards,
   blocks,
   onRestart,
+  replay = false,
   reviewView,
   onChangeReviewView,
   onJumpToBuilder,
@@ -117,6 +118,8 @@ export default function ChronoBarScreen({
           saveLabel={saveLabel}
           onSave={handleSave}
           onRestart={onRestart}
+          restartLabel={replay ? "Back to My Days" : "Start Over"}
+          showSave={!replay}
         />
       </div>
     );
@@ -124,6 +127,11 @@ export default function ChronoBarScreen({
 
   return (
     <div className="screen active" id="chronoScreen">
+      {replay && (
+        <button className="replayExitLink" onClick={onRestart}>
+          ← Back to My Days
+        </button>
+      )}
       {reviewView && <ReviewTabs value={reviewView} onChange={onChangeReviewView} />}
 
       <div className="chronoHead">
@@ -227,7 +235,7 @@ export default function ChronoBarScreen({
       <div style={{ flex: 1 }} />
       <div className="endBtns" style={{ padding: "0 18px 16px" }}>
         <button className="endBtn" id="chronoFinishBtn" onClick={() => setDone(true)}>
-          Finish &amp; Save
+          {replay ? "Finish" : "Finish & Save"}
         </button>
       </div>
     </div>

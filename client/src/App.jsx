@@ -18,7 +18,7 @@ import ChronoBarScreen from "./components/screens/ChronoBarScreen.jsx";
 
 function GameApp() {
   const [screen, setScreen] = useState("mode");
-  const [run, setRun] = useState(null); // { mode, cards, blocks }
+  const [run, setRun] = useState(null); // { mode, cards, blocks, replay? }
   const [reviewView, setReviewView] = useState("dialogue");
   const [timelineJump, setTimelineJump] = useState(null); // { anchorMinutes } | null
 
@@ -37,6 +37,27 @@ function GameApp() {
     setTimelineJump(null);
     setReviewView("dialogue");
     setScreen("mode");
+  }
+
+  // Opens a previously saved day (from MyDaysScreen) in the review screens,
+  // read-only — no save button, and "back" returns to the list instead of
+  // resetting to a fresh entry.
+  function handleReplayDay(day) {
+    setRun({
+      mode: day.mode,
+      cards: day.logCards || [],
+      blocks: day.timelineBlocks || [],
+      replay: true,
+    });
+    setReviewView("dialogue");
+    setScreen("recap");
+  }
+
+  function handleExitReplay() {
+    setRun(null);
+    setTimelineJump(null);
+    setReviewView("dialogue");
+    setScreen("days");
   }
 
   // The chrono bar's "tap empty space" shortcut: only offered in builder
@@ -65,7 +86,9 @@ function GameApp() {
     <div id="app">
       <VerifyEmailBanner />
       {screen === "mode" && <ModeSelectScreen onPick={setScreen} />}
-      {screen === "days" && <MyDaysScreen onBack={() => setScreen("mode")} />}
+      {screen === "days" && (
+        <MyDaysScreen onBack={() => setScreen("mode")} onSelectDay={handleReplayDay} />
+      )}
       {screen === "cards" && (
         <LogCardModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromLogCards} />
       )}
@@ -82,7 +105,8 @@ function GameApp() {
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
-          onRestart={handleRestart}
+          onRestart={run.replay ? handleExitReplay : handleRestart}
+          replay={run.replay}
           reviewView={reviewView}
           onChangeReviewView={setReviewView}
         />
@@ -92,10 +116,11 @@ function GameApp() {
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
-          onRestart={handleRestart}
+          onRestart={run.replay ? handleExitReplay : handleRestart}
+          replay={run.replay}
           reviewView={reviewView}
           onChangeReviewView={setReviewView}
-          onJumpToBuilder={run.mode === "builder" ? handleJumpToBuilder : undefined}
+          onJumpToBuilder={!run.replay && run.mode === "builder" ? handleJumpToBuilder : undefined}
         />
       )}
     </div>

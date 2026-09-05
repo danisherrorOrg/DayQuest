@@ -606,6 +606,20 @@ body,
   color: #2b2140;
 }
 
+/* Exit link shown atop either review screen when replaying a past saved
+   day, in place of the "← Back" pattern used elsewhere — that one's styled
+   for the light cream panels, not these screens' dark purple background. */
+.replayExitLink {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: #e8d2b0;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 10px 14px 0;
+  cursor: pointer;
+}
+
 /* ---- Chrono-bar review screen ---- */
 #chronoScreen.screen {
   position: relative;

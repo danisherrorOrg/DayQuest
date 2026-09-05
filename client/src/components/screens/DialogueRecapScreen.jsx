@@ -59,6 +59,7 @@ export default function DialogueRecapScreen({
   cards,
   blocks,
   onRestart,
+  replay = false,
   reviewView,
   onChangeReviewView,
 }) {
@@ -135,6 +136,8 @@ export default function DialogueRecapScreen({
           saveLabel={saveLabel}
           onSave={handleSave}
           onRestart={onRestart}
+          restartLabel={replay ? "Back to My Days" : "Start Over"}
+          showSave={!replay}
         />
       </div>
     );
@@ -142,6 +145,11 @@ export default function DialogueRecapScreen({
 
   return (
     <div className="screen active" id="recapScreen">
+      {replay && (
+        <button className="replayExitLink" onClick={onRestart}>
+          ← Back to My Days
+        </button>
+      )}
       <div id="dialogueStage">
         {reviewView && <ReviewTabs value={reviewView} onChange={onChangeReviewView} />}
         <StageCanvas page={page} />

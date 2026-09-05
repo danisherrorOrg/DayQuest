@@ -12,7 +12,7 @@ function modeBadge(mode) {
   return MODE_BADGES[mode] || "❔ Legacy entry";
 }
 
-export default function MyDaysScreen({ onBack }) {
+export default function MyDaysScreen({ onBack, onSelectDay }) {
   const [days, setDays] = useState(null);
   const [error, setError] = useState(null);
 
@@ -58,6 +58,9 @@ export default function MyDaysScreen({ onBack }) {
                   <span className="logCardDuration">{modeBadge(day.mode)}</span>
                 </div>
                 {day.summary && <div className="logCardLog">{day.summary}</div>}
+                <div className="momentActions">
+                  <button onClick={() => onSelectDay(day)}>▶ view recap</button>
+                </div>
               </div>
             ))}
         </div>

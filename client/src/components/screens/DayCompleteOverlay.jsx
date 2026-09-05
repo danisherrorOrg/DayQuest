@@ -9,6 +9,8 @@ export default function DayCompleteOverlay({
   saveLabel,
   onSave,
   onRestart,
+  restartLabel = "Start Over",
+  showSave = true,
 }) {
   return (
     <div id="completeOverlay" style={{ position: "static", flex: 1, display: "flex" }}>
@@ -36,11 +38,18 @@ export default function DayCompleteOverlay({
         </div>
       </div>
       <div className="endBtns">
-        <button className="endBtn" id="saveBtn" disabled={saveStatus === "saving"} onClick={onSave}>
-          {saveLabel}
-        </button>
+        {showSave && (
+          <button
+            className="endBtn"
+            id="saveBtn"
+            disabled={saveStatus === "saving"}
+            onClick={onSave}
+          >
+            {saveLabel}
+          </button>
+        )}
         <button className="endBtn" id="againBtn" onClick={onRestart}>
-          Start Over
+          {restartLabel}
         </button>
       </div>
     </div>

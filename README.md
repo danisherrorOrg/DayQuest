@@ -143,10 +143,12 @@ bug, JWT algorithm pinning, and the pre-removal `levelBuilder.js` dedup).
 
 ## Browsing past days
 
-A "My Days" link on the mode-select screen opens a read-only, newest-first
-list of every day you've saved (`GET /api/days`), showing the date and the
-summary line generated when it was saved. Opening or deleting a listed day
-isn't built yet — see `TODO.md`.
+A "My Days" link on the mode-select screen opens a newest-first list of
+every day you've saved (`GET /api/days`), showing the date and the summary
+line generated when it was saved. Tapping "▶ view recap" on any of them
+replays that day in either review mode (dialogue or chrono bar), same as a
+day you just finished logging — just without a Save button, since it's
+already saved. Deleting a listed day isn't built yet — see `TODO.md`.
 
-See `TODO.md` for tracked gaps and planned feature work — replaying or
-deleting a past day, account management, and more.
+See `TODO.md` for tracked gaps and planned feature work — deleting a past
+day, account management, and more.
