@@ -123,6 +123,8 @@ range, note, tags. Untouched stretches stay plain gradient with no
 segment, same "shown honestly, not hidden" black-box framing as elsewhere.
 For a day logged with the timeline builder, tapping empty space on the bar
 jumps back into that entry mode with a new block pre-opened at that time.
+A `↔`/`↕` toggle next to the heading switches the bar between horizontal
+and vertical layout.
 
 Finishing either review mode opens an end-of-day summary (total tracked
 hours, breakdown by category) with the same Save/Start Over flow.

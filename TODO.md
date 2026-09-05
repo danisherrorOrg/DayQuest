@@ -167,8 +167,22 @@ index change, no new endpoint) and push the merge to the client, since
       `dayRecap.js`) are unit-tested; there are no tests for the
       pointer-drag timeline interactions, dialogue box, or chrono bar
       components (see `client/CLAUDE.md`).
-- [ ] **Vertical chrono-bar layout** — the original chrono-bar spec allowed
-      a vertical option for wide/tall screens; only horizontal shipped.
+- [x] ~~**Vertical chrono-bar layout** — the original chrono-bar spec
+      allowed a vertical option for wide/tall screens; only horizontal
+      shipped.~~ Fixed, though the "spec" turned out to be seven words
+      ("vertical as a later option") with no actual breakpoint or trigger
+      condition ever written down — rather than guess an aspect-ratio media
+      query, `ChronoBarScreen` now has a manual `↔`/`↕` toggle next to the
+      heading, so it works on any screen (including a phone turned
+      sideways) instead of only the guessed-right ones. Segments, pins,
+      ticks, the popup, and the sky gradient all get a `.vertical` CSS
+      variant and a top/height (vs. left/width) positioning branch in the
+      JSX; the sun/moon arc stage deliberately stays horizontal in both
+      modes, since it's a separate element above the bar, not the bar
+      itself. Not visually verified in a real browser — this sandbox can't
+      render the client — so a manual check of both orientations,
+      especially the vertical popup's placement on a narrow phone width,
+      is worth doing before considering this fully done.
 - [ ] **Offline-first draft saving** — `OfflineBanner`/`useOnlineStatus`
       detect connectivity, but there's no local draft queue/retry; going
       offline mid-entry just blocks the save.
