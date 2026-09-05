@@ -16,8 +16,10 @@ import LogCardModeScreen from "./components/screens/LogCardModeScreen.jsx";
 import TimelineBuilderScreen from "./components/screens/TimelineBuilderScreen.jsx";
 import DialogueRecapScreen from "./components/screens/DialogueRecapScreen.jsx";
 import ChronoBarScreen from "./components/screens/ChronoBarScreen.jsx";
+import { usePendingSaveFlush } from "./hooks/usePendingSaveFlush.js";
 
 function GameApp() {
+  const justSynced = usePendingSaveFlush();
   const [screen, setScreen] = useState("mode");
   const [run, setRun] = useState(null); // { mode, cards, blocks, replay? }
   const [reviewView, setReviewView] = useState("dialogue");
@@ -85,6 +87,7 @@ function GameApp() {
 
   return (
     <div id="app">
+      {justSynced && <div className="syncBanner">✓ Back online — your saved day went through.</div>}
       <VerifyEmailBanner />
       {screen === "mode" && <ModeSelectScreen onPick={setScreen} />}
       {screen === "days" && (

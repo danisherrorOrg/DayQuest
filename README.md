@@ -165,5 +165,14 @@ A "Settings" link next to "My Days" opens a screen to change your password
 permanently delete your account and every saved day (`DELETE
 /auth/account`, also requires your password, behind a confirm step).
 
+## Offline handling
+
+`OfflineBanner` shows while the connection is down. If "Save This Day"
+fails specifically because you're offline, that save is queued in
+`localStorage` (one slot — your most recent attempt) and retried
+automatically the moment you're back online, even if you've since
+navigated away from the recap screen; a brief banner confirms it went
+through.
+
 See `TODO.md` for tracked gaps and planned feature work — exporting a
-recap as an image, offline draft saving, and more.
+recap as an image, PWA support, and more.

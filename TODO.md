@@ -183,9 +183,22 @@ index change, no new endpoint) and push the merge to the client, since
       render the client — so a manual check of both orientations,
       especially the vertical popup's placement on a narrow phone width,
       is worth doing before considering this fully done.
-- [ ] **Offline-first draft saving** — `OfflineBanner`/`useOnlineStatus`
+- [x] ~~**Offline-first draft saving** — `OfflineBanner`/`useOnlineStatus`
       detect connectivity, but there's no local draft queue/retry; going
-      offline mid-entry just blocks the save.
+      offline mid-entry just blocks the save.~~ Fixed, scoped to the actual
+      gap (entry-building itself makes no network calls, so nothing there
+      was ever "blocked" — it's specifically `useDaySave`'s final `PUT` that
+      was): a new single-slot `client/src/api/offlineQueue.js`
+      (`getPendingSave`/`setPendingSave`/`clearPendingSave`, backed by
+      `localStorage` so it survives a tab close) is written to whenever
+      `useDaySave`'s save fails with `isNetworkError`, and a new
+      `usePendingSaveFlush` hook — mounted once at the top of `GameApp` so
+      it runs regardless of which screen is active — retries it
+      automatically whenever `useOnlineStatus` flips back to `true`,
+      showing a brief green `.syncBanner` on success. One save slot, not a
+      general queue, since a user only ever has one day in flight; a later
+      save attempt naturally overwrites an unflushed one via the same
+      full-replace `PUT` semantics everything else already relies on.
 - [ ] **PWA support** — no manifest or service worker for a
       mobile-friendly, daily-use app.
 - [ ] **Reminders/notifications** to log the day — SMTP is already wired

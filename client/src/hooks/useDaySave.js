@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { saveDay } from "../api/days.js";
 import { todayDateString } from "../game/date.js";
+import { setPendingSave, clearPendingSave } from "../api/offlineQueue.js";
 
 const SAVE_LABELS = {
   idle: "Save This Day",
@@ -17,37 +18,42 @@ export function useDaySave({ mode, cards, blocks, summaryText }) {
 
   async function handleSave() {
     setSaveStatus("saving");
+    const date = todayDateString();
+    const entry = {
+      mode,
+      moments: null,
+      logCards:
+        mode === "cards"
+          ? cards.map((c) => ({
+              title: c.title,
+              log: c.log,
+              categoryKey: c.categoryKey,
+              tags: c.tags,
+              durationMins: c.durationMins,
+            }))
+          : null,
+      timelineBlocks:
+        mode === "builder"
+          ? blocks.map((b) => ({
+              start: b.start,
+              end: b.end,
+              title: b.title,
+              log: b.log,
+              categoryKey: b.categoryKey,
+              tags: b.tags,
+            }))
+          : null,
+      summary: summaryText,
+    };
     try {
-      const date = todayDateString();
-      const entry = {
-        mode,
-        moments: null,
-        logCards:
-          mode === "cards"
-            ? cards.map((c) => ({
-                title: c.title,
-                log: c.log,
-                categoryKey: c.categoryKey,
-                tags: c.tags,
-                durationMins: c.durationMins,
-              }))
-            : null,
-        timelineBlocks:
-          mode === "builder"
-            ? blocks.map((b) => ({
-                start: b.start,
-                end: b.end,
-                title: b.title,
-                log: b.log,
-                categoryKey: b.categoryKey,
-                tags: b.tags,
-              }))
-            : null,
-        summary: summaryText,
-      };
       await saveDay(date, entry);
+      clearPendingSave();
       setSaveStatus("saved");
     } catch (err) {
+      // Persisted so it survives a tab close/refresh — usePendingSaveFlush
+      // retries it automatically once the connection comes back, even if
+      // the user has already navigated away from this screen by then.
+      if (err.isNetworkError) setPendingSave(date, entry);
       setSaveStatus(err.isNetworkError ? "offline" : "error");
     } finally {
       setTimeout(() => setSaveStatus("idle"), 1600);
