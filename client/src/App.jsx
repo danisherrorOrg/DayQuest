@@ -13,30 +13,25 @@ import ModeSelectScreen from "./components/screens/ModeSelectScreen.jsx";
 import LogCardModeScreen from "./components/screens/LogCardModeScreen.jsx";
 import TimelineBuilderScreen from "./components/screens/TimelineBuilderScreen.jsx";
 import MomentsModeScreen from "./components/screens/MomentsModeScreen.jsx";
-import GameScreen from "./components/screens/GameScreen.jsx";
-import {
-  buildLevelFromMoments,
-  buildLevelFromLogCards,
-  buildLevelFromBuilderBlocks,
-} from "./game/levelBuilder.js";
+import DialogueRecapScreen from "./components/screens/DialogueRecapScreen.jsx";
 
 function GameApp() {
   const [screen, setScreen] = useState("mode");
-  const [run, setRun] = useState(null); // { mode, cards, blocks, moments, builtLevel }
+  const [run, setRun] = useState(null); // { mode, cards, blocks, moments }
 
   function handleBuildFromLogCards(cards) {
-    setRun({ mode: "cards", cards, builtLevel: buildLevelFromLogCards(cards) });
-    setScreen("game");
+    setRun({ mode: "cards", cards });
+    setScreen("recap");
   }
 
   function handleBuildFromBuilderBlocks(blocks) {
-    setRun({ mode: "builder", blocks, builtLevel: buildLevelFromBuilderBlocks(blocks) });
-    setScreen("game");
+    setRun({ mode: "builder", blocks });
+    setScreen("recap");
   }
 
   function handleBuildFromMoments(moments) {
-    setRun({ mode: "sequence", moments, builtLevel: buildLevelFromMoments(moments) });
-    setScreen("game");
+    setRun({ mode: "sequence", moments });
+    setScreen("recap");
   }
 
   function handleRestart() {
@@ -60,13 +55,12 @@ function GameApp() {
       {screen === "moments" && (
         <MomentsModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromMoments} />
       )}
-      {screen === "game" && run && (
-        <GameScreen
+      {screen === "recap" && run && (
+        <DialogueRecapScreen
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
           moments={run.moments}
-          builtLevel={run.builtLevel}
           onRestart={handleRestart}
         />
       )}

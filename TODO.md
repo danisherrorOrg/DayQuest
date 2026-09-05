@@ -86,21 +86,46 @@ and both review modes so an activity's color is consistent everywhere.
 A Pokémon-NPC-style text-box walkthrough of the day instead of running a
 level:
 
-- [ ] Retro dialogue box docked at the bottom of the screen with a
+- [x] ~~Retro dialogue box docked at the bottom of the screen with a
       typewriter text-reveal; "▼ press to continue" advances one entry at a
       time, chronologically from the day's first logged activity to its
-      last.
-- [ ] One "page" per activity: time range, title, category, and the log
-      text if present (e.g. "6:30–7:00 · GYM — leg day 💪"). Black-box gaps
-      between activities get their own filler page (e.g. "...the rest is a
-      mystery.") so unrecorded time is still acknowledged, not silently
-      skipped.
-- [ ] Reuse the existing platformer sprite/tile assets for a small
-      backdrop or avatar that swaps per category (home, gym, office, etc.)
-      instead of building new art from scratch.
-- [ ] End-of-day summary screen in the same visual style as the existing
+      last.~~ Fixed: `DialogueRecapScreen.jsx` (`#dialogueBox`) reveals the
+      current page's text one character at a time; clicking/tapping the box
+      (or pressing Space/Enter/→) instantly finishes the reveal on the
+      first press and advances to the next page on the next one, same
+      "press A to continue" two-step Pokémon convention.
+- [x] ~~One "page" per activity: time range, title, category, and the log
+      text if present ... Black-box gaps between activities get their own
+      filler page ... so unrecorded time is still acknowledged, not
+      silently skipped.~~ Fixed: `buildDayPages` in the new
+      `client/src/game/dayRecap.js` walks cards/timeline-blocks/moments in
+      chronological order and emits one page per activity (time range or
+      duration, title, category, log) plus a filler page
+      ("...the rest is a mystery.") for every gap, mirroring the gap logic
+      the old `levelBuilder.js` used for the platformer's black-box
+      segments (now removed — see below).
+- [x] ~~Reuse the existing platformer sprite/tile assets for a small
+      backdrop or avatar that swaps per category ... instead of building
+      new art from scratch.~~ Fixed: `client/src/game/sprites.js` lifts the
+      old `engine.js` canvas draw code verbatim (sky gradient, ground band,
+      player figure) into shared helpers; `DialogueRecapScreen`'s
+      `StageCanvas` redraws that same little scene per page, tinting the
+      ground/avatar with the current page's category color (a neutral gray
+      for black-box/filler pages) and showing the category emoji as a
+      corner badge.
+- [x] ~~End-of-day summary screen in the same visual style as the existing
       end-of-run recap (total tracked hours, breakdown by category) instead
-      of a "level complete" screen.
+      of a "level complete" screen.~~ Fixed: reuses the exact
+      `#completeOverlay`/`#badgeRow`/`#timelineRecap`/`.endBtn` markup and
+      CSS the platformer's recap used, now fed by `buildDaySummary`
+      (total tracked minutes + per-category minutes, largest first) instead
+      of a flat list of collected coins. Save/Start Over work the same way.
+
+With this shipped, the platformer run (`GameScreen.jsx`, `engine.js`,
+`levelBuilder.js`, the canvas physics constants) has been deleted rather
+than kept unused — `App.jsx` now goes straight from an entry mode to
+`DialogueRecapScreen`. This resolves the "undecided" note in `README.md`'s
+"Ideas for next steps": the platformer did not survive the redesign.
 
 ### Review mode 2 — day/night chrono bar
 

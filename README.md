@@ -1,17 +1,18 @@
 # Day Story — Run Your Day
 
-A 2D platformer diary. You log your day — as free text, a timestamped format,
-a tap-in timeline, or an ordered list of moments — and it turns into a small
-Mario-style level you run and jump through in a couple of minutes. Each
-activity you did becomes a collectible station; unrecorded time becomes an
-honest "black box" you still run past.
+A day diary that replays your logged day as a retro dialogue-box walkthrough,
+Pokémon-NPC style. You log your day — as a card per activity, a drag-to-block
+timeline, or an ordered list of moments — and then step through it one page
+at a time: a page per activity (time, title, category, note), plus a "black
+box" filler page for any unrecorded stretch, so unlogged time is acknowledged
+rather than hidden.
 
 ## Stack
 
 A MERN app: **M**ongoDB, **E**xpress, **R**eact (Vite), **N**ode.
 
-- `client/` — React frontend. The three input modes, the canvas platformer
-  engine, and the save/complete flow, ported from an earlier single-file
+- `client/` — React frontend: the entry modes, the dialogue-recap review
+  screen, and the save/complete flow, ported from an earlier single-file
   HTML version (still viewable at `index.html` in this repo / in git
   history) onto real components.
 - `server/` — Express API with JWT auth (register/login) and MongoDB
@@ -91,14 +92,30 @@ build, and the test suite on every push/PR to `main`.
 3. **List your moments in order** — add what you did, one at a time, top to
    bottom. A time is optional per moment; order is what matters.
 
-All three feed the same platformer engine and the same end-of-run recap and
-save flow.
+All three feed the same review screen and save flow.
 
-**Mode 3 is still slated for replacement.** The agreed next design adds two
-review modes (a Pokémon-dialogue-style recap, and a day/night "chrono bar"
-timeline) alongside the platformer run, and drops the moments-list mode —
-see `TODO.md` → "Feature: entry & review redesign" for the full spec. Modes
-1 and 2 above are that redesign's two entry modes, already built.
+**Mode 3 is still slated for replacement.** The agreed next design drops the
+moments-list mode and adds a second review mode (a day/night "chrono bar"
+timeline) alongside the dialogue recap below — see `TODO.md` → "Feature:
+entry & review redesign" for the full spec. Modes 1 and 2 above are that
+redesign's two entry modes, already built.
+
+## Review mode (current)
+
+**Dialogue recap** — a retro, Pokémon-NPC-style text box docked at the
+bottom of the screen. Text reveals a character at a time; tapping the box
+finishes the current page's reveal, then advances to the next. One page per
+logged activity (time range, title, category, note if any), plus a filler
+page for every unrecorded gap so the day's "black box" time is acknowledged
+rather than skipped. A small canvas backdrop above the box reuses the
+original platformer's sky/ground/avatar art, recolored per the current
+page's category. Finishing the last page opens an end-of-day summary (total
+tracked hours, breakdown by category) with the same Save/Start Over flow as
+before.
+
+The platformer run this replaced (`GameScreen.jsx`, `engine.js`,
+`levelBuilder.js`) has been removed — see `TODO.md` → "Review mode 1" for
+what changed.
 
 ## Saving days
 
@@ -108,7 +125,7 @@ date overwrites rather than duplicating. Days are private per account.
 
 No open known issues from code review at the moment — see git history for
 past fixes (auth email resolution, error-message leakage, local-date save
-bug, JWT algorithm pinning, `levelBuilder.js` dedup).
+bug, JWT algorithm pinning, and the pre-removal `levelBuilder.js` dedup).
 
 See `TODO.md` for the entry/review redesign spec (the main thing planned
 next) and any other tracked gaps.
@@ -118,6 +135,3 @@ next) and any other tracked gaps.
 - A "My Days" screen using the already-built `GET /api/days` list endpoint
 - A "replay a past saved day" mode, using `GET /api/days/:date`
 - Export a finished recap as an image to share
-- Obstacles/enemies for extra platforming challenge, if the platformer
-  recap survives the redesign in `TODO.md` (undecided — it may be fully
-  replaced by the dialogue recap described there)
