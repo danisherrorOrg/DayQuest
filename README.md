@@ -95,8 +95,8 @@ build, and the test suite on every push/PR to `main`.
 All three feed the same review screens and save flow.
 
 **Mode 3 is still slated for replacement.** The agreed next design drops the
-moments-list mode — see `TODO.md` → "Feature: entry & review redesign" for
-the full spec. Modes 1 and 2 above are that redesign's two entry modes,
+moments-list mode — see `TODO.md` → "Other tracked gaps" for the note.
+Modes 1 and 2 above are that redesign's two entry modes,
 already built; both review modes below are also now built.
 
 ## Review modes (current)
@@ -115,8 +115,7 @@ original platformer's sky/ground/avatar art, recolored per the current
 page's category.
 
 The platformer run this replaced (`GameScreen.jsx`, `engine.js`,
-`levelBuilder.js`) has been removed — see `TODO.md` → "Review mode 1" for
-what changed.
+`levelBuilder.js`) has been removed.
 
 **Chrono bar** — the whole day as one 0:00–24:00 line, its background a
 day/night gradient (dark at both ends, brightest at noon, warm at sunrise/
@@ -128,7 +127,6 @@ range, note, tags. Untouched stretches stay plain gradient with no
 segment, same "shown honestly, not hidden" black-box framing as elsewhere.
 For a day logged with the timeline builder, tapping empty space on the bar
 jumps back into that entry mode with a new block pre-opened at that time.
-See `TODO.md` → "Review mode 2" for details.
 
 Finishing either review mode opens an end-of-day summary (total tracked
 hours, breakdown by category) with the same Save/Start Over flow.
@@ -137,17 +135,12 @@ hours, breakdown by category) with the same Save/Start Over flow.
 
 "Save This Day" calls `PUT /api/days/:date` on the server (JWT-authenticated),
 which upserts a `Day` document scoped to your account — re-saving the same
-date overwrites rather than duplicating. Days are private per account.
+date overwrites rather than duplicating (see `TODO.md` → "Feature: multiple
+entries per day" for the planned fix). Days are private per account.
 
 No open known issues from code review at the moment — see git history for
 past fixes (auth email resolution, error-message leakage, local-date save
 bug, JWT algorithm pinning, and the pre-removal `levelBuilder.js` dedup).
 
-See `TODO.md` for the entry/review redesign spec (the main thing planned
-next) and any other tracked gaps.
-
-## Ideas for next steps
-
-- A "My Days" screen using the already-built `GET /api/days` list endpoint
-- A "replay a past saved day" mode, using `GET /api/days/:date`
-- Export a finished recap as an image to share
+See `TODO.md` for tracked gaps and planned feature work — multiple entries
+per day, a "My Days" list/replay/delete, account management, and more.
