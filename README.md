@@ -141,5 +141,12 @@ No open known issues from code review at the moment — see git history for
 past fixes (auth email resolution, error-message leakage, local-date save
 bug, JWT algorithm pinning, and the pre-removal `levelBuilder.js` dedup).
 
-See `TODO.md` for tracked gaps and planned feature work — a "My Days"
-list/replay/delete, account management, and more.
+## Browsing past days
+
+A "My Days" link on the mode-select screen opens a read-only, newest-first
+list of every day you've saved (`GET /api/days`), showing the date and the
+summary line generated when it was saved. Opening or deleting a listed day
+isn't built yet — see `TODO.md`.
+
+See `TODO.md` for tracked gaps and planned feature work — replaying or
+deleting a past day, account management, and more.

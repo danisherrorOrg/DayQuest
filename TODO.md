@@ -99,9 +99,20 @@ index change, no new endpoint) and push the merge to the client, since
       `"legacy"`) as a fully black-box day, and `ModeSelectScreen`'s
       mode-mismatch dialog names all three generically ("an earlier version
       of today's entry") since none of them can be picked again.
-- [ ] **"My Days" list screen** — `GET /api/days` (`listDays`) already
+- [x] ~~**"My Days" list screen** — `GET /api/days` (`listDays`) already
       exists server-side but nothing in the client calls it; there's
-      currently no way to browse previously saved days.
+      currently no way to browse previously saved days.~~ Fixed: new
+      `MyDaysScreen` (`client/src/components/screens/MyDaysScreen.jsx`),
+      opened via a "My Days" link next to "Log out" on `ModeSelectScreen`.
+      Calls the already-existing `listDays()` (`client/src/api/days.js`,
+      already used elsewhere for tag-autocomplete seeding) and lists every
+      saved day newest-first (the server already sorts by `date desc`),
+      showing the date (new `formatDisplayDate` in `client/src/game/date.js`),
+      a mode badge, and the day's stored `summary` sentence — reusing that
+      already-saved text instead of recomputing a breakdown client-side, so
+      it works uniformly even for a day saved under a retired mode value.
+      Read-only for now — opening/replaying or deleting a listed day are
+      the next two tracked gaps below.
 - [ ] **Replay a past saved day** — `GET /api/days/:date` (`getDay`) is
       also unused; no UI reopens an old day in either review mode.
 - [ ] **Delete a saved day** — no delete endpoint or UI exists.
