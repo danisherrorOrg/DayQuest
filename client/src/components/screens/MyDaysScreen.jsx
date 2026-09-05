@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { listDays, deleteDay } from "../../api/days.js";
 import { formatDisplayDate } from "../../game/date.js";
+import { formatDuration } from "../../game/activities.js";
+import { aggregateDays, withinLastNDays } from "../../game/dayStats.js";
 
 const MODE_BADGES = {
   cards: "📇 Log Cards",
@@ -18,6 +20,7 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleteError, setDeleteError] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [statsRange, setStatsRange] = useState("week");
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +35,12 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
       cancelled = true;
     };
   }, []);
+
+  const stats = useMemo(() => {
+    if (!days || days.length === 0) return null;
+    const scoped = statsRange === "week" ? withinLastNDays(days, 7) : days;
+    return aggregateDays(scoped);
+  }, [days, statsRange]);
 
   function askDelete(day) {
     setDeleteError(null);
@@ -67,6 +76,40 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
         </p>
 
         {error && <p className="authError">{error}</p>}
+
+        {stats && (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <button
+                className={statsRange === "week" ? "primaryBtn" : "ghostBtn"}
+                style={{ flex: 1 }}
+                onClick={() => setStatsRange("week")}
+              >
+                This Week
+              </button>
+              <button
+                className={statsRange === "all" ? "primaryBtn" : "ghostBtn"}
+                style={{ flex: 1 }}
+                onClick={() => setStatsRange("all")}
+              >
+                All Time
+              </button>
+            </div>
+            <p className="logCardLog">
+              {stats.totalDays} day{stats.totalDays === 1 ? "" : "s"} logged
+              {stats.totalTrackedMins > 0 && ` · ${formatDuration(stats.totalTrackedMins)} tracked`}
+            </p>
+            {stats.breakdown.length > 0 && (
+              <div className="tagRow" style={{ marginTop: 6 }}>
+                {stats.breakdown.map(({ category, mins }) => (
+                  <span className="tagChip" key={category.key}>
+                    {category.emoji} {formatDuration(mins)} {category.label}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div style={{ flex: 1, overflowY: "auto" }}>
           {days === null && !error && <p className="sub">Loading…</p>}

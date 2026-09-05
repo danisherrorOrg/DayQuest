@@ -151,6 +151,11 @@ day you just finished logging — just without a Save button, since it's
 already saved. "✕ delete" permanently removes a day (`DELETE
 /api/days/:date`) after a confirm step.
 
+Above the list, a "This Week" / "All Time" toggle shows aggregate stats
+across your saved days: days logged, total time tracked, and a
+category-by-category breakdown (e.g. how much of the week went to Work vs.
+Gym) — computed client-side from the same list, no separate endpoint.
+
 ## Account management
 
 A "Settings" link next to "My Days" opens a screen to change your password
@@ -159,4 +164,4 @@ permanently delete your account and every saved day (`DELETE
 /auth/account`, also requires your password, behind a confirm step).
 
 See `TODO.md` for tracked gaps and planned feature work — exporting a
-recap as an image, stats across saved days, and more.
+recap as an image, offline draft saving, and more.

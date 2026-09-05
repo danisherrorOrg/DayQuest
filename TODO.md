@@ -153,9 +153,16 @@ index change, no new endpoint) and push the merge to the client, since
       `Day.deleteMany({ user })` before `User.deleteOne` so no orphaned days
       are left behind, and clears the session client-side so `RequireAuth`
       redirects to `/login` on its own.
-- [ ] **Stats/trends across saved days** — each day gets a per-category
+- [x] ~~**Stats/trends across saved days** — each day gets a per-category
       summary, but nothing aggregates across days (e.g. "this week you
-      spent most time on Work").
+      spent most time on Work").~~ Fixed: new pure-logic
+      `client/src/game/dayStats.js` (`aggregateDays`, merging each day's
+      already-computed `buildDaySummary` breakdown into one running total;
+      `withinLastNDays`, filtering by `YYYY-MM-DD` string comparison the
+      same way the server's `listDays` sort already relies on) plus a
+      "This Week" / "All Time" toggle and category-breakdown chips added to
+      `MyDaysScreen`, reusing the list's already-fetched days instead of a
+      separate endpoint or screen.
 - [ ] **Component/UI tests** — only pure-logic modules (`builderGeometry.js`,
       `dayRecap.js`) are unit-tested; there are no tests for the
       pointer-drag timeline interactions, dialogue box, or chrono bar
