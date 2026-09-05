@@ -65,12 +65,18 @@ Set these environment variables wherever the server runs (see
   `https://dayquest.example.com`); also used as the base URL in
   verification/reset email links
 - `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `EMAIL_FROM` — set
-  these to actually send verification/reset emails; otherwise they're only
-  logged server-side, which is not viable in production
+  these to actually send verification/reset/reminder emails; otherwise
+  they're only logged server-side, which is not viable in production
+- `REMINDER_HOUR_UTC` — hour (0-23) the daily "you haven't logged today yet"
+  reminder job runs; defaults to 20
 
 Run it under a process manager (systemd, pm2, or your platform's own
 supervisor) so it restarts on crash, and put it behind HTTPS (either the
 platform terminates TLS for you, or put a reverse proxy in front of it).
+The reminder job runs in-process on a schedule — deploying multiple
+replicas of this server would send each user's reminder once per replica,
+so stick to a single instance (as this guide already assumes) until that's
+addressed.
 
 ### 3. Client
 

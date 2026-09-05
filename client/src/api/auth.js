@@ -46,3 +46,7 @@ export function changePasswordRequest(currentPassword, newPassword) {
 export function deleteAccountRequest(password) {
   return apiRequest("/auth/account", { method: "DELETE", body: { password } });
 }
+
+export function updateRemindersRequest(enabled) {
+  return apiRequest("/auth/reminders", { method: "PUT", body: { enabled } });
+}

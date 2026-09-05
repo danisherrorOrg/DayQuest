@@ -215,8 +215,22 @@ index change, no new endpoint) and push the merge to the client, since
       otherwise serve it as `application/octet-stream`. Not installed and
       tested on an actual device from this sandbox — worth confirming
       "Add to Home Screen" actually offers itself on a real phone.
-- [ ] **Reminders/notifications** to log the day — SMTP is already wired
-      up for verification/reset emails but nothing nudges users to log.
+- [x] ~~**Reminders/notifications** to log the day — SMTP is already wired
+      up for verification/reset emails but nothing nudges users to log.~~
+      Fixed: a new `remindersEnabled` field on `User` (default `true`,
+      toggled via a new `PUT /auth/reminders` and a checkbox in
+      `SettingsScreen`), a new `sendDailyReminders` job
+      (`server/src/utils/reminders.js`) that emails every verified,
+      opted-in user who has no `Day` for "today" yet, and a `node-cron`
+      schedule in `server/src/index.js` (new `REMINDER_HOUR_UTC` env var,
+      default 20) that runs it once a day. "Today" is a single global UTC
+      calendar day, not per-user local time — there's no per-user timezone
+      stored anywhere in this app, so a user well east or west of UTC gets
+      reminded a bit early or late relative to their own midnight; adding
+      real per-user timezones is a bigger change than this gap called for.
+      Also flagged in code and `DEPLOY.md`: this scheduler runs in-process,
+      so a multi-replica deploy (not what this project's deploy docs
+      describe) would double-send reminders per extra replica.
 
 ## Verified fine (not gaps)
 

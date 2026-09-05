@@ -56,7 +56,12 @@ async function issueSession(user, res) {
 }
 
 function sessionResponse(user, token) {
-  return { token, email: user.email, emailVerified: user.emailVerified };
+  return {
+    token,
+    email: user.email,
+    emailVerified: user.emailVerified,
+    remindersEnabled: user.remindersEnabled,
+  };
 }
 
 async function sendVerificationEmail(user) {
@@ -174,7 +179,11 @@ export async function me(req, res, next) {
   try {
     const user = await User.findById(req.userId);
     if (!user) return res.status(401).json({ error: "Invalid or expired token" });
-    res.json({ email: user.email, emailVerified: user.emailVerified });
+    res.json({
+      email: user.email,
+      emailVerified: user.emailVerified,
+      remindersEnabled: user.remindersEnabled,
+    });
   } catch (err) {
     next(err);
   }
@@ -330,6 +339,19 @@ export async function deleteAccount(req, res, next) {
 
     clearRefreshCookie(res);
     res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateReminderPreference(req, res, next) {
+  try {
+    const { enabled } = req.body;
+    if (typeof enabled !== "boolean")
+      return res.status(400).json({ error: "enabled must be a boolean" });
+
+    await User.updateOne({ _id: req.userId }, { $set: { remindersEnabled: enabled } });
+    res.json({ remindersEnabled: enabled });
   } catch (err) {
     next(err);
   }

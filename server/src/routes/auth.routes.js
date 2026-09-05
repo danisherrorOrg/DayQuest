@@ -11,6 +11,7 @@ import {
   resetPassword,
   changePassword,
   deleteAccount,
+  updateReminderPreference,
 } from "../controllers/auth.controller.js";
 import { requireAuth } from "../middleware/auth.js";
 import { authLimiter } from "../middleware/rateLimit.js";
@@ -28,5 +29,6 @@ router.post("/forgot-password", authLimiter, forgotPassword);
 router.post("/reset-password", authLimiter, resetPassword);
 router.post("/change-password", requireAuth, authLimiter, changePassword);
 router.delete("/account", requireAuth, authLimiter, deleteAccount);
+router.put("/reminders", requireAuth, updateReminderPreference);
 
 export default router;

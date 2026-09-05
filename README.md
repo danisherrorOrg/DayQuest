@@ -36,12 +36,13 @@ npm run dev                       # runs server (:4000) and client (:5173) toget
 
 Then open `http://localhost:5173`, register an account, and play.
 
-Registration sends a verification email and "Forgot your password?" sends a reset
-email; leave `SMTP_HOST` unset in `server/.env` for local dev and both just log the
-link to the server console instead of actually sending mail. Set `SMTP_HOST` /
-`SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `EMAIL_FROM` to send for real. Neither
-flow blocks registering or logging in — an unverified email is tracked but not
-enforced.
+Registration sends a verification email, "Forgot your password?" sends a reset
+email, and (once a day, for anyone who hasn't logged that day yet and hasn't
+opted out) a reminder email goes out too; leave `SMTP_HOST` unset in
+`server/.env` for local dev and all three just log to the server console
+instead of actually sending mail. Set `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` /
+`SMTP_PASS` / `EMAIL_FROM` to send for real. Registering/logging in is never
+blocked by any of this — an unverified email is tracked but not enforced.
 
 `run.sh` is a convenience wrapper around the same `npm run dev` that also
 installs dependencies on first run. It also forwards to the lint/format
@@ -165,6 +166,15 @@ A "Settings" link next to "My Days" opens a screen to change your password
 permanently delete your account and every saved day (`DELETE
 /auth/account`, also requires your password, behind a confirm step).
 
+## Reminders
+
+A daily job (`server/src/utils/reminders.js`, scheduled with `node-cron` in
+`server/src/index.js`, hour set by `REMINDER_HOUR_UTC`) emails every
+verified user who hasn't saved a day yet for the current UTC calendar day.
+There's no per-user timezone stored, so this is one global cutoff — a user
+far from UTC may get nudged a little early or late relative to their own
+midnight. Toggle it off any time from the "Reminders" section in Settings.
+
 ## Offline handling
 
 `OfflineBanner` shows while the connection is down. If "Save This Day"
@@ -182,4 +192,4 @@ installable ("Add to Home Screen" on mobile, or an install prompt on
 desktop Chrome/Edge) and keep already-visited pages available offline.
 
 See `TODO.md` for tracked gaps and planned feature work — exporting a
-recap as an image, reminders to log the day, and more.
+recap as an image, component/UI tests, and more.

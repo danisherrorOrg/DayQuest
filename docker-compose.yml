@@ -28,6 +28,7 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       EMAIL_FROM: ${EMAIL_FROM:-Day Story <no-reply@dayquest.local>}
+      REMINDER_HOUR_UTC: ${REMINDER_HOUR_UTC:-20}
     depends_on:
       - mongo
     ports:

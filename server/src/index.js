@@ -3,12 +3,14 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import cron from "node-cron";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import daysRoutes from "./routes/days.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { sendDailyReminders } from "./utils/reminders.js";
 
-const { MONGO_URI, JWT_SECRET, PORT = 4000, CORS_ORIGIN } = process.env;
+const { MONGO_URI, JWT_SECRET, PORT = 4000, CORS_ORIGIN, REMINDER_HOUR_UTC = "20" } = process.env;
 
 if (!MONGO_URI) throw new Error("MONGO_URI is not set — copy server/.env.example to server/.env");
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not set — copy server/.env.example to server/.env");
@@ -28,6 +30,14 @@ app.use(errorHandler);
 connectDB(MONGO_URI)
   .then(() => {
     app.listen(PORT, () => console.log(`Day Story API listening on :${PORT}`));
+
+    // Runs in-process, once per server instance. Fine for the single-
+    // instance deploy this project documents (see DEPLOY.md) — running
+    // multiple replicas of this server would send each user's reminder
+    // once per replica.
+    cron.schedule(`0 ${REMINDER_HOUR_UTC} * * *`, () => {
+      sendDailyReminders().catch((err) => console.error("Failed to send daily reminders", err));
+    });
   })
   .catch((err) => {
     console.error("Failed to connect to MongoDB", err);

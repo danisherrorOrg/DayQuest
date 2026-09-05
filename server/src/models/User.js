@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
     refreshTokenHash: { type: String, select: false },
     refreshTokenExpiresAt: { type: Date, select: false },
     emailVerified: { type: Boolean, default: false },
+    remindersEnabled: { type: Boolean, default: true },
     verificationTokenHash: { type: String, select: false },
     verificationTokenExpiresAt: { type: Date, select: false },
     resetTokenHash: { type: String, select: false },

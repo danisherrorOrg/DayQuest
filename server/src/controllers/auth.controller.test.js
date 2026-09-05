@@ -35,6 +35,7 @@ import {
   resetPassword,
   changePassword,
   deleteAccount,
+  updateReminderPreference,
 } from "./auth.controller.js";
 
 function mockRes() {
@@ -58,6 +59,7 @@ function fakeUser(overrides = {}) {
     email: "person@example.com",
     passwordHash: "",
     emailVerified: false,
+    remindersEnabled: true,
     save: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
@@ -223,11 +225,15 @@ describe("me", () => {
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
-  it("returns the current user's email and verification status", async () => {
-    User.findById.mockResolvedValue(fakeUser({ emailVerified: true }));
+  it("returns the current user's email, verification status, and reminder preference", async () => {
+    User.findById.mockResolvedValue(fakeUser({ emailVerified: true, remindersEnabled: false }));
     const res = mockRes();
     await me({ userId: "user123" }, res, vi.fn());
-    expect(res.json).toHaveBeenCalledWith({ email: "person@example.com", emailVerified: true });
+    expect(res.json).toHaveBeenCalledWith({
+      email: "person@example.com",
+      emailVerified: true,
+      remindersEnabled: false,
+    });
   });
 });
 
@@ -403,5 +409,24 @@ describe("deleteAccount", () => {
     expect(User.deleteOne).toHaveBeenCalledWith({ _id: user._id });
     expect(res.clearCookie).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(204);
+  });
+});
+
+describe("updateReminderPreference", () => {
+  it("rejects a non-boolean enabled value", async () => {
+    const res = mockRes();
+    await updateReminderPreference({ userId: "user123", body: { enabled: "yes" } }, res, vi.fn());
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(User.updateOne).not.toHaveBeenCalled();
+  });
+
+  it("updates the reminder preference for the current user", async () => {
+    const res = mockRes();
+    await updateReminderPreference({ userId: "user123", body: { enabled: false } }, res, vi.fn());
+    expect(User.updateOne).toHaveBeenCalledWith(
+      { _id: "user123" },
+      { $set: { remindersEnabled: false } },
+    );
+    expect(res.json).toHaveBeenCalledWith({ remindersEnabled: false });
   });
 });

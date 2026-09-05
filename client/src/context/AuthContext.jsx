@@ -8,6 +8,7 @@ import {
   resendVerificationRequest,
   changePasswordRequest,
   deleteAccountRequest,
+  updateRemindersRequest,
 } from "../api/auth.js";
 
 const AuthContext = createContext(null);
@@ -16,12 +17,14 @@ export function AuthProvider({ children }) {
   const [token, setTokenState] = useState(getToken());
   const [email, setEmail] = useState(null);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
 
   const applySession = useCallback((data) => {
     persistToken(data.token);
     setTokenState(data.token);
     setEmail(data.email);
     setEmailVerified(Boolean(data.emailVerified));
+    setRemindersEnabled(data.remindersEnabled !== false);
   }, []);
 
   const clearSession = useCallback(() => {
@@ -29,6 +32,7 @@ export function AuthProvider({ children }) {
     setTokenState(null);
     setEmail(null);
     setEmailVerified(false);
+    setRemindersEnabled(true);
   }, []);
 
   // Silently exchange the httpOnly refresh cookie (if any) for a fresh access token on load,
@@ -80,18 +84,25 @@ export function AuthProvider({ children }) {
     [clearSession],
   );
 
+  const updateReminders = useCallback(async (enabled) => {
+    const data = await updateRemindersRequest(enabled);
+    setRemindersEnabled(Boolean(data.remindersEnabled));
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
         token,
         email,
         emailVerified,
+        remindersEnabled,
         register,
         login,
         logout,
         resendVerification,
         changePassword,
         deleteAccount,
+        updateReminders,
       }}
     >
       {children}

@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function SettingsScreen({ onBack }) {
-  const { changePassword, deleteAccount } = useAuth();
+  const { changePassword, deleteAccount, remindersEnabled, updateReminders } = useAuth();
+
+  const [reminderSaving, setReminderSaving] = useState(false);
+  const [reminderError, setReminderError] = useState(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -35,6 +38,18 @@ export default function SettingsScreen({ onBack }) {
       setPwError(err.message);
     } finally {
       setPwSubmitting(false);
+    }
+  }
+
+  async function handleToggleReminders() {
+    setReminderError(null);
+    setReminderSaving(true);
+    try {
+      await updateReminders(!remindersEnabled);
+    } catch (err) {
+      setReminderError(err.message);
+    } finally {
+      setReminderSaving(false);
     }
   }
 
@@ -104,6 +119,21 @@ export default function SettingsScreen({ onBack }) {
               {pwSubmitting ? "Changing…" : "Change Password"}
             </button>
           </form>
+
+          <h3 style={{ marginTop: 24 }}>Reminders</h3>
+          <p className="sub">A daily email if you haven&apos;t logged today yet.</p>
+          {reminderError && <p className="authError">{reminderError}</p>}
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={remindersEnabled}
+              disabled={reminderSaving}
+              onChange={handleToggleReminders}
+            />
+            <span className="sub" style={{ margin: 0 }}>
+              {remindersEnabled ? "Reminder emails are on" : "Reminder emails are off"}
+            </span>
+          </label>
 
           <h3 style={{ marginTop: 24 }}>Delete Account</h3>
           <p className="sub">Permanently deletes your account and every day you&apos;ve saved.</p>
