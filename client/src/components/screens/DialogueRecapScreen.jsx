@@ -58,6 +58,7 @@ export default function DialogueRecapScreen({
   mode,
   cards,
   blocks,
+  date,
   onRestart,
   replay = false,
   reviewView,
@@ -130,6 +131,7 @@ export default function DialogueRecapScreen({
     return (
       <div className="screen active" id="recapScreen">
         <DayCompleteOverlay
+          date={date}
           summary={summary}
           summaryText={summaryText}
           saveStatus={saveStatus}

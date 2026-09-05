@@ -63,6 +63,7 @@ export default function ChronoBarScreen({
   mode,
   cards,
   blocks,
+  date,
   onRestart,
   replay = false,
   reviewView,
@@ -127,6 +128,7 @@ export default function ChronoBarScreen({
     return (
       <div className="screen active" id="chronoScreen">
         <DayCompleteOverlay
+          date={date}
           summary={summary}
           summaryText={summaryText}
           saveStatus={saveStatus}

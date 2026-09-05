@@ -137,7 +137,26 @@ index change, no new endpoint) and push the merge to the client, since
       used for the mode-mismatch dialog) so a mis-tap can't lose a day;
       confirming removes it from the list's local state on success without
       a full re-fetch.
-- [ ] **Export a finished recap as an image**, to share outside the app.
+- [x] ~~**Export a finished recap as an image**, to share outside the app.~~
+      Fixed: new pure-canvas `client/src/game/recapImage.js`
+      (`buildRecapCanvas`/`downloadRecapImage`) draws the same data
+      `DayCompleteOverlay` already shows — date, summary sentence, category
+      badges, per-category breakdown, total tracked — onto an offscreen
+      canvas styled to match the overlay's own colors/fonts, then triggers
+      a `day-story-<date>.png` download via a synchronous `toDataURL` +
+      temporary `<a download>`. No new dependency (no html2canvas/
+      dom-to-image) — same plain Canvas 2D approach `sprites.js` already
+      uses for the dialogue stage backdrop. A new "🖼️ Export Image" button
+      sits in `DayCompleteOverlay`'s `endBtns` row, available in both
+      review modes and during replay of a past day. Needed threading a
+      `date` prop down through `DialogueRecapScreen`/`ChronoBarScreen` from
+      `App.jsx`'s `run` state (`todayDateString()` for a fresh run, the
+      saved `day.date` for a replay), since neither screen previously
+      needed to know the date at all. Not visually verified in a real
+      browser — this sandbox can't render the client — so checking the
+      exported PNG's layout (text wrapping, badge-row wrapping for a day
+      with many categories) is worth doing before considering this fully
+      done.
 - [x] ~~**Account management** — no change-password-while-logged-in and no
       delete-account/settings screen; only register/login/forgot-password/
       reset-password/verify-email exist today (`auth.routes.js`).~~ Fixed:

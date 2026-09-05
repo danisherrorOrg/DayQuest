@@ -940,6 +940,11 @@ body,
   background: #c1502e;
   color: #fff;
 }
+#exportBtn {
+  background: transparent;
+  color: #b79f82;
+  border: 1.5px solid #b79f82;
+}
 #againBtn {
   background: transparent;
   color: #e8d2b0;

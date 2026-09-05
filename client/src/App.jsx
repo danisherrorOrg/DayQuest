@@ -17,6 +17,7 @@ import TimelineBuilderScreen from "./components/screens/TimelineBuilderScreen.js
 import DialogueRecapScreen from "./components/screens/DialogueRecapScreen.jsx";
 import ChronoBarScreen from "./components/screens/ChronoBarScreen.jsx";
 import { usePendingSaveFlush } from "./hooks/usePendingSaveFlush.js";
+import { todayDateString } from "./game/date.js";
 
 function GameApp() {
   const justSynced = usePendingSaveFlush();
@@ -26,12 +27,12 @@ function GameApp() {
   const [timelineJump, setTimelineJump] = useState(null); // { anchorMinutes } | null
 
   function handleBuildFromLogCards(cards) {
-    setRun({ mode: "cards", cards });
+    setRun({ mode: "cards", cards, date: todayDateString() });
     setScreen("recap");
   }
 
   function handleBuildFromBuilderBlocks(blocks) {
-    setRun({ mode: "builder", blocks });
+    setRun({ mode: "builder", blocks, date: todayDateString() });
     setScreen("recap");
   }
 
@@ -50,6 +51,7 @@ function GameApp() {
       mode: day.mode,
       cards: day.logCards || [],
       blocks: day.timelineBlocks || [],
+      date: day.date,
       replay: true,
     });
     setReviewView("dialogue");
@@ -110,6 +112,7 @@ function GameApp() {
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
+          date={run.date}
           onRestart={run.replay ? handleExitReplay : handleRestart}
           replay={run.replay}
           reviewView={reviewView}
@@ -121,6 +124,7 @@ function GameApp() {
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
+          date={run.date}
           onRestart={run.replay ? handleExitReplay : handleRestart}
           replay={run.replay}
           reviewView={reviewView}

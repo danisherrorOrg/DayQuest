@@ -128,7 +128,11 @@ A `↔`/`↕` toggle next to the heading switches the bar between horizontal
 and vertical layout.
 
 Finishing either review mode opens an end-of-day summary (total tracked
-hours, breakdown by category) with the same Save/Start Over flow.
+hours, breakdown by category) with the same Save/Start Over flow. A
+"🖼️ Export Image" button there renders that same summary onto a canvas and
+downloads it as a `day-story-<date>.png`, so a finished day can be shared
+outside the app — available whether the day was just finished or is being
+replayed from "My Days".
 
 ## Saving days
 
@@ -191,5 +195,5 @@ through.
 installable ("Add to Home Screen" on mobile, or an install prompt on
 desktop Chrome/Edge) and keep already-visited pages available offline.
 
-See `TODO.md` for tracked gaps and planned feature work — exporting a
-recap as an image, component/UI tests, and more.
+See `TODO.md` for tracked gaps and planned feature work — component/UI
+tests and more.
