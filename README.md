@@ -174,5 +174,12 @@ automatically the moment you're back online, even if you've since
 navigated away from the recap screen; a brief banner confirms it went
 through.
 
+## Installing as an app
+
+`client/public/manifest.webmanifest` and a minimal service worker
+(`client/public/sw.js`, registered in production only) make the app
+installable ("Add to Home Screen" on mobile, or an install prompt on
+desktop Chrome/Edge) and keep already-visited pages available offline.
+
 See `TODO.md` for tracked gaps and planned feature work — exporting a
-recap as an image, PWA support, and more.
+recap as an image, reminders to log the day, and more.

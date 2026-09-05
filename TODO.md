@@ -199,8 +199,22 @@ index change, no new endpoint) and push the merge to the client, since
       general queue, since a user only ever has one day in flight; a later
       save attempt naturally overwrites an unflushed one via the same
       full-replace `PUT` semantics everything else already relies on.
-- [ ] **PWA support** — no manifest or service worker for a
-      mobile-friendly, daily-use app.
+- [x] ~~**PWA support** — no manifest or service worker for a
+      mobile-friendly, daily-use app.~~ Fixed: `client/public/` now has a
+      `manifest.webmanifest` (name, icons, `display: standalone`, colors
+      matching the app's palette) linked from `index.html`, hand-generated
+      192/512px PNG icons (no image tooling in this sandbox, so they're a
+      simple cream-circle-on-dark-purple mark encoded directly via
+      `zlib.deflateSync`, not a proper illustration), and a minimal
+      `sw.js` registered from `main.jsx` (production builds only, so it
+      can't fight Vite's dev server over cached responses) — network-first
+      with cache-as-you-go fallback, since Vite's hashed build filenames
+      aren't known ahead of time for a real precache list. `nginx.conf`
+      gets an explicit `default_type` for `/manifest.webmanifest`, since
+      nginx's default `mime.types` has no `.webmanifest` entry and would
+      otherwise serve it as `application/octet-stream`. Not installed and
+      tested on an actual device from this sandbox — worth confirming
+      "Add to Home Screen" actually offers itself on a real phone.
 - [ ] **Reminders/notifications** to log the day — SMTP is already wired
       up for verification/reset emails but nothing nudges users to log.
 
