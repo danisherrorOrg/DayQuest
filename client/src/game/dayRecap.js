@@ -117,6 +117,81 @@ export function buildDayPages(mode, { cards, blocks, moments }) {
   return pages;
 }
 
+// Absolute-time segments for the chrono-bar review mode — unlike
+// buildDayPages, only real (categorized) activities are included; black-box
+// gaps just stay uncovered stretches of the bar rather than their own
+// entries, per the "shown honestly, not hidden" framing.
+function segmentsFromLogCards(cards) {
+  const segments = [];
+  let cursor = 0;
+  for (const card of cards) {
+    const category = findActivityByKey(card.categoryKey) || BLACKBOX;
+    const start = cursor;
+    const end = Math.min(MINUTES_PER_DAY, cursor + card.durationMins);
+    segments.push({
+      id: `card-${segments.length}`,
+      start,
+      end,
+      category,
+      title: card.title || category.label,
+      log: card.log || "",
+      tags: card.tags || [],
+      timeLabel: `${minutesToLabel(start)}–${minutesToLabel(end)}`,
+      isPoint: false,
+    });
+    cursor = end;
+  }
+  return segments;
+}
+
+function segmentsFromBuilderBlocks(blocks) {
+  return [...blocks]
+    .filter((b) => b.categoryKey)
+    .sort((a, b) => a.start - b.start)
+    .map((b, i) => {
+      const category = findActivityByKey(b.categoryKey) || BLACKBOX;
+      return {
+        id: `block-${i}`,
+        start: b.start,
+        end: b.end,
+        category,
+        title: b.title || category.label,
+        log: b.log || "",
+        tags: b.tags || [],
+        timeLabel: `${minutesToLabel(b.start)}–${minutesToLabel(b.end)}`,
+        isPoint: false,
+      };
+    });
+}
+
+// Moments have no duration, and not every moment has a recorded time — only
+// timed ones can be placed on a 0–24 axis at all, so untimed moments are
+// left out here (the caller can surface that count separately).
+function segmentsFromMoments(moments) {
+  return moments
+    .filter((m) => m.time != null)
+    .map((m, i) => {
+      const category = guessActivityFromText(m.text);
+      return {
+        id: `moment-${i}`,
+        start: m.time,
+        end: m.time,
+        category,
+        title: m.text,
+        log: "",
+        tags: [],
+        timeLabel: minutesToLabel(m.time),
+        isPoint: true,
+      };
+    });
+}
+
+export function buildDaySegments(mode, { cards, blocks, moments }) {
+  if (mode === "cards") return segmentsFromLogCards(cards || []);
+  if (mode === "builder") return segmentsFromBuilderBlocks(blocks || []);
+  return segmentsFromMoments(moments || []);
+}
+
 export function buildDaySummary(pages) {
   const activityPages = pages.filter((p) => p.kind === "activity");
   const totalTrackedMins = activityPages.reduce((sum, p) => sum + (p.durationMins || 0), 0);

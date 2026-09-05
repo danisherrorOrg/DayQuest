@@ -15,8 +15,13 @@ function hourLabel(mins) {
   return minutesToLabel(mins).replace(":00", "");
 }
 
-export default function TimelineBuilderScreen({ onBack, onBuild }) {
-  const [blocks, setBlocks] = useState([]);
+export default function TimelineBuilderScreen({
+  onBack,
+  onBuild,
+  initialBlocks = [],
+  initialAnchorMinutes = null,
+}) {
+  const [blocks, setBlocks] = useState(initialBlocks);
   const [dragState, setDragState] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [popupForm, setPopupForm] = useState(emptyPopupForm);
@@ -70,6 +75,29 @@ export default function TimelineBuilderScreen({ onBack, onBuild }) {
     });
     setTagInput("");
   }
+
+  // Arriving here via the chrono bar's "jump to entry mode 2" shortcut:
+  // pre-open a fresh block right at the tapped time, same as a real drag
+  // would, instead of making the user drag it out themselves.
+  useEffect(() => {
+    if (initialAnchorMinutes == null) return;
+    const bounds = neighborBounds(blocks, initialAnchorMinutes);
+    if (bounds.hi - bounds.lo < MIN_LEN) return;
+    const start = clamp(initialAnchorMinutes, bounds.lo, bounds.hi - MIN_LEN);
+    const block = {
+      id: crypto.randomUUID(),
+      start,
+      end: start + MIN_LEN,
+      title: "",
+      log: "",
+      categoryKey: null,
+      tags: [],
+    };
+    setBlocks((prev) => [...prev, block]);
+    openPopup(block);
+    // Only ever run once, on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function commitDrag(ds) {
     if (!ds) return;

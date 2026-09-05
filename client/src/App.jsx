@@ -14,10 +14,13 @@ import LogCardModeScreen from "./components/screens/LogCardModeScreen.jsx";
 import TimelineBuilderScreen from "./components/screens/TimelineBuilderScreen.jsx";
 import MomentsModeScreen from "./components/screens/MomentsModeScreen.jsx";
 import DialogueRecapScreen from "./components/screens/DialogueRecapScreen.jsx";
+import ChronoBarScreen from "./components/screens/ChronoBarScreen.jsx";
 
 function GameApp() {
   const [screen, setScreen] = useState("mode");
   const [run, setRun] = useState(null); // { mode, cards, blocks, moments }
+  const [reviewView, setReviewView] = useState("dialogue");
+  const [timelineJump, setTimelineJump] = useState(null); // { anchorMinutes } | null
 
   function handleBuildFromLogCards(cards) {
     setRun({ mode: "cards", cards });
@@ -36,7 +39,31 @@ function GameApp() {
 
   function handleRestart() {
     setRun(null);
+    setTimelineJump(null);
+    setReviewView("dialogue");
     setScreen("mode");
+  }
+
+  // The chrono bar's "tap empty space" shortcut: only offered in builder
+  // mode, since timeline blocks are the only entry-mode data shape that can
+  // be carried back into the builder and re-edited without losing anything.
+  function handleJumpToBuilder(minutes) {
+    setTimelineJump({ anchorMinutes: minutes });
+    setScreen("timeline");
+  }
+
+  function handleTimelineBack() {
+    if (timelineJump) {
+      setTimelineJump(null);
+      setScreen("recap");
+    } else {
+      setScreen("mode");
+    }
+  }
+
+  function handleTimelineBuild(blocks) {
+    setTimelineJump(null);
+    handleBuildFromBuilderBlocks(blocks);
   }
 
   return (
@@ -48,20 +75,36 @@ function GameApp() {
       )}
       {screen === "timeline" && (
         <TimelineBuilderScreen
-          onBack={() => setScreen("mode")}
-          onBuild={handleBuildFromBuilderBlocks}
+          onBack={handleTimelineBack}
+          onBuild={handleTimelineBuild}
+          initialBlocks={timelineJump && run?.mode === "builder" ? run.blocks : []}
+          initialAnchorMinutes={timelineJump ? timelineJump.anchorMinutes : null}
         />
       )}
       {screen === "moments" && (
         <MomentsModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromMoments} />
       )}
-      {screen === "recap" && run && (
+      {screen === "recap" && run && reviewView === "dialogue" && (
         <DialogueRecapScreen
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
           moments={run.moments}
           onRestart={handleRestart}
+          reviewView={reviewView}
+          onChangeReviewView={setReviewView}
+        />
+      )}
+      {screen === "recap" && run && reviewView === "chrono" && (
+        <ChronoBarScreen
+          mode={run.mode}
+          cards={run.cards}
+          blocks={run.blocks}
+          moments={run.moments}
+          onRestart={handleRestart}
+          reviewView={reviewView}
+          onChangeReviewView={setReviewView}
+          onJumpToBuilder={run.mode === "builder" ? handleJumpToBuilder : undefined}
         />
       )}
     </div>

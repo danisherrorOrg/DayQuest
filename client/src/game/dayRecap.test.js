@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildDayPages,
+  buildDaySegments,
   buildDaySummary,
   buildSummaryText,
   pageBody,
@@ -148,6 +149,53 @@ describe("buildSummaryText", () => {
     ];
     const pages = buildDayPages("cards", { cards });
     expect(buildSummaryText(pages)).toBe("You spent today on gym, food, and work.");
+  });
+});
+
+describe("buildDaySegments — cards mode", () => {
+  it("lays cards out end-to-end from midnight, skipping black-box time entirely", () => {
+    const cards = [
+      { title: "Leg day", categoryKey: "gym", durationMins: 30, log: "", tags: [] },
+      { title: "Lunch", categoryKey: "food", durationMins: 45, log: "", tags: [] },
+    ];
+    const segments = buildDaySegments("cards", { cards });
+    expect(segments).toHaveLength(2);
+    expect(segments[0]).toMatchObject({ start: 0, end: 30, title: "Leg day" });
+    expect(segments[1]).toMatchObject({ start: 30, end: 75, title: "Lunch" });
+    expect(segments.every((s) => !s.isPoint)).toBe(true);
+  });
+});
+
+describe("buildDaySegments — builder mode", () => {
+  it("only includes categorized blocks, using their absolute start/end", () => {
+    const blocks = [
+      { start: 480, end: 540, categoryKey: "gym", title: "Gym", log: "", tags: [] },
+      { start: 0, end: 480, categoryKey: null, title: "", log: "", tags: [] },
+    ];
+    const segments = buildDaySegments("builder", { blocks });
+    expect(segments).toHaveLength(1);
+    expect(segments[0]).toMatchObject({ start: 480, end: 540, title: "Gym" });
+  });
+
+  it("sorts out-of-order blocks by start time", () => {
+    const blocks = [
+      { start: 700, end: 740, categoryKey: "food", title: "Lunch", log: "", tags: [] },
+      { start: 0, end: 30, categoryKey: "gym", title: "Gym", log: "", tags: [] },
+    ];
+    const segments = buildDaySegments("builder", { blocks });
+    expect(segments.map((s) => s.category.key)).toEqual(["gym", "food"]);
+  });
+});
+
+describe("buildDaySegments — sequence (moments) mode", () => {
+  it("only places moments that have a recorded time, as zero-width points", () => {
+    const moments = [
+      { text: "went for a run", time: 0 },
+      { text: "no time on this one", time: null },
+    ];
+    const segments = buildDaySegments("sequence", { moments });
+    expect(segments).toHaveLength(1);
+    expect(segments[0]).toMatchObject({ start: 0, end: 0, isPoint: true });
   });
 });
 

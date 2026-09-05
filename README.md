@@ -92,15 +92,18 @@ build, and the test suite on every push/PR to `main`.
 3. **List your moments in order** — add what you did, one at a time, top to
    bottom. A time is optional per moment; order is what matters.
 
-All three feed the same review screen and save flow.
+All three feed the same review screens and save flow.
 
 **Mode 3 is still slated for replacement.** The agreed next design drops the
-moments-list mode and adds a second review mode (a day/night "chrono bar"
-timeline) alongside the dialogue recap below — see `TODO.md` → "Feature:
-entry & review redesign" for the full spec. Modes 1 and 2 above are that
-redesign's two entry modes, already built.
+moments-list mode — see `TODO.md` → "Feature: entry & review redesign" for
+the full spec. Modes 1 and 2 above are that redesign's two entry modes,
+already built; both review modes below are also now built.
 
-## Review mode (current)
+## Review modes (current)
+
+A `📖 Dialogue` / `🌗 Chrono Bar` switcher at the top of either screen swaps
+between the two review modes below without losing your place; both end in
+the same end-of-day summary and Save/Start Over flow.
 
 **Dialogue recap** — a retro, Pokémon-NPC-style text box docked at the
 bottom of the screen. Text reveals a character at a time; tapping the box
@@ -109,13 +112,26 @@ logged activity (time range, title, category, note if any), plus a filler
 page for every unrecorded gap so the day's "black box" time is acknowledged
 rather than skipped. A small canvas backdrop above the box reuses the
 original platformer's sky/ground/avatar art, recolored per the current
-page's category. Finishing the last page opens an end-of-day summary (total
-tracked hours, breakdown by category) with the same Save/Start Over flow as
-before.
+page's category.
 
 The platformer run this replaced (`GameScreen.jsx`, `engine.js`,
 `levelBuilder.js`) has been removed — see `TODO.md` → "Review mode 1" for
 what changed.
+
+**Chrono bar** — the whole day as one 0:00–24:00 line, its background a
+day/night gradient (dark at both ends, brightest at noon, warm at sunrise/
+sunset) with a sun or moon glyph arcing above it to mark the actual current
+time-of-day. Logged activities overlay the line as colored segments (color
+= category) with a pin marking each segment's start and end; hovering
+(desktop) or tapping (mobile) a segment opens its full info — title, time
+range, note, tags. Untouched stretches stay plain gradient with no
+segment, same "shown honestly, not hidden" black-box framing as elsewhere.
+For a day logged with the timeline builder, tapping empty space on the bar
+jumps back into that entry mode with a new block pre-opened at that time.
+See `TODO.md` → "Review mode 2" for details.
+
+Finishing either review mode opens an end-of-day summary (total tracked
+hours, breakdown by category) with the same Save/Start Over flow.
 
 ## Saving days
 

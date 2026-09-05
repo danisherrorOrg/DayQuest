@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BLACKBOX, formatDuration } from "../../game/activities.js";
+import { BLACKBOX } from "../../game/activities.js";
 import {
   buildDayPages,
   buildDaySummary,
@@ -8,7 +8,9 @@ import {
   pageNameplate,
 } from "../../game/dayRecap.js";
 import { drawGroundBand, drawPlayerSprite, drawSky, shade } from "../../game/sprites.js";
-import { saveDay } from "../../api/days.js";
+import { useDaySave } from "../../hooks/useDaySave.js";
+import DayCompleteOverlay from "./DayCompleteOverlay.jsx";
+import ReviewTabs from "./ReviewTabs.jsx";
 
 const REVEAL_MS_PER_CHAR = 18;
 const STAGE_W = 320;
@@ -52,7 +54,15 @@ function StageCanvas({ page }) {
   return <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />;
 }
 
-export default function DialogueRecapScreen({ mode, cards, blocks, moments, onRestart }) {
+export default function DialogueRecapScreen({
+  mode,
+  cards,
+  blocks,
+  moments,
+  onRestart,
+  reviewView,
+  onChangeReviewView,
+}) {
   const pages = useMemo(
     () => buildDayPages(mode, { cards, blocks, moments }),
     [mode, cards, blocks, moments],
@@ -61,7 +71,6 @@ export default function DialogueRecapScreen({ mode, cards, blocks, moments, onRe
   const [pageIndex, setPageIndex] = useState(0);
   const [revealedChars, setRevealedChars] = useState(0);
   const [done, setDone] = useState(false);
-  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved | error | offline
   const revealTimer = useRef(null);
 
   const page = pages[pageIndex];
@@ -113,99 +122,25 @@ export default function DialogueRecapScreen({ mode, cards, blocks, moments, onRe
 
   const summary = useMemo(() => buildDaySummary(pages), [pages]);
   const summaryText = useMemo(() => buildSummaryText(pages), [pages]);
-
-  async function handleSave() {
-    setSaveStatus("saving");
-    try {
-      const now = new Date();
-      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-      const entry = {
-        mode,
-        moments: mode === "sequence" ? moments : null,
-        logCards:
-          mode === "cards"
-            ? cards.map((c) => ({
-                title: c.title,
-                log: c.log,
-                categoryKey: c.categoryKey,
-                tags: c.tags,
-                durationMins: c.durationMins,
-              }))
-            : null,
-        timelineBlocks:
-          mode === "builder"
-            ? blocks.map((b) => ({
-                start: b.start,
-                end: b.end,
-                title: b.title,
-                log: b.log,
-                categoryKey: b.categoryKey,
-                tags: b.tags,
-              }))
-            : null,
-        summary: summaryText,
-      };
-      await saveDay(date, entry);
-      setSaveStatus("saved");
-    } catch (err) {
-      setSaveStatus(err.isNetworkError ? "offline" : "error");
-    } finally {
-      setTimeout(() => setSaveStatus("idle"), 1600);
-    }
-  }
-
-  const saveLabel = {
-    idle: "Save This Day",
-    saving: "Saving...",
-    saved: "Saved ✓",
-    error: "Could not save",
-    offline: "Offline — try again",
-  }[saveStatus];
+  const { saveStatus, saveLabel, handleSave } = useDaySave({
+    mode,
+    cards,
+    blocks,
+    moments,
+    summaryText,
+  });
 
   if (done) {
     return (
       <div className="screen active" id="recapScreen">
-        <div id="completeOverlay" style={{ position: "static", flex: 1, display: "flex" }}>
-          <h2>Day Complete!</h2>
-          <p className="desc">{summaryText}</p>
-          <div id="badgeRow">
-            {summary.breakdown.map(({ category }) => (
-              <div key={category.key} className="cbadge" style={{ background: category.color }}>
-                {category.emoji}
-              </div>
-            ))}
-          </div>
-          <div
-            id="timelineRecap"
-            style={{ display: summary.breakdown.length ? undefined : "none" }}
-          >
-            {summary.breakdown.map(({ category, mins }) => (
-              <div className="recapRow" key={category.key}>
-                <span className="rt">{formatDuration(mins)}</span>
-                <span className="rl">
-                  {category.emoji} {category.label}
-                </span>
-              </div>
-            ))}
-            <div className="recapRow">
-              <span className="rt">{formatDuration(summary.totalTrackedMins)}</span>
-              <span className="rl">total tracked</span>
-            </div>
-          </div>
-          <div className="endBtns">
-            <button
-              className="endBtn"
-              id="saveBtn"
-              disabled={saveStatus === "saving"}
-              onClick={handleSave}
-            >
-              {saveLabel}
-            </button>
-            <button className="endBtn" id="againBtn" onClick={onRestart}>
-              Start Over
-            </button>
-          </div>
-        </div>
+        <DayCompleteOverlay
+          summary={summary}
+          summaryText={summaryText}
+          saveStatus={saveStatus}
+          saveLabel={saveLabel}
+          onSave={handleSave}
+          onRestart={onRestart}
+        />
       </div>
     );
   }
@@ -213,6 +148,7 @@ export default function DialogueRecapScreen({ mode, cards, blocks, moments, onRe
   return (
     <div className="screen active" id="recapScreen">
       <div id="dialogueStage">
+        {reviewView && <ReviewTabs value={reviewView} onChange={onChangeReviewView} />}
         <StageCanvas page={page} />
         <span className="dialoguePageCount">
           {pageIndex + 1} / {pages.length}

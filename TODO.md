@@ -132,24 +132,48 @@ than kept unused — `App.jsx` now goes straight from an entry mode to
 A single line, 0:00 on one end to 24:00 on the other (horizontal by
 default; vertical as a later option), used as a full-day visualization:
 
-- [ ] Background of the line renders a day/night gradient along its length
-      — dark at both ends (midnight), brightening through sunrise (~6am),
-      brightest at noon, dimming through sunset (~6pm), dark again at the
-      far end — plus a small sun/moon glyph that moves along an arc above
-      the line to mark current time-of-day (sun while it's day, moon while
-      it's night). This is a visual echo of the 0–24 axis, not a literal
-      clock.
-- [ ] Logged activities render as colored segments overlaid on the line
-      (color = category), each with a small marker pin at its start point
-      and its end point.
-- [ ] Hover (desktop) or tap (mobile) on a segment opens a popup with that
-      activity's full info (title, time range, log, tags) — same info
-      shown in the dialogue recap, different presentation.
-- [ ] Untouched stretches of the line stay as plain day/night gradient with
-      no segment — the black box, shown honestly rather than hidden.
-- [ ] Nice-to-have, not required for a first pass: clicking empty space on
-      the bar jumps into entry mode 2 (timeline builder) pre-positioned at
-      that time.
+- [x] ~~Background of the line renders a day/night gradient along its
+      length ... plus a small sun/moon glyph that moves along an arc above
+      the line to mark current time-of-day.~~ Fixed: `ChronoBarScreen.jsx`
+      renders the bar's background as a CSS gradient built from `SKY_STOPS`
+      (dark at 0h/24h, warm sunrise/sunset tint at 6h/18h, brightest at
+      noon); a `☀️`/`🌙` glyph is positioned above the bar each render from
+      the real current wall-clock time (`glyphPosition`), arcing up from
+      the bar at sunrise/sunset and peaking above the bar at noon/midnight.
+- [x] ~~Logged activities render as colored segments overlaid on the line
+      ... with a small marker pin at its start point and its end point.~~
+      Fixed: `buildDaySegments` (new, in `dayRecap.js`) turns cards/blocks/
+      timed moments into absolute-time segments (cards lay out end-to-end
+      from midnight like the dialogue recap does; builder blocks use their
+      real start/end; only categorized/timed items are included). Each
+      segment renders with a `chronoPin` at each end (a single center pin
+      for a moment's point-in-time marker, since moments have no duration).
+- [x] ~~Hover (desktop) or tap (mobile) on a segment opens a popup with that
+      activity's full info.~~ Fixed: a segment's `onMouseEnter`/`onClick`
+      toggle it into `openId` state, showing a floating card (title, time
+      range, log, tags) positioned above the bar, clamped in pixels against
+      the bar's measured width so it can't run off-screen.
+- [x] ~~Untouched stretches of the line stay as plain day/night gradient
+      with no segment.~~ Fixed: `buildDaySegments` only emits entries for
+      categorized cards/blocks and timed moments — black-box time is just
+      uncovered bar, never its own segment. Moments without a recorded time
+      have no place on a 0–24 axis at all; they're left off the bar and
+      called out in a small note instead of being silently dropped.
+- [x] ~~Nice-to-have: clicking empty space on the bar jumps into entry mode
+      2 (timeline builder) pre-positioned at that time.~~ Fixed, scoped to
+      builder-mode days: `TimelineBuilderScreen` now accepts
+      `initialBlocks`/`initialAnchorMinutes` and pre-opens a new block's
+      popup at that time on mount. Only wired up when the day being
+      reviewed came from the timeline builder (`App.jsx`'s
+      `handleJumpToBuilder`), since that's the only entry mode whose data
+      shape (blocks) can be carried back in and re-edited without lossily
+      reinterpreting cards or moments as blocks.
+
+A `📖 Dialogue` / `🌗 Chrono Bar` switcher (`ReviewTabs.jsx`) toggles
+between the two review modes from either screen; both now share a
+`useDaySave` hook and `DayCompleteOverlay` component for the end-of-day
+summary/save flow (pulled out of `DialogueRecapScreen.jsx`, which owned it
+alone before) so "Finish & Save" works the same from either view.
 
 ## Verified fine (not gaps)
 
