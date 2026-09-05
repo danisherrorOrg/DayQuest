@@ -1,10 +1,4 @@
-import {
-  BLACKBOX,
-  findActivityByKey,
-  formatDuration,
-  guessActivityFromText,
-  minutesToLabel,
-} from "./activities.js";
+import { BLACKBOX, findActivityByKey, formatDuration, minutesToLabel } from "./activities.js";
 
 const MINUTES_PER_DAY = 1440;
 
@@ -90,26 +84,14 @@ function pagesFromBuilderBlocks(blocks) {
   return pages;
 }
 
-// Moments have no duration and don't have to cover the whole day either, so
-// unlike the other two modes there are no filler pages between them.
-function pagesFromMoments(moments) {
-  return moments.map((m) =>
-    activityPage({
-      category: guessActivityFromText(m.text),
-      title: m.text,
-      timeLabel: m.time != null ? minutesToLabel(m.time) : null,
-      log: "",
-      tags: [],
-      durationMins: null,
-    }),
-  );
-}
-
-export function buildDayPages(mode, { cards, blocks, moments }) {
+// A day saved under a mode with no entry screen anymore ("sequence" from
+// the retired moments-list mode, or the older "timed"/"legacy" values) has
+// no page-building logic left — it just renders as a fully black-box day.
+export function buildDayPages(mode, { cards, blocks }) {
   let pages;
   if (mode === "cards") pages = pagesFromLogCards(cards || []);
   else if (mode === "builder") pages = pagesFromBuilderBlocks(blocks || []);
-  else pages = pagesFromMoments(moments || []);
+  else pages = [];
 
   if (pages.length === 0) {
     pages = [fillerPage({ timeLabel: null, durationMins: null })];
@@ -164,32 +146,10 @@ function segmentsFromBuilderBlocks(blocks) {
     });
 }
 
-// Moments have no duration, and not every moment has a recorded time — only
-// timed ones can be placed on a 0–24 axis at all, so untimed moments are
-// left out here (the caller can surface that count separately).
-function segmentsFromMoments(moments) {
-  return moments
-    .filter((m) => m.time != null)
-    .map((m, i) => {
-      const category = guessActivityFromText(m.text);
-      return {
-        id: `moment-${i}`,
-        start: m.time,
-        end: m.time,
-        category,
-        title: m.text,
-        log: "",
-        tags: [],
-        timeLabel: minutesToLabel(m.time),
-        isPoint: true,
-      };
-    });
-}
-
-export function buildDaySegments(mode, { cards, blocks, moments }) {
+export function buildDaySegments(mode, { cards, blocks }) {
   if (mode === "cards") return segmentsFromLogCards(cards || []);
   if (mode === "builder") return segmentsFromBuilderBlocks(blocks || []);
-  return segmentsFromMoments(moments || []);
+  return [];
 }
 
 export function buildDaySummary(pages) {

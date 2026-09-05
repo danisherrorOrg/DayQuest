@@ -89,19 +89,9 @@ describe("buildDayPages — builder mode", () => {
   });
 });
 
-describe("buildDayPages — sequence (moments) mode", () => {
-  it("makes one activity page per moment, no filler pages", () => {
-    const moments = [
-      { text: "went for a run", time: 0 },
-      { text: "ate lunch", time: 60 },
-    ];
-    const pages = buildDayPages("sequence", { moments });
-    expect(pages.every((p) => p.kind === "activity")).toBe(true);
-    expect(pages[0].category.key).toBe("gym");
-  });
-
-  it("falls back to a single filler page when there's nothing logged", () => {
-    const pages = buildDayPages("sequence", { moments: [] });
+describe("buildDayPages — retired mode value", () => {
+  it("falls back to a single filler page for a mode with no entry screen anymore", () => {
+    const pages = buildDayPages("sequence", {});
     expect(pages).toHaveLength(1);
     expect(pages[0].kind).toBe("filler");
   });
@@ -187,15 +177,9 @@ describe("buildDaySegments — builder mode", () => {
   });
 });
 
-describe("buildDaySegments — sequence (moments) mode", () => {
-  it("only places moments that have a recorded time, as zero-width points", () => {
-    const moments = [
-      { text: "went for a run", time: 0 },
-      { text: "no time on this one", time: null },
-    ];
-    const segments = buildDaySegments("sequence", { moments });
-    expect(segments).toHaveLength(1);
-    expect(segments[0]).toMatchObject({ start: 0, end: 0, isPoint: true });
+describe("buildDaySegments — retired mode value", () => {
+  it("returns no segments for a mode with no entry screen anymore", () => {
+    expect(buildDaySegments("sequence", {})).toEqual([]);
   });
 });
 

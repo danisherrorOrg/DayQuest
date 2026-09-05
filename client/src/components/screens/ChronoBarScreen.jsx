@@ -59,24 +59,15 @@ export default function ChronoBarScreen({
   mode,
   cards,
   blocks,
-  moments,
   onRestart,
   reviewView,
   onChangeReviewView,
   onJumpToBuilder,
 }) {
-  const segments = useMemo(
-    () => buildDaySegments(mode, { cards, blocks, moments }),
-    [mode, cards, blocks, moments],
-  );
-  const pages = useMemo(
-    () => buildDayPages(mode, { cards, blocks, moments }),
-    [mode, cards, blocks, moments],
-  );
+  const segments = useMemo(() => buildDaySegments(mode, { cards, blocks }), [mode, cards, blocks]);
+  const pages = useMemo(() => buildDayPages(mode, { cards, blocks }), [mode, cards, blocks]);
   const summary = useMemo(() => buildDaySummary(pages), [pages]);
   const summaryText = useMemo(() => buildSummaryText(pages), [pages]);
-  const untimedMoments =
-    mode === "sequence" ? (moments || []).filter((m) => m.time == null).length : 0;
 
   const [openId, setOpenId] = useState(null);
   const [done, setDone] = useState(false);
@@ -102,7 +93,6 @@ export default function ChronoBarScreen({
     mode,
     cards,
     blocks,
-    moments,
     summaryText,
   });
 
@@ -233,13 +223,6 @@ export default function ChronoBarScreen({
           ))}
         </div>
       </div>
-
-      {untimedMoments > 0 && (
-        <p className="chronoNote">
-          {untimedMoments} moment{untimedMoments > 1 ? "s" : ""} without a time noted{" "}
-          {untimedMoments > 1 ? "aren't" : "isn't"} shown on the bar.
-        </p>
-      )}
 
       <div style={{ flex: 1 }} />
       <div className="endBtns" style={{ padding: "0 18px 16px" }}>

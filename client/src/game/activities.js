@@ -133,23 +133,6 @@ export function findActivityByKey(key) {
   return ACTIVITIES.find((a) => a.key === key) || null;
 }
 
-export function guessActivityFromText(text) {
-  const lower = text.toLowerCase();
-  for (const act of ACTIVITIES) {
-    if (act.words.some((w) => lower.includes(w))) return act;
-  }
-  const label = text.trim().split(/\s+/).slice(0, 3).join(" ");
-  const palette = ["#8C6E4F", "#5E7A9A", "#9A6B7A", "#6E8C6E", "#7A6E9A"];
-  const hash = [...text].reduce((a, c) => a + c.charCodeAt(0), 0);
-  return {
-    key: "custom_" + hash,
-    label: label.charAt(0).toUpperCase() + label.slice(1),
-    color: palette[hash % palette.length],
-    emoji: "⭐",
-    words: [],
-  };
-}
-
 export function formatDuration(mins) {
   const total = Math.max(0, Math.round(mins));
   const h = Math.floor(total / 60);

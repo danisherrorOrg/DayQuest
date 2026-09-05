@@ -1,11 +1,11 @@
 # Day Story — Run Your Day
 
 A day diary that replays your logged day as a retro dialogue-box walkthrough,
-Pokémon-NPC style. You log your day — as a card per activity, a drag-to-block
-timeline, or an ordered list of moments — and then step through it one page
-at a time: a page per activity (time, title, category, note), plus a "black
-box" filler page for any unrecorded stretch, so unlogged time is acknowledged
-rather than hidden.
+Pokémon-NPC style. You log your day — as a card per activity, or a
+drag-to-block timeline — and then step through it one page at a time: a
+page per activity (time, title, category, note), plus a "black box" filler
+page for any unrecorded stretch, so unlogged time is acknowledged rather
+than hidden.
 
 ## Stack
 
@@ -89,15 +89,11 @@ build, and the test suite on every push/PR to `main`.
    something; a popup lets you add a title, note, category, and tags (all
    optional). Blocks can be moved or resized afterward by dragging their
    body or edges. Untouched time stays black box.
-3. **List your moments in order** — add what you did, one at a time, top to
-   bottom. A time is optional per moment; order is what matters.
 
-All three feed the same review screens and save flow.
-
-**Mode 3 is still slated for replacement.** The agreed next design drops the
-moments-list mode — see `TODO.md` → "Other tracked gaps" for the note.
-Modes 1 and 2 above are that redesign's two entry modes,
-already built; both review modes below are also now built.
+Both feed the same review screens and save flow. An earlier third mode
+("list your moments in order") was dropped — see `TODO.md` for the note; a
+day saved under it before the drop still opens fine in either review mode,
+just with nothing to show but black box.
 
 ## Review modes (current)
 

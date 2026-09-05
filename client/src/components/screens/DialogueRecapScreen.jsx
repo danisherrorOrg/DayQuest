@@ -58,15 +58,11 @@ export default function DialogueRecapScreen({
   mode,
   cards,
   blocks,
-  moments,
   onRestart,
   reviewView,
   onChangeReviewView,
 }) {
-  const pages = useMemo(
-    () => buildDayPages(mode, { cards, blocks, moments }),
-    [mode, cards, blocks, moments],
-  );
+  const pages = useMemo(() => buildDayPages(mode, { cards, blocks }), [mode, cards, blocks]);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [revealedChars, setRevealedChars] = useState(0);
@@ -126,7 +122,6 @@ export default function DialogueRecapScreen({
     mode,
     cards,
     blocks,
-    moments,
     summaryText,
   });
 

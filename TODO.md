@@ -81,11 +81,24 @@ index change, no new endpoint) and push the merge to the client, since
 
 ## Other tracked gaps
 
-- [ ] **Drop the moments-list entry mode** — the redesign's agreed shape was
-      two entry modes (log cards, timeline builder) replacing all three
+- [x] ~~**Drop the moments-list entry mode** — the redesign's agreed shape
+      was two entry modes (log cards, timeline builder) replacing all three
       old modes, but `MomentsModeScreen` was never actually removed and is
       still offered/used in `App.jsx` and `dayRecap.js` alongside the two
-      new modes.
+      new modes.~~ Fixed: `MomentsModeScreen.jsx` deleted, along with its
+      `App.jsx` wiring, `ModeSelectScreen`'s third mode card, the
+      moments-specific paths in `dayRecap.js`
+      (`pagesFromMoments`/`segmentsFromMoments`) and `activities.js`
+      (`guessActivityFromText`, unused once those were gone), the `moments`
+      prop threaded through both review screens and `useDaySave`, and the
+      now-orphaned moments-mode CSS. The server keeps `"sequence"` in the
+      `Day` mode enum (`server/src/models/Day.js`,
+      `days.controller.js`) purely so a day saved before this change still
+      round-trips; `buildDayPages`/`buildDaySegments` render any day with a
+      mode that has no entry screen anymore (`"sequence"`, `"timed"`,
+      `"legacy"`) as a fully black-box day, and `ModeSelectScreen`'s
+      mode-mismatch dialog names all three generically ("an earlier version
+      of today's entry") since none of them can be picked again.
 - [ ] **"My Days" list screen** — `GET /api/days` (`listDays`) already
       exists server-side but nothing in the client calls it; there's
       currently no way to browse previously saved days.

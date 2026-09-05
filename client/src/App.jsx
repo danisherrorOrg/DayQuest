@@ -12,13 +12,12 @@ import OfflineBanner from "./components/OfflineBanner.jsx";
 import ModeSelectScreen from "./components/screens/ModeSelectScreen.jsx";
 import LogCardModeScreen from "./components/screens/LogCardModeScreen.jsx";
 import TimelineBuilderScreen from "./components/screens/TimelineBuilderScreen.jsx";
-import MomentsModeScreen from "./components/screens/MomentsModeScreen.jsx";
 import DialogueRecapScreen from "./components/screens/DialogueRecapScreen.jsx";
 import ChronoBarScreen from "./components/screens/ChronoBarScreen.jsx";
 
 function GameApp() {
   const [screen, setScreen] = useState("mode");
-  const [run, setRun] = useState(null); // { mode, cards, blocks, moments }
+  const [run, setRun] = useState(null); // { mode, cards, blocks }
   const [reviewView, setReviewView] = useState("dialogue");
   const [timelineJump, setTimelineJump] = useState(null); // { anchorMinutes } | null
 
@@ -29,11 +28,6 @@ function GameApp() {
 
   function handleBuildFromBuilderBlocks(blocks) {
     setRun({ mode: "builder", blocks });
-    setScreen("recap");
-  }
-
-  function handleBuildFromMoments(moments) {
-    setRun({ mode: "sequence", moments });
     setScreen("recap");
   }
 
@@ -81,15 +75,11 @@ function GameApp() {
           initialAnchorMinutes={timelineJump ? timelineJump.anchorMinutes : null}
         />
       )}
-      {screen === "moments" && (
-        <MomentsModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromMoments} />
-      )}
       {screen === "recap" && run && reviewView === "dialogue" && (
         <DialogueRecapScreen
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
-          moments={run.moments}
           onRestart={handleRestart}
           reviewView={reviewView}
           onChangeReviewView={setReviewView}
@@ -100,7 +90,6 @@ function GameApp() {
           mode={run.mode}
           cards={run.cards}
           blocks={run.blocks}
-          moments={run.moments}
           onRestart={handleRestart}
           reviewView={reviewView}
           onChangeReviewView={setReviewView}

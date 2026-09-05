@@ -12,7 +12,7 @@ const SAVE_LABELS = {
 
 // Shared by both review modes (dialogue recap and chrono bar) so the save
 // payload shape and status handling only live in one place.
-export function useDaySave({ mode, cards, blocks, moments, summaryText }) {
+export function useDaySave({ mode, cards, blocks, summaryText }) {
   const [saveStatus, setSaveStatus] = useState("idle");
 
   async function handleSave() {
@@ -21,7 +21,7 @@ export function useDaySave({ mode, cards, blocks, moments, summaryText }) {
       const date = todayDateString();
       const entry = {
         mode,
-        moments: mode === "sequence" ? moments : null,
+        moments: null,
         logCards:
           mode === "cards"
             ? cards.map((c) => ({
