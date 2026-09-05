@@ -6,6 +6,8 @@ import {
   refreshRequest,
   logoutRequest,
   resendVerificationRequest,
+  changePasswordRequest,
+  deleteAccountRequest,
 } from "../api/auth.js";
 
 const AuthContext = createContext(null);
@@ -62,9 +64,35 @@ export function AuthProvider({ children }) {
     return resendVerificationRequest(email);
   }, [email]);
 
+  const changePassword = useCallback(
+    async (currentPassword, newPassword) => {
+      const data = await changePasswordRequest(currentPassword, newPassword);
+      applySession(data);
+    },
+    [applySession],
+  );
+
+  const deleteAccount = useCallback(
+    async (password) => {
+      await deleteAccountRequest(password);
+      clearSession();
+    },
+    [clearSession],
+  );
+
   return (
     <AuthContext.Provider
-      value={{ token, email, emailVerified, register, login, logout, resendVerification }}
+      value={{
+        token,
+        email,
+        emailVerified,
+        register,
+        login,
+        logout,
+        resendVerification,
+        changePassword,
+        deleteAccount,
+      }}
     >
       {children}
     </AuthContext.Provider>

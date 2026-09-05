@@ -131,13 +131,19 @@ body,
 /* ---- Auth ---- */
 .topBar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  row-gap: 6px;
   margin-bottom: 10px;
 }
 .topBarEmail {
   font-size: 12.5px;
   color: #9a7a56;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 .authInput {
   width: 100%;

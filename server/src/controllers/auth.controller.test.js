@@ -8,6 +8,12 @@ vi.mock("../models/User.js", () => ({
     create: vi.fn(),
     updateOne: vi.fn(),
     findById: vi.fn(),
+    deleteOne: vi.fn(),
+  },
+}));
+vi.mock("../models/Day.js", () => ({
+  default: {
+    deleteMany: vi.fn(),
   },
 }));
 vi.mock("../utils/mailer.js", () => ({
@@ -15,6 +21,7 @@ vi.mock("../utils/mailer.js", () => ({
 }));
 
 import User from "../models/User.js";
+import Day from "../models/Day.js";
 import { sendMail } from "../utils/mailer.js";
 import {
   register,
@@ -26,6 +33,8 @@ import {
   resendVerification,
   forgotPassword,
   resetPassword,
+  changePassword,
+  deleteAccount,
 } from "./auth.controller.js";
 
 function mockRes() {
@@ -316,5 +325,83 @@ describe("resetPassword", () => {
     );
     expect(res.clearCookie).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalled();
+  });
+});
+
+describe("changePassword", () => {
+  it("rejects a missing current/new password or a too-short new password", async () => {
+    const res = mockRes();
+    await changePassword({ userId: "user123", body: { currentPassword: "" } }, res, vi.fn());
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(User.findById).not.toHaveBeenCalled();
+  });
+
+  it("rejects an incorrect current password", async () => {
+    const passwordHash = await bcrypt.hash("correct-password", 4);
+    User.findById.mockResolvedValue(fakeUser({ passwordHash }));
+    const res = mockRes();
+    await changePassword(
+      { userId: "user123", body: { currentPassword: "wrong", newPassword: "longenough2" } },
+      res,
+      vi.fn(),
+    );
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it("updates the password and issues a fresh session", async () => {
+    const passwordHash = await bcrypt.hash("correct-password", 4);
+    const user = fakeUser({ passwordHash });
+    User.findById.mockResolvedValue(user);
+    const res = mockRes();
+
+    await changePassword(
+      {
+        userId: "user123",
+        body: { currentPassword: "correct-password", newPassword: "longenough2" },
+      },
+      res,
+      vi.fn(),
+    );
+
+    expect(user.save).toHaveBeenCalled();
+    expect(user.passwordHash).not.toBe(passwordHash);
+    expect(res.cookie).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ email: user.email }));
+  });
+});
+
+describe("deleteAccount", () => {
+  it("rejects a missing password", async () => {
+    const res = mockRes();
+    await deleteAccount({ userId: "user123", body: {} }, res, vi.fn());
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(User.findById).not.toHaveBeenCalled();
+  });
+
+  it("rejects an incorrect password", async () => {
+    const passwordHash = await bcrypt.hash("correct-password", 4);
+    User.findById.mockResolvedValue(fakeUser({ passwordHash }));
+    const res = mockRes();
+    await deleteAccount({ userId: "user123", body: { password: "wrong" } }, res, vi.fn());
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(User.deleteOne).not.toHaveBeenCalled();
+  });
+
+  it("deletes the user's saved days and account, then clears the session", async () => {
+    const passwordHash = await bcrypt.hash("correct-password", 4);
+    const user = fakeUser({ passwordHash });
+    User.findById.mockResolvedValue(user);
+    const res = mockRes();
+
+    await deleteAccount(
+      { userId: "user123", body: { password: "correct-password" } },
+      res,
+      vi.fn(),
+    );
+
+    expect(Day.deleteMany).toHaveBeenCalledWith({ user: user._id });
+    expect(User.deleteOne).toHaveBeenCalledWith({ _id: user._id });
+    expect(res.clearCookie).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(204);
   });
 });

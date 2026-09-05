@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../models/User.js";
+import Day from "../models/Day.js";
 import { sendMail } from "../utils/mailer.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -283,6 +284,52 @@ export async function resetPassword(req, res, next) {
 
     clearRefreshCookie(res);
     res.json({ message: "Password has been reset. Please log in." });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function changePassword(req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword)
+      return res.status(400).json({ error: "Current and new password are required" });
+    if (newPassword.length < 8)
+      return res.status(400).json({ error: "New password must be at least 8 characters" });
+
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(401).json({ error: "Invalid or expired token" });
+
+    const match = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!match) return res.status(400).json({ error: "Current password is incorrect" });
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    // The schema only tracks one refresh token per user, so issuing a new
+    // one here (like a fresh login would) already replaces whatever
+    // session existed — no separate revoke step needed.
+    const token = await issueSession(user, res);
+    res.json(sessionResponse(user, token));
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteAccount(req, res, next) {
+  try {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ error: "Password is required" });
+
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(401).json({ error: "Invalid or expired token" });
+
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) return res.status(400).json({ error: "Incorrect password" });
+
+    await Day.deleteMany({ user: user._id });
+    await User.deleteOne({ _id: user._id });
+
+    clearRefreshCookie(res);
+    res.status(204).end();
   } catch (err) {
     next(err);
   }

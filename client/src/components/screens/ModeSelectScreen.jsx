@@ -47,6 +47,9 @@ export default function ModeSelectScreen({ onPick }) {
             <button className="backLink" onClick={() => onPick("days")}>
               My Days
             </button>
+            <button className="backLink" onClick={() => onPick("settings")}>
+              Settings
+            </button>
             <button className="backLink" onClick={logout}>
               Log out
             </button>

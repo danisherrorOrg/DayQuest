@@ -151,5 +151,12 @@ day you just finished logging — just without a Save button, since it's
 already saved. "✕ delete" permanently removes a day (`DELETE
 /api/days/:date`) after a confirm step.
 
-See `TODO.md` for tracked gaps and planned feature work — account
-management, exporting a recap as an image, and more.
+## Account management
+
+A "Settings" link next to "My Days" opens a screen to change your password
+(`POST /auth/change-password`, requires the current password) or
+permanently delete your account and every saved day (`DELETE
+/auth/account`, also requires your password, behind a confirm step).
+
+See `TODO.md` for tracked gaps and planned feature work — exporting a
+recap as an image, stats across saved days, and more.

@@ -11,6 +11,7 @@ import VerifyEmailBanner from "./components/auth/VerifyEmailBanner.jsx";
 import OfflineBanner from "./components/OfflineBanner.jsx";
 import ModeSelectScreen from "./components/screens/ModeSelectScreen.jsx";
 import MyDaysScreen from "./components/screens/MyDaysScreen.jsx";
+import SettingsScreen from "./components/screens/SettingsScreen.jsx";
 import LogCardModeScreen from "./components/screens/LogCardModeScreen.jsx";
 import TimelineBuilderScreen from "./components/screens/TimelineBuilderScreen.jsx";
 import DialogueRecapScreen from "./components/screens/DialogueRecapScreen.jsx";
@@ -89,6 +90,7 @@ function GameApp() {
       {screen === "days" && (
         <MyDaysScreen onBack={() => setScreen("mode")} onSelectDay={handleReplayDay} />
       )}
+      {screen === "settings" && <SettingsScreen onBack={() => setScreen("mode")} />}
       {screen === "cards" && (
         <LogCardModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromLogCards} />
       )}

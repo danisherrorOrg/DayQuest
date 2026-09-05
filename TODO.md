@@ -138,9 +138,21 @@ index change, no new endpoint) and push the merge to the client, since
       confirming removes it from the list's local state on success without
       a full re-fetch.
 - [ ] **Export a finished recap as an image**, to share outside the app.
-- [ ] **Account management** — no change-password-while-logged-in and no
+- [x] ~~**Account management** — no change-password-while-logged-in and no
       delete-account/settings screen; only register/login/forgot-password/
-      reset-password/verify-email exist today (`auth.routes.js`).
+      reset-password/verify-email exist today (`auth.routes.js`).~~ Fixed:
+      new `POST /auth/change-password` and `DELETE /auth/account` (both
+      `requireAuth` + `authLimiter`, `auth.controller.js`/`auth.routes.js`),
+      a new `SettingsScreen` reachable via a "Settings" link next to
+      "My Days"/"Log out" on `ModeSelectScreen`. `changePassword` verifies
+      the current password with the same `bcrypt.compare` as `login`, then
+      calls the existing `issueSession` helper to rotate the (single, per
+      the schema) refresh token — same effect as `resetPassword`'s "revoke
+      everywhere" but without forcing a re-login, since the caller already
+      proved their identity. `deleteAccount` verifies the password, then
+      `Day.deleteMany({ user })` before `User.deleteOne` so no orphaned days
+      are left behind, and clears the session client-side so `RequireAuth`
+      redirects to `/login` on its own.
 - [ ] **Stats/trends across saved days** — each day gets a per-category
       summary, but nothing aggregates across days (e.g. "this week you
       spent most time on Work").

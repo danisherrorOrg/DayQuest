@@ -35,3 +35,14 @@ export function forgotPasswordRequest(email) {
 export function resetPasswordRequest(token, password) {
   return apiRequest("/auth/reset-password", { method: "POST", body: { token, password } });
 }
+
+export function changePasswordRequest(currentPassword, newPassword) {
+  return apiRequest("/auth/change-password", {
+    method: "POST",
+    body: { currentPassword, newPassword },
+  });
+}
+
+export function deleteAccountRequest(password) {
+  return apiRequest("/auth/account", { method: "DELETE", body: { password } });
+}
