@@ -3,6 +3,13 @@
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
+html {
+  /* The app is a single, deliberately-themed design (cream panels on a
+     dark purple ground) rather than a light/dark pair — this just stops
+     browsers from fighting that with an auto-dark-themed scrollbar,
+     autofill dropdown, or date/time picker when the OS is in dark mode. */
+  color-scheme: light;
+}
 html,
 body,
 #root {

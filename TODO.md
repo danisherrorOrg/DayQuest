@@ -184,9 +184,35 @@ two halves don't feel like the same product yet.
       Prettier, `npm run build -w client`, `npm test` (111 passing), and a
       live look in Chrome, including confirming nav links still work from
       the new header.
-- [ ] **Mobile responsiveness and dark-mode support are unverified** — this
-      pass was desktop-width, one theme only; worth a real check on a
-      narrow viewport and under `prefers-color-scheme: dark`.
+- [x] ~~**Mobile responsiveness and dark-mode support are unverified**~~
+      Partially resolved (2026-09-09):
+      - **Dark mode**: this is a single, deliberately-themed design (cream
+        panels on a dark purple ground), not a light/dark pair, and
+        building a real second theme is a much bigger, separate product
+        call than this checkbox implied. What *was* a real gap: no
+        `color-scheme` was declared, so a browser in OS dark mode could
+        auto-dark-theme native chrome (scrollbars, autofill dropdowns,
+        date/time pickers) against this light-only design. Added
+        `color-scheme: light` on `html` in `index.css` to fix that
+        specific mismatch.
+      - **Mobile responsiveness**: reviewed the CSS rather than confirming
+        on an actual narrow viewport (see caveat below). The foundation
+        looks sound: `index.html` has a correct `viewport` meta tag,
+        `#app`/`.screen` are `width:100%; max-width:480px` (fills narrow
+        viewports, centers a phone-width column on wider ones), there's
+        already a `@media (max-width: 340px)` breakpoint tightening panel
+        padding/heading size/control sizes for very narrow phones, and the
+        one place with a fixed-pixel-width absolutely-positioned element
+        (`.chronoPopup`, 200px/180px, in `ChronoBarScreen`) already clamps
+        its position in JS (`clamp(x, 104, barSize - 104)`, `barSize`
+        measured live from the DOM) rather than assuming a fixed
+        container width. **Caveat**: this is a static read of the CSS/JS,
+        not a rendered check — the sandboxed Chrome session's
+        `resize_window` calls didn't change the tab's actual viewport
+        (`window.innerWidth` stayed at the full display width, ~1414px,
+        after requesting 375×700 and 390×750), so no narrow-viewport
+        screenshot was possible this pass. Worth a real check in a phone
+        or a browser's device toolbar before fully trusting this.
 
 ---
 
