@@ -23,8 +23,8 @@ npm run dev                       # server :4000 + client :5173 together
 `./run.sh` wraps `npm run dev`, installs deps on first run, and self-heals
 once (clean reinstall) if the dev servers crash on startup — this project has
 occasionally hit npm's optional-dependency bug that drops the platform
-rollup binary. `./run.sh lint`, `lint:fix`, `format`, `format:check` forward
-to the root scripts of the same name.
+rollup binary. `./run.sh lint`, `lint:fix`, `format`, `format:check`, `test`,
+`test:watch` forward to the root scripts of the same name.
 
 ## MongoDB is not reachable from inside a Claude Code sandbox
 

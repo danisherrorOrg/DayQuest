@@ -45,9 +45,9 @@ instead of actually sending mail. Set `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` /
 blocked by any of this — an unverified email is tracked but not enforced.
 
 `run.sh` is a convenience wrapper around the same `npm run dev` that also
-installs dependencies on first run. It also forwards to the lint/format
+installs dependencies on first run. It also forwards to the lint/format/test
 scripts below: `./run.sh lint`, `./run.sh lint:fix`, `./run.sh format`,
-`./run.sh format:check`.
+`./run.sh format:check`, `./run.sh test`, `./run.sh test:watch`.
 
 ### Linting & formatting
 
