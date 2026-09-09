@@ -53,6 +53,11 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
     return aggregateDays(scoped);
   }, [days, statsRange]);
 
+  const dayCategories = useMemo(() => {
+    if (!days) return null;
+    return new Map(days.map((day) => [day._id || day.date, dominantCategory(day)]));
+  }, [days]);
+
   function askDelete(day) {
     setDeleteError(null);
     setPendingDelete(day);
@@ -130,7 +135,7 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
           {days && days.length > 0 && (
             <div className="dayTimeline">
               {days.map((day, i) => {
-                const category = dominantCategory(day);
+                const category = dayCategories.get(day._id || day.date);
                 return (
                   <div className="dayRow" key={day._id || day.date}>
                     <div className="dayRowRail">

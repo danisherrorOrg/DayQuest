@@ -20,6 +20,43 @@ function emptyForm() {
   };
 }
 
+function DurationSegment({
+  value,
+  unit,
+  step,
+  onStep,
+  disableDecrease,
+  disableIncrease,
+  unitLabel,
+}) {
+  return (
+    <div className="durationSegment">
+      <button
+        type="button"
+        className="stepperBtn"
+        disabled={disableDecrease}
+        onClick={() => onStep(-step)}
+        aria-label={`Decrease ${unitLabel}`}
+      >
+        −
+      </button>
+      <span className="stepperValue">
+        {value}
+        {unit}
+      </span>
+      <button
+        type="button"
+        className="stepperBtn"
+        disabled={disableIncrease}
+        onClick={() => onStep(step)}
+        aria-label={`Increase ${unitLabel}`}
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
 export default function LogCardModeScreen({ onBack, onBuild }) {
   const [cards, setCards] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -215,48 +252,24 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
             <label className="fieldLabel">
               Duration
               <div className="durationStepper">
-                <div className="durationSegment">
-                  <button
-                    type="button"
-                    className="stepperBtn"
-                    disabled={durationMins <= 0}
-                    onClick={() => stepDuration(-HOUR_STEP)}
-                    aria-label="Decrease hours"
-                  >
-                    −
-                  </button>
-                  <span className="stepperValue">{Math.floor(durationMins / 60)}h</span>
-                  <button
-                    type="button"
-                    className="stepperBtn"
-                    disabled={durationMins >= DAY_MINUTES}
-                    onClick={() => stepDuration(HOUR_STEP)}
-                    aria-label="Increase hours"
-                  >
-                    +
-                  </button>
-                </div>
-                <div className="durationSegment">
-                  <button
-                    type="button"
-                    className="stepperBtn"
-                    disabled={durationMins <= 0}
-                    onClick={() => stepDuration(-MINUTE_STEP)}
-                    aria-label="Decrease minutes"
-                  >
-                    −
-                  </button>
-                  <span className="stepperValue">{durationMins % 60}m</span>
-                  <button
-                    type="button"
-                    className="stepperBtn"
-                    disabled={durationMins >= DAY_MINUTES}
-                    onClick={() => stepDuration(MINUTE_STEP)}
-                    aria-label="Increase minutes"
-                  >
-                    +
-                  </button>
-                </div>
+                <DurationSegment
+                  value={Math.floor(durationMins / 60)}
+                  unit="h"
+                  unitLabel="hours"
+                  step={HOUR_STEP}
+                  onStep={stepDuration}
+                  disableDecrease={durationMins <= 0}
+                  disableIncrease={durationMins >= DAY_MINUTES}
+                />
+                <DurationSegment
+                  value={durationMins % 60}
+                  unit="m"
+                  unitLabel="minutes"
+                  step={MINUTE_STEP}
+                  onStep={stepDuration}
+                  disableDecrease={durationMins <= 0}
+                  disableIncrease={durationMins >= DAY_MINUTES}
+                />
               </div>
             </label>
             <label className="fieldLabel" style={{ flex: 1 }}>

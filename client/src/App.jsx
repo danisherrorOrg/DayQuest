@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { ToastProvider } from "./context/ToastContext.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
+import RequireRun from "./components/RequireRun.jsx";
 import LoginForm from "./components/auth/LoginForm.jsx";
 import RegisterForm from "./components/auth/RegisterForm.jsx";
 import ForgotPasswordForm from "./components/auth/ForgotPasswordForm.jsx";
@@ -71,18 +72,23 @@ function GameApp() {
     navigate("/days");
   }
 
+  function reviewPath(view) {
+    return view === "chrono" ? "/recap/chrono" : "/recap";
+  }
+
   // The chrono bar's "tap empty space" shortcut: only offered in builder
   // mode, since timeline blocks are the only entry-mode data shape that can
   // be carried back into the builder and re-edited without losing anything.
   function handleJumpToBuilder(minutes) {
-    setTimelineJump({ anchorMinutes: minutes });
+    setTimelineJump({ anchorMinutes: minutes, fromView: "chrono" });
     navigate("/timeline");
   }
 
   function handleTimelineBack() {
     if (timelineJump) {
+      const fromView = timelineJump.fromView;
       setTimelineJump(null);
-      navigate("/recap");
+      navigate(reviewPath(fromView));
     } else {
       navigate("/");
     }
@@ -94,7 +100,7 @@ function GameApp() {
   }
 
   function handleChangeReviewView(view) {
-    navigate(view === "chrono" ? "/recap/chrono" : "/recap");
+    navigate(reviewPath(view));
   }
 
   return (
@@ -131,42 +137,38 @@ function GameApp() {
         <Route
           path="recap"
           element={
-            run ? (
+            <RequireRun run={run}>
               <DialogueRecapScreen
-                mode={run.mode}
-                cards={run.cards}
-                blocks={run.blocks}
-                date={run.date}
-                onRestart={run.replay ? handleExitReplay : handleRestart}
-                replay={run.replay}
+                mode={run?.mode}
+                cards={run?.cards}
+                blocks={run?.blocks}
+                date={run?.date}
+                onRestart={run?.replay ? handleExitReplay : handleRestart}
+                replay={run?.replay}
                 reviewView="dialogue"
                 onChangeReviewView={handleChangeReviewView}
               />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </RequireRun>
           }
         />
         <Route
           path="recap/chrono"
           element={
-            run ? (
+            <RequireRun run={run}>
               <ChronoBarScreen
-                mode={run.mode}
-                cards={run.cards}
-                blocks={run.blocks}
-                date={run.date}
-                onRestart={run.replay ? handleExitReplay : handleRestart}
-                replay={run.replay}
+                mode={run?.mode}
+                cards={run?.cards}
+                blocks={run?.blocks}
+                date={run?.date}
+                onRestart={run?.replay ? handleExitReplay : handleRestart}
+                replay={run?.replay}
                 reviewView="chrono"
                 onChangeReviewView={handleChangeReviewView}
                 onJumpToBuilder={
-                  !run.replay && run.mode === "builder" ? handleJumpToBuilder : undefined
+                  run && !run.replay && run.mode === "builder" ? handleJumpToBuilder : undefined
                 }
               />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </RequireRun>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

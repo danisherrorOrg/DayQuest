@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 const ToastContext = createContext(null);
 let nextToastId = 0;
@@ -8,13 +8,24 @@ let nextToastId = 0;
 // settings toggle) without each screen owning its own banner state.
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
+  const timeoutIdsRef = useRef(new Map());
+
+  useEffect(() => {
+    const timeoutIds = timeoutIdsRef.current;
+    return () => {
+      timeoutIds.forEach((id) => clearTimeout(id));
+      timeoutIds.clear();
+    };
+  }, []);
 
   const showToast = useCallback((message, tone = "success") => {
     const id = ++nextToastId;
     setToasts((prev) => [...prev, { id, message, tone }]);
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
+      timeoutIdsRef.current.delete(id);
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 2600);
+    timeoutIdsRef.current.set(id, timeoutId);
   }, []);
 
   return (
