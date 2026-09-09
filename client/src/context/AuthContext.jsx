@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { getToken, setToken as persistToken } from "../api/http.js";
 import {
   registerRequest,
@@ -37,7 +37,16 @@ export function AuthProvider({ children }) {
 
   // Silently exchange the httpOnly refresh cookie (if any) for a fresh access token on load,
   // so a page reload doesn't require re-login just because the short-lived token expired.
+  // The refresh endpoint rotates the cookie's token on every call, so two concurrent calls
+  // sharing the same stale cookie race: whichever the server sees second finds its token
+  // already rotated away and 401s, logging the user right back out. React 18 StrictMode's
+  // dev-only double-invoke of this effect made that race easy to hit on an ordinary reload —
+  // the requestedRef guard (same one-shot-effect idiom as VerifyEmailScreen/LogCardModeScreen)
+  // ensures only one refresh call actually goes out per mount.
+  const requestedRef = useRef(false);
   useEffect(() => {
+    if (requestedRef.current) return;
+    requestedRef.current = true;
     refreshRequest().then(applySession).catch(clearSession);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

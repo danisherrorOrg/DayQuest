@@ -29,20 +29,36 @@ individual fixes. What's left is tracked below.
       on `/` with just internal state changing. A *full page reload* on
       those routes wasn't confirmed live end-to-end — see the new
       session-refresh item below, found during this same pass.
-- [ ] **A full page reload while logged in logs the user out**, landing on
-      `/login` instead of back on whatever screen they were on. Found
-      2026-09-09 while live-verifying the routing fix above: reloading
-      `/days` (or any in-app route) fires `AuthContext`'s startup
-      `POST /api/auth/refresh` (meant to silently trade the httpOnly
-      refresh cookie for a new access token — see the comment above that
-      call in `AuthContext.jsx`), which came back `401`, so `clearSession()`
-      ran and `RequireAuth` redirected to `/login`. Not caused by or fixed
-      by the routing change above — `RequireAuth.jsx`/`AuthContext.jsx`
-      weren't touched — and unconfirmed whether it's a real bug (e.g. the
-      refresh cookie's `SameSite`/`secure` flags not surviving a top-level
-      navigation the way an XHR does) or an artifact specific to the
-      Chrome-automation profile used for that pass. Worth reproducing in a
-      normal browser tab before treating it as a real bug.
+- [x] ~~**A full page reload while logged in logs the user out**~~, landing
+      on `/login` instead of back on whatever screen they were on. Found
+      2026-09-09 while live-verifying the routing fix above. Root-caused
+      and fixed the same day: `refresh()` in `auth.controller.js` *rotates*
+      the httpOnly refresh cookie's token on every call (issues a new one,
+      overwrites `refreshTokenHash` in the DB). `AuthContext.jsx`'s startup
+      effect called `refreshRequest()` directly — bypassing the existing
+      `refreshAccessToken()` de-dup singleton in `http.js`, which only
+      guards the 401-retry-on-request path, not this call. React 18
+      StrictMode's dev-only double-invoke of that effect (see
+      `main.jsx`'s `<StrictMode>`) fired two real, undeduplicated
+      `POST /api/auth/refresh` requests with the same stale cookie; the
+      first rotated the token server-side, so the second's lookup by the
+      now-stale hash 401'd, and `clearSession()` logged the user out —
+      exactly the "artifact of the Chrome-automation profile" this note
+      was unsure about turned out to be a real race condition, just one
+      StrictMode makes easy to trigger. Fixed with a `requestedRef` guard
+      in `AuthContext.jsx` (same one-shot-effect idiom already used in
+      `VerifyEmailScreen`/`LogCardModeScreen`) so only one refresh call
+      goes out per mount, regardless of how many times the effect runs.
+      Left the server-side rotation itself as-is — a legitimate multi-tab
+      race (two tabs refreshing around the same instant, sharing the same
+      cookie) is still theoretically possible and would need a grace-
+      period or similar on the server to close fully, but that's a bigger,
+      separate hardening call the reload-logs-you-out symptom didn't
+      require. Verified with lint, Prettier, `npm run build -w client`,
+      `npm test` (111 passing), and a live Chrome walkthrough: registered
+      a throwaway account, reloaded `/` and `/days` directly, and stayed
+      logged in on the right screen both times (previously reproduced the
+      401/logout on both).
 
 ## UI/UX polish
 
