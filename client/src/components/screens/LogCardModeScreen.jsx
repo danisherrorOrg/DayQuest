@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ACTIVITIES, formatDuration } from "../../game/activities.js";
 import { listDays } from "../../api/days.js";
 import { useTodayEntry } from "../../hooks/useTodayEntry.js";
+import EmptyState from "../EmptyState.jsx";
 
 const DAY_MINUTES = 1440;
 
@@ -170,9 +171,7 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
         )}
 
         <div id="logCardList" style={{ flex: 1, overflowY: "auto", marginBottom: 10 }}>
-          {cards.length === 0 && (
-            <div id="emptyMoments">No cards yet — add your first one below.</div>
-          )}
+          {cards.length === 0 && <EmptyState message="No cards yet — add your first one below." />}
           {cards.map((card) => {
             const act = ACTIVITIES.find((a) => a.key === card.categoryKey) || ACTIVITIES[0];
             return (

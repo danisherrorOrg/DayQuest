@@ -4,6 +4,7 @@ import { formatDisplayDate } from "../../game/date.js";
 import { BLACKBOX, formatDuration } from "../../game/activities.js";
 import { aggregateDays, withinLastNDays } from "../../game/dayStats.js";
 import { buildDayPages, buildDaySummary } from "../../game/dayRecap.js";
+import EmptyState from "../EmptyState.jsx";
 
 const MODE_BADGES = {
   cards: "📇 Log Cards",
@@ -124,7 +125,7 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
         <div style={{ flex: 1, overflowY: "auto" }}>
           {days === null && !error && <p className="sub">Loading…</p>}
           {days && days.length === 0 && (
-            <div id="emptyMoments">No saved days yet — log today to start one.</div>
+            <EmptyState message="No saved days yet — log today to start one." />
           )}
           {days && days.length > 0 && (
             <div className="dayTimeline">

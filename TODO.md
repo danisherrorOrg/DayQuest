@@ -142,11 +142,17 @@ two halves don't feel like the same product yet.
       visually identical to a neutral Cancel button before. Verified with
       lint, Prettier, `npm run build -w client`, `npm test` (111 passing),
       and a live look in Chrome.
-- [ ] **Empty states are just gray placeholder text** ("No cards yet — add
-      your first one below") — no illustration or personality in an app
-      whose whole premise is turning your day into something visually fun.
-      Worth a small illustration or the character sprite plus a short
-      prompt instead.
+- [x] ~~**Empty states are just gray placeholder text**~~ Fixed
+      (2026-09-09): new shared `EmptyState` component (`client/src/
+      components/EmptyState.jsx`) draws a small static canvas of the recap
+      screens' pixel character standing on a strip of ground — reusing
+      `drawGroundBand`/`drawPlayerSprite` from `game/sprites.js` rather
+      than new art — above the message text. Replaces the bare
+      `#emptyMoments` div in both `LogCardModeScreen` ("No cards yet…")
+      and `MyDaysScreen` ("No saved days yet…"), the only two places that
+      pattern was used. Verified with lint, Prettier, `npm run build -w
+      client`, `npm test` (111 passing), and a live look in Chrome on
+      both screens.
 - [ ] **Top nav reads as three stray links** ("My Days / Settings / Log
       out") — no icons, no active-state, no visual weight. Add icons and
       some visual grouping.
