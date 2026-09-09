@@ -153,9 +153,16 @@ two halves don't feel like the same product yet.
       pattern was used. Verified with lint, Prettier, `npm run build -w
       client`, `npm test` (111 passing), and a live look in Chrome on
       both screens.
-- [ ] **Top nav reads as three stray links** ("My Days / Settings / Log
-      out") — no icons, no active-state, no visual weight. Add icons and
-      some visual grouping.
+- [x] ~~**Top nav reads as three stray links**~~ Fixed (2026-09-09): the
+      three `ModeSelectScreen` topBar buttons are now a `.navGroup` pill
+      (tan pill background, rounded segments) with an icon per link
+      (🗓️ My Days, ⚙️ Settings, 🚪 Log out) and hover/active/press states,
+      instead of three bare text buttons in a row. Only `ModeSelectScreen`
+      changed — the separate `.backLink` "← Back" pattern used on other
+      screens (My Days, Settings, Log Cards, …) is a different, single-
+      link case and was left alone. Verified with lint, Prettier, `npm run
+      build -w client`, `npm test` (111 passing), and a live look in
+      Chrome, including confirming the links still navigate correctly.
 - [ ] **Extend the game's mood into the surrounding chrome** — the dark
       purple/warm-accent palette from the recap screens doesn't appear
       anywhere in mode-select, nav, or forms, which is the main reason the

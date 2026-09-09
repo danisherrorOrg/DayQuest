@@ -43,17 +43,17 @@ export default function ModeSelectScreen({ onPick }) {
       <div className="panel">
         <div className="topBar">
           <span className="topBarEmail">{email}</span>
-          <div style={{ display: "flex", gap: 12 }}>
-            <button className="backLink" onClick={() => onPick("days")}>
-              My Days
+          <nav className="navGroup">
+            <button className="navLink" onClick={() => onPick("days")}>
+              <span aria-hidden="true">🗓️</span> My Days
             </button>
-            <button className="backLink" onClick={() => onPick("settings")}>
-              Settings
+            <button className="navLink" onClick={() => onPick("settings")}>
+              <span aria-hidden="true">⚙️</span> Settings
             </button>
-            <button className="backLink" onClick={logout}>
-              Log out
+            <button className="navLink navLinkExit" onClick={logout}>
+              <span aria-hidden="true">🚪</span> Log out
             </button>
-          </div>
+          </nav>
         </div>
         <h1>Day Story: Run Your Day</h1>
         <p className="sub">
