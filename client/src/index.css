@@ -347,6 +347,46 @@ body,
 }
 
 /* ---- Mode select ---- */
+/* Same purple-gradient-header-over-floating-cream-panel shape as
+   .authScreen/.authPanel, so the home screen carries the game's dark
+   palette too instead of only appearing on the recap screens. */
+.modeHeader {
+  flex: none;
+  background: linear-gradient(160deg, #2b2140, #3a2a52 70%, #4a3266);
+  padding: max(16px, env(safe-area-inset-top) + 10px) 18px 16px;
+}
+.modeHeader .topBar {
+  margin-bottom: 0;
+}
+.modeHeader .topBarEmail {
+  color: #e8d2b0;
+}
+.modeHeader .navGroup {
+  background: rgba(255, 255, 255, 0.1);
+}
+.modeHeader .navLink {
+  color: #e8d2b0;
+}
+.modeHeader .navLink:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff8ec;
+}
+.modeHeader .navLink:active {
+  background: rgba(255, 255, 255, 0.24);
+}
+.modeHeader .navLinkExit {
+  color: #e0a98a;
+}
+.modeHeader .navLinkExit:hover {
+  color: #f0c4a8;
+}
+.modePanel {
+  border-radius: 20px 20px 0 0;
+  margin-top: -14px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.15);
+}
 .modeCard {
   border: 1.5px solid #e8d2b0;
   background: #fffefb;

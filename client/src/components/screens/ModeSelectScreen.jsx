@@ -40,7 +40,7 @@ export default function ModeSelectScreen({ onPick }) {
 
   return (
     <div className="screen active">
-      <div className="panel">
+      <div className="modeHeader">
         <div className="topBar">
           <span className="topBarEmail">{email}</span>
           <nav className="navGroup">
@@ -55,6 +55,8 @@ export default function ModeSelectScreen({ onPick }) {
             </button>
           </nav>
         </div>
+      </div>
+      <div className="panel modePanel">
         <h1>Day Story: Run Your Day</h1>
         <p className="sub">
           Choose how you want to log today. Either way, unlogged time just becomes a black box in

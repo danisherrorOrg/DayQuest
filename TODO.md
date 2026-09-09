@@ -163,10 +163,27 @@ two halves don't feel like the same product yet.
       link case and was left alone. Verified with lint, Prettier, `npm run
       build -w client`, `npm test` (111 passing), and a live look in
       Chrome, including confirming the links still navigate correctly.
-- [ ] **Extend the game's mood into the surrounding chrome** — the dark
-      purple/warm-accent palette from the recap screens doesn't appear
-      anywhere in mode-select, nav, or forms, which is the main reason the
-      app currently feels like two products stitched together.
+- [x] ~~**Extend the game's mood into the surrounding chrome**~~ Partially
+      fixed (2026-09-09): `ModeSelectScreen` — the actual home screen a
+      user lands on after login — now opens with the same purple-gradient
+      `.modeHeader` + floating rounded cream `.modePanel` shape as
+      `AuthLayout` (new `.modeHeader`/`.modePanel` rules in `index.css`,
+      reusing the exact gradient/overlap values), with dark-background
+      nav-pill color overrides so `My Days`/`Settings`/`Log out` stay
+      legible. Combined with the auth screens (item above) and the
+      category-color accents already added to My Days (colored dots) and
+      Settings (danger-section tint), the purple/warm-accent language now
+      shows up before, at, and around every top-level screen except the
+      three entry/edit forms themselves (Log Cards, Timeline Builder,
+      Settings' input fields), which were deliberately left as plain
+      cream — recoloring dense data-entry forms is a bigger, separate call
+      the TODO's wording didn't clearly ask for, and risks hurting
+      legibility for editable fields. Left `~~struck~~` rather than a
+      fresh open item since re-scoping "extend into forms too" belongs in
+      product discussion, not a leftover checkbox. Verified with lint,
+      Prettier, `npm run build -w client`, `npm test` (111 passing), and a
+      live look in Chrome, including confirming nav links still work from
+      the new header.
 - [ ] **Mobile responsiveness and dark-mode support are unverified** — this
       pass was desktop-width, one theme only; worth a real check on a
       narrow viewport and under `prefers-color-scheme: dark`.
