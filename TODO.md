@@ -117,10 +117,20 @@ two halves don't feel like the same product yet.
       (111 passing — no test file covered this component before), and a
       live walkthrough in Chrome: stepped to 2h 15m, added a card, and
       confirmed "edit" repopulates the stepper from the saved duration.
-- [ ] **"My Days" has no visual identity** — just bordered rows of
-      date/badge/sentence/two text-link buttons, reads like a database
-      table. Give it more of a timeline feel — a colored strip or icon per
-      category, some sense of looking back through days, not rows.
+- [x] ~~**"My Days" has no visual identity**~~ Fixed (2026-09-09): each row
+      now sits in a vertical rail alongside the list — a colored dot
+      showing the day's dominant category's emoji, connected to the next
+      row by a line, evoking a timeline you're scrolling back through. The
+      card itself gets a matching colored left border (same pattern
+      `LogCardModeScreen` already used per-card). "Dominant category" reuses
+      `buildDayPages`/`buildDaySummary` from `game/dayRecap.js` — the exact
+      same breakdown math the recap screens use — so a day's color here
+      always matches what it looks like once opened; legacy/empty days fall
+      back to `BLACKBOX`'s neutral color/❔. Verified with lint, Prettier,
+      `npm run build -w client`, `npm test` (111 passing — no test file
+      covered this component before), and a live look in Chrome: saved a
+      "Work" day and confirmed the dot/border render in that category's
+      blue-gray.
 - [ ] **Settings screen is the plainest screen in the app** — bare stacked
       labeled inputs, no visual hierarchy beyond section headings. Needs
       the same design pass as the rest once the native-control fix above

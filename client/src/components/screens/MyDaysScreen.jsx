@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { listDays, deleteDay } from "../../api/days.js";
 import { formatDisplayDate } from "../../game/date.js";
-import { formatDuration } from "../../game/activities.js";
+import { BLACKBOX, formatDuration } from "../../game/activities.js";
 import { aggregateDays, withinLastNDays } from "../../game/dayStats.js";
+import { buildDayPages, buildDaySummary } from "../../game/dayRecap.js";
 
 const MODE_BADGES = {
   cards: "📇 Log Cards",
@@ -12,6 +13,15 @@ const MODE_BADGES = {
 // "sequence"/"timed"/"legacy" days have no entry screen left to reopen them.
 function modeBadge(mode) {
   return MODE_BADGES[mode] || "❔ Legacy entry";
+}
+
+// The category the day was mostly spent on, for the timeline rail's dot and
+// the card's accent border — same breakdown math the recap screens use, so
+// a day's dominant color here always matches what it looks like once open.
+function dominantCategory(day) {
+  const pages = buildDayPages(day.mode, { cards: day.logCards, blocks: day.timelineBlocks });
+  const { breakdown } = buildDaySummary(pages);
+  return breakdown[0]?.category || BLACKBOX;
 }
 
 export default function MyDaysScreen({ onBack, onSelectDay }) {
@@ -116,20 +126,38 @@ export default function MyDaysScreen({ onBack, onSelectDay }) {
           {days && days.length === 0 && (
             <div id="emptyMoments">No saved days yet — log today to start one.</div>
           )}
-          {days &&
-            days.map((day) => (
-              <div className="logCard" key={day._id || day.date}>
-                <div className="logCardHead">
-                  <span className="logCardTitle">{formatDisplayDate(day.date)}</span>
-                  <span className="logCardDuration">{modeBadge(day.mode)}</span>
-                </div>
-                {day.summary && <div className="logCardLog">{day.summary}</div>}
-                <div className="momentActions">
-                  <button onClick={() => onSelectDay(day)}>▶ view recap</button>
-                  <button onClick={() => askDelete(day)}>✕ delete</button>
-                </div>
-              </div>
-            ))}
+          {days && days.length > 0 && (
+            <div className="dayTimeline">
+              {days.map((day, i) => {
+                const category = dominantCategory(day);
+                return (
+                  <div className="dayRow" key={day._id || day.date}>
+                    <div className="dayRowRail">
+                      <span
+                        className="dayRowDot"
+                        style={{ background: category.color }}
+                        aria-hidden="true"
+                      >
+                        {category.emoji}
+                      </span>
+                      {i < days.length - 1 && <span className="dayRowLine" />}
+                    </div>
+                    <div className="logCard dayRowCard" style={{ borderLeftColor: category.color }}>
+                      <div className="logCardHead">
+                        <span className="logCardTitle">{formatDisplayDate(day.date)}</span>
+                        <span className="logCardDuration">{modeBadge(day.mode)}</span>
+                      </div>
+                      {day.summary && <div className="logCardLog">{day.summary}</div>}
+                      <div className="momentActions">
+                        <button onClick={() => onSelectDay(day)}>▶ view recap</button>
+                        <button onClick={() => askDelete(day)}>✕ delete</button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
