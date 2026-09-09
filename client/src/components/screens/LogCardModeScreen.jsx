@@ -5,11 +5,13 @@ import { useTodayEntry } from "../../hooks/useTodayEntry.js";
 
 const DAY_MINUTES = 1440;
 
+const HOUR_STEP = 60;
+const MINUTE_STEP = 5;
+
 function emptyForm() {
   return {
     id: null,
-    hours: "",
-    minutes: "",
+    durationMins: 0,
     title: "",
     log: "",
     categoryKey: ACTIVITIES[0].key,
@@ -62,8 +64,15 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
       .catch(() => {});
   }, []);
 
-  const durationMins = (Number(form.hours) || 0) * 60 + (Number(form.minutes) || 0);
+  const durationMins = form.durationMins;
   const isEditing = form.id !== null;
+
+  function stepDuration(delta) {
+    setForm((f) => ({
+      ...f,
+      durationMins: Math.max(0, Math.min(DAY_MINUTES, f.durationMins + delta)),
+    }));
+  }
 
   const totalLoggedMins = useMemo(() => cards.reduce((sum, c) => sum + c.durationMins, 0), [cards]);
   const remainingMins = DAY_MINUTES - totalLoggedMins;
@@ -126,8 +135,7 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
   function editCard(card) {
     setForm({
       id: card.id,
-      hours: String(Math.floor(card.durationMins / 60) || ""),
-      minutes: String(card.durationMins % 60 || ""),
+      durationMins: card.durationMins,
       title: card.title,
       log: card.log,
       categoryKey: card.categoryKey,
@@ -207,25 +215,49 @@ export default function LogCardModeScreen({ onBack, onBuild }) {
           <div className="durationRow">
             <label className="fieldLabel">
               Duration
-              <div className="durationInputs">
-                <input
-                  type="number"
-                  min="0"
-                  max="24"
-                  placeholder="0"
-                  value={form.hours}
-                  onChange={(e) => setForm((f) => ({ ...f, hours: e.target.value }))}
-                />
-                <span>h</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="59"
-                  placeholder="0"
-                  value={form.minutes}
-                  onChange={(e) => setForm((f) => ({ ...f, minutes: e.target.value }))}
-                />
-                <span>m</span>
+              <div className="durationStepper">
+                <div className="durationSegment">
+                  <button
+                    type="button"
+                    className="stepperBtn"
+                    disabled={durationMins <= 0}
+                    onClick={() => stepDuration(-HOUR_STEP)}
+                    aria-label="Decrease hours"
+                  >
+                    −
+                  </button>
+                  <span className="stepperValue">{Math.floor(durationMins / 60)}h</span>
+                  <button
+                    type="button"
+                    className="stepperBtn"
+                    disabled={durationMins >= DAY_MINUTES}
+                    onClick={() => stepDuration(HOUR_STEP)}
+                    aria-label="Increase hours"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="durationSegment">
+                  <button
+                    type="button"
+                    className="stepperBtn"
+                    disabled={durationMins <= 0}
+                    onClick={() => stepDuration(-MINUTE_STEP)}
+                    aria-label="Decrease minutes"
+                  >
+                    −
+                  </button>
+                  <span className="stepperValue">{durationMins % 60}m</span>
+                  <button
+                    type="button"
+                    className="stepperBtn"
+                    disabled={durationMins >= DAY_MINUTES}
+                    onClick={() => stepDuration(MINUTE_STEP)}
+                    aria-label="Increase minutes"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </label>
             <label className="fieldLabel" style={{ flex: 1 }}>

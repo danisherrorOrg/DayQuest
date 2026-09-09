@@ -419,22 +419,43 @@ body,
   color: #9a7a56;
   font-weight: 600;
 }
-.durationInputs {
+.durationStepper {
+  display: flex;
+  gap: 6px;
+}
+.durationSegment {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #3f2b1d;
-}
-.durationInputs input {
-  width: 44px;
-  padding: 8px 6px;
   border: 1.5px solid #e8d2b0;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fffefb;
-  color: #3f2b1d;
-  font-size: 13px;
+  overflow: hidden;
+}
+.stepperBtn {
+  border: none;
+  background: transparent;
+  color: #b0703f;
+  font-size: 16px;
+  font-weight: 700;
+  width: 28px;
+  height: 38px;
+  line-height: 1;
+  cursor: pointer;
+}
+.stepperBtn:disabled {
+  color: #e8d2b0;
+  cursor: default;
+}
+.stepperBtn:active:not(:disabled) {
+  background: #f3e4c8;
+}
+.stepperValue {
+  min-width: 30px;
   text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3f2b1d;
+  font-variant-numeric: tabular-nums;
 }
 #logCardForm input[type="text"],
 #logCardForm textarea,

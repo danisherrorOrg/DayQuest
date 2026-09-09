@@ -105,9 +105,18 @@ two halves don't feel like the same product yet.
       client`, `npm test` (111 passing), and a live save-flow walkthrough
       in Chrome (toggle reminders → toast; log a day → save → "Day saved
       ✓" toast alongside the button's own "Saved ✓").
-- [ ] **Duration input is two bare number boxes** (`0 h` / `0 m` in
-      `LogCardModeScreen`) — no steppers, easy to mistype. Redesign as one
-      compact control (segmented stepper or slider).
+- [x] ~~**Duration input is two bare number boxes**~~ Fixed (2026-09-09):
+      replaced the free-typed `0 h` / `0 m` number inputs in
+      `LogCardModeScreen` with a segmented stepper — an hour segment
+      (±60 min per tap) and a minute segment (±5 min per tap), each a
+      `−`/value/`+` trio, both clamped to the 0–24h range. Typing is gone
+      entirely (that was the point — no more mistyping), which let the
+      form state collapse from separate `hours`/`minutes` strings to one
+      `durationMins` number, simplifying `editCard`/`saveCard` too.
+      Verified with lint, Prettier, `npm run build -w client`, `npm test`
+      (111 passing — no test file covered this component before), and a
+      live walkthrough in Chrome: stepped to 2h 15m, added a card, and
+      confirmed "edit" repopulates the stepper from the saved duration.
 - [ ] **"My Days" has no visual identity** — just bordered rows of
       date/badge/sentence/two text-link buttons, reads like a database
       table. Give it more of a timeline feel — a colored strip or icon per
