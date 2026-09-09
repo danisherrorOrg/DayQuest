@@ -112,6 +112,21 @@ body,
   font-size: 14px;
   cursor: pointer;
 }
+.dangerBtn {
+  border: 1.5px solid #c1502e;
+  background: transparent;
+  color: #c1502e;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dangerBtn:disabled {
+  border-color: #e8d2b0;
+  color: #c8ab8a;
+  cursor: default;
+}
 .backRow {
   display: flex;
   justify-content: space-between;
@@ -312,6 +327,31 @@ body,
   font-size: 13px;
   color: #7a5a42;
   line-height: 1.4;
+}
+
+/* ---- Settings ---- */
+.settingsSection {
+  border: 1.5px solid #e8d2b0;
+  background: #fffefb;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.settingsSection h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-family: Georgia, serif;
+  color: #3f2b1d;
+}
+.settingsSectionDanger {
+  border-color: #e3b199;
+  background: #fff9f5;
+}
+.settingsSectionDanger h3 {
+  color: #a5432a;
 }
 
 /* ---- Text mode ---- */

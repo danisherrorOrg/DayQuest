@@ -131,10 +131,17 @@ two halves don't feel like the same product yet.
       covered this component before), and a live look in Chrome: saved a
       "Work" day and confirmed the dot/border render in that category's
       blue-gray.
-- [ ] **Settings screen is the plainest screen in the app** — bare stacked
-      labeled inputs, no visual hierarchy beyond section headings. Needs
-      the same design pass as the rest once the native-control fix above
-      lands.
+- [x] ~~**Settings screen is the plainest screen in the app**~~ Fixed
+      (2026-09-09): each of the three sections (Change Password, Reminders,
+      Delete Account) is now its own bordered `.settingsSection` card
+      (same visual language as `.modeCard` on mode-select) with an emoji +
+      serif heading, instead of bare stacked inputs under plain `<h3>`s.
+      Delete Account also gets a `.settingsSectionDanger` tint (warm-red
+      border/heading) and its button switched from `.ghostBtn` to a new
+      `.dangerBtn` (red outline) — it's a destructive action and was
+      visually identical to a neutral Cancel button before. Verified with
+      lint, Prettier, `npm run build -w client`, `npm test` (111 passing),
+      and a live look in Chrome.
 - [ ] **Empty states are just gray placeholder text** ("No cards yet — add
       your first one below") — no illustration or personality in an app
       whose whole premise is turning your day into something visually fun.

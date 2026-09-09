@@ -82,98 +82,104 @@ export default function SettingsScreen({ onBack }) {
         <h1 style={{ marginBottom: 2 }}>Account Settings</h1>
 
         <div style={{ flex: 1, overflowY: "auto" }}>
-          <h3>Change Password</h3>
-          <form onSubmit={handleChangePassword}>
+          <section className="settingsSection">
+            <h3>🔒 Change Password</h3>
+            <form onSubmit={handleChangePassword}>
+              <input
+                className="authInput"
+                type="password"
+                placeholder="Current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <input
+                className="authInput"
+                type="password"
+                placeholder="New password (min 8 characters)"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+              <input
+                className="authInput"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+              {pwError && <p className="authError">{pwError}</p>}
+              {pwSuccess && <p className="authSuccess">{pwSuccess}</p>}
+              <button
+                className="primaryBtn"
+                type="submit"
+                disabled={pwSubmitting}
+                style={{ width: "100%" }}
+              >
+                {pwSubmitting ? "Changing…" : "Change Password"}
+              </button>
+            </form>
+          </section>
+
+          <section className="settingsSection">
+            <h3>🔔 Reminders</h3>
+            <p className="sub">A daily email if you haven&apos;t logged today yet.</p>
+            {reminderError && <p className="authError">{reminderError}</p>}
+            <label className="checkboxRow">
+              <input
+                type="checkbox"
+                className="checkboxInput"
+                checked={remindersEnabled}
+                disabled={reminderSaving}
+                onChange={handleToggleReminders}
+              />
+              <span className="checkboxBox" aria-hidden="true">
+                <svg viewBox="0 0 12 10" fill="none">
+                  <path
+                    d="M1 5L4.5 8.5L11 1.5"
+                    stroke="#fff8ec"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <span className="sub" style={{ margin: 0 }}>
+                {remindersEnabled ? "Reminder emails are on" : "Reminder emails are off"}
+              </span>
+            </label>
+          </section>
+
+          <section className="settingsSection settingsSectionDanger">
+            <h3>⚠️ Delete Account</h3>
+            <p className="sub">Permanently deletes your account and every day you&apos;ve saved.</p>
             <input
               className="authInput"
               type="password"
-              placeholder="Current password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
+              placeholder="Confirm your password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
               autoComplete="current-password"
             />
-            <input
-              className="authInput"
-              type="password"
-              placeholder="New password (min 8 characters)"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-            <input
-              className="authInput"
-              type="password"
-              placeholder="Confirm new password"
-              value={confirmNewPassword}
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-            {pwError && <p className="authError">{pwError}</p>}
-            {pwSuccess && <p className="authSuccess">{pwSuccess}</p>}
+            {deleteError && <p className="authError">{deleteError}</p>}
             <button
-              className="primaryBtn"
-              type="submit"
-              disabled={pwSubmitting}
+              className="dangerBtn"
               style={{ width: "100%" }}
+              disabled={!deletePassword}
+              onClick={() => {
+                setDeleteError(null);
+                setConfirmingDelete(true);
+              }}
             >
-              {pwSubmitting ? "Changing…" : "Change Password"}
+              Delete Account
             </button>
-          </form>
-
-          <h3 style={{ marginTop: 24 }}>Reminders</h3>
-          <p className="sub">A daily email if you haven&apos;t logged today yet.</p>
-          {reminderError && <p className="authError">{reminderError}</p>}
-          <label className="checkboxRow">
-            <input
-              type="checkbox"
-              className="checkboxInput"
-              checked={remindersEnabled}
-              disabled={reminderSaving}
-              onChange={handleToggleReminders}
-            />
-            <span className="checkboxBox" aria-hidden="true">
-              <svg viewBox="0 0 12 10" fill="none">
-                <path
-                  d="M1 5L4.5 8.5L11 1.5"
-                  stroke="#fff8ec"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            <span className="sub" style={{ margin: 0 }}>
-              {remindersEnabled ? "Reminder emails are on" : "Reminder emails are off"}
-            </span>
-          </label>
-
-          <h3 style={{ marginTop: 24 }}>Delete Account</h3>
-          <p className="sub">Permanently deletes your account and every day you&apos;ve saved.</p>
-          <input
-            className="authInput"
-            type="password"
-            placeholder="Confirm your password"
-            value={deletePassword}
-            onChange={(e) => setDeletePassword(e.target.value)}
-            autoComplete="current-password"
-          />
-          {deleteError && <p className="authError">{deleteError}</p>}
-          <button
-            className="ghostBtn"
-            style={{ width: "100%" }}
-            disabled={!deletePassword}
-            onClick={() => {
-              setDeleteError(null);
-              setConfirmingDelete(true);
-            }}
-          >
-            Delete Account
-          </button>
+          </section>
         </div>
       </div>
 
