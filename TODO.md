@@ -26,13 +26,13 @@ individual fixes. What's left is tracked below.
       reachable) a live Chrome walkthrough against a throwaway registered
       account: clicking "My Days"/"Settings" now updates the URL to
       `/days`/`/settings` and renders the right screen, instead of staying
-      on `/` with just internal state changing. A *full page reload* on
+      on `/` with just internal state changing. A _full page reload_ on
       those routes wasn't confirmed live end-to-end — see the new
       session-refresh item below, found during this same pass.
 - [x] ~~**A full page reload while logged in logs the user out**~~, landing
       on `/login` instead of back on whatever screen they were on. Found
       2026-09-09 while live-verifying the routing fix above. Root-caused
-      and fixed the same day: `refresh()` in `auth.controller.js` *rotates*
+      and fixed the same day: `refresh()` in `auth.controller.js` _rotates_
       the httpOnly refresh cookie's token on every call (issues a new one,
       overwrites `refreshTokenHash` in the DB). `AuthContext.jsx`'s startup
       effect called `refreshRequest()` directly — bypassing the existing
@@ -70,7 +70,7 @@ two halves don't feel like the same product yet.
 
 - [x] ~~**Auth screens (Login/Register) have no branding**~~ Fixed
       (2026-09-09): added a shared `AuthLayout` (`client/src/components/
-      auth/AuthLayout.jsx`) — a "D" monogram mark, "Day Story" wordmark,
+auth/AuthLayout.jsx`) — a "D" monogram mark, "Day Story" wordmark,
       and a one-line tagline on the game's dark purple gradient
       (`.authScreen`/`.authBrand` in `index.css`), with the existing cream
       `.panel` floating below with rounded top corners so it reads as one
@@ -83,7 +83,7 @@ two halves don't feel like the same product yet.
       click "My Days"/"Settings" smoke test against a throwaway account
       (deleted after) that also re-confirmed the routing fix above:
       client-side nav to `/days` and `/settings` render those screens with
-      the URL updated to match, not mode-select. (A *full page reload* on
+      the URL updated to match, not mode-select. (A _full page reload_ on
       those routes hit a separate, pre-existing issue — see new item
       below — so that specific half of the routing fix wasn't confirmed
       live, only by code review.)
@@ -118,7 +118,7 @@ two halves don't feel like the same product yet.
       to their `renderScreen` helper, since `useDaySave` now calls
       `useToast()`, which throws outside a provider (matching `useAuth`'s
       existing behavior). Verified with lint, Prettier, `npm run build -w
-      client`, `npm test` (111 passing), and a live save-flow walkthrough
+client`, `npm test` (111 passing), and a live save-flow walkthrough
       in Chrome (toggle reminders → toast; log a day → save → "Day saved
       ✓" toast alongside the button's own "Saved ✓").
 - [x] ~~**Duration input is two bare number boxes**~~ Fixed (2026-09-09):
@@ -160,14 +160,14 @@ two halves don't feel like the same product yet.
       and a live look in Chrome.
 - [x] ~~**Empty states are just gray placeholder text**~~ Fixed
       (2026-09-09): new shared `EmptyState` component (`client/src/
-      components/EmptyState.jsx`) draws a small static canvas of the recap
+components/EmptyState.jsx`) draws a small static canvas of the recap
       screens' pixel character standing on a strip of ground — reusing
       `drawGroundBand`/`drawPlayerSprite` from `game/sprites.js` rather
       than new art — above the message text. Replaces the bare
       `#emptyMoments` div in both `LogCardModeScreen` ("No cards yet…")
       and `MyDaysScreen` ("No saved days yet…"), the only two places that
       pattern was used. Verified with lint, Prettier, `npm run build -w
-      client`, `npm test` (111 passing), and a live look in Chrome on
+client`, `npm test` (111 passing), and a live look in Chrome on
       both screens.
 - [x] ~~**Top nav reads as three stray links**~~ Fixed (2026-09-09): the
       three `ModeSelectScreen` topBar buttons are now a `.navGroup` pill
@@ -177,7 +177,7 @@ two halves don't feel like the same product yet.
       changed — the separate `.backLink` "← Back" pattern used on other
       screens (My Days, Settings, Log Cards, …) is a different, single-
       link case and was left alone. Verified with lint, Prettier, `npm run
-      build -w client`, `npm test` (111 passing), and a live look in
+build -w client`, `npm test` (111 passing), and a live look in
       Chrome, including confirming the links still navigate correctly.
 - [x] ~~**Extend the game's mood into the surrounding chrome**~~ Partially
       fixed (2026-09-09): `ModeSelectScreen` — the actual home screen a
@@ -201,34 +201,32 @@ two halves don't feel like the same product yet.
       live look in Chrome, including confirming nav links still work from
       the new header.
 - [x] ~~**Mobile responsiveness and dark-mode support are unverified**~~
-      Partially resolved (2026-09-09):
-      - **Dark mode**: this is a single, deliberately-themed design (cream
-        panels on a dark purple ground), not a light/dark pair, and
-        building a real second theme is a much bigger, separate product
-        call than this checkbox implied. What *was* a real gap: no
-        `color-scheme` was declared, so a browser in OS dark mode could
-        auto-dark-theme native chrome (scrollbars, autofill dropdowns,
-        date/time pickers) against this light-only design. Added
-        `color-scheme: light` on `html` in `index.css` to fix that
-        specific mismatch.
-      - **Mobile responsiveness**: reviewed the CSS rather than confirming
-        on an actual narrow viewport (see caveat below). The foundation
-        looks sound: `index.html` has a correct `viewport` meta tag,
-        `#app`/`.screen` are `width:100%; max-width:480px` (fills narrow
-        viewports, centers a phone-width column on wider ones), there's
-        already a `@media (max-width: 340px)` breakpoint tightening panel
-        padding/heading size/control sizes for very narrow phones, and the
-        one place with a fixed-pixel-width absolutely-positioned element
-        (`.chronoPopup`, 200px/180px, in `ChronoBarScreen`) already clamps
-        its position in JS (`clamp(x, 104, barSize - 104)`, `barSize`
-        measured live from the DOM) rather than assuming a fixed
-        container width. **Caveat**: this is a static read of the CSS/JS,
-        not a rendered check — the sandboxed Chrome session's
-        `resize_window` calls didn't change the tab's actual viewport
-        (`window.innerWidth` stayed at the full display width, ~1414px,
-        after requesting 375×700 and 390×750), so no narrow-viewport
-        screenshot was possible this pass. Worth a real check in a phone
-        or a browser's device toolbar before fully trusting this.
+      Partially resolved (2026-09-09). **Dark mode**: this is a single,
+      deliberately-themed design (cream panels on a dark purple ground),
+      not a light/dark pair, and building a real second theme is a much
+      bigger, separate product call than this checkbox implied. What
+      _was_ a real gap: no `color-scheme` was declared, so a browser in
+      OS dark mode could auto-dark-theme native chrome (scrollbars,
+      autofill dropdowns, date/time pickers) against this light-only
+      design. Added `color-scheme: light` on `html` in `index.css` to fix
+      that specific mismatch. **Mobile responsiveness**: reviewed the CSS
+      rather than confirming on an actual narrow viewport (see caveat
+      below). The foundation looks sound: `index.html` has a correct
+      `viewport` meta tag, `#app`/`.screen` are `width:100%;
+max-width:480px` (fills narrow viewports, centers a phone-width
+      column on wider ones), there's already a `@media (max-width: 340px)`
+      breakpoint tightening panel padding/heading size/control sizes for
+      very narrow phones, and the one place with a fixed-pixel-width
+      absolutely-positioned element (`.chronoPopup`, 200px/180px, in
+      `ChronoBarScreen`) already clamps its position in JS (`clamp(x, 104,
+barSize - 104)`, `barSize` measured live from the DOM) rather than
+      assuming a fixed container width. **Caveat**: this is a static read
+      of the CSS/JS, not a rendered check — the sandboxed Chrome session's
+      `resize_window` calls didn't change the tab's actual viewport
+      (`window.innerWidth` stayed at the full display width, ~1414px,
+      after requesting 375×700 and 390×750), so no narrow-viewport
+      screenshot was possible this pass. Worth a real check in a phone or
+      a browser's device toolbar before fully trusting this.
 
 ---
 
