@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import DialogueRecapScreen from "./DialogueRecapScreen.jsx";
+import { ToastProvider } from "../../context/ToastContext.jsx";
 
 vi.mock("../../api/days.js", () => ({
   saveDay: vi.fn(() => Promise.resolve({})),
@@ -21,14 +22,16 @@ const cards = [
 
 function renderScreen(props = {}) {
   return render(
-    <DialogueRecapScreen
-      mode="cards"
-      cards={cards}
-      blocks={[]}
-      date="2026-09-05"
-      onRestart={vi.fn()}
-      {...props}
-    />,
+    <ToastProvider>
+      <DialogueRecapScreen
+        mode="cards"
+        cards={cards}
+        blocks={[]}
+        date="2026-09-05"
+        onRestart={vi.fn()}
+        {...props}
+      />
+    </ToastProvider>,
   );
 }
 

@@ -84,15 +84,27 @@ two halves don't feel like the same product yet.
       — no markup changes needed for the selects, just CSS, since they
       already had matching border/radius/background from the existing
       `#logCardForm select` / `.builderPopupSheet select` rules. Verified
-      with lint, Prettier, `npm run build -w client`, and `npm test` (111
-      passing); **not** verified visually in a browser — the Chrome
-      extension was disconnected for this pass (unlike the previous two
-      items, which did get a live look) — worth a quick manual glance at
-      Settings and Log Cards before calling this fully done.
-- [ ] **No visible confirmation that "Save This Day" worked** — clicking it
-      gives no on-screen feedback (only visible via the network tab).
-      Add a toast/banner on save success (and ideally on Settings actions —
-      password change, reminder toggle) so actions feel acknowledged.
+      with lint, Prettier, `npm run build -w client`, `npm test` (111
+      passing), and — once the Chrome extension reconnected in a later
+      pass the same day — a live look: the checkbox renders as a filled
+      orange box with a cream checkmark when on, and the category select
+      shows a small chevron matching the theme instead of the OS arrow.
+- [x] ~~**No visible confirmation that "Save This Day" worked**~~ Fixed
+      (2026-09-09): added a shared bottom-center toast stack (`ToastContext`
+      / `useToast()`, mounted once via `<ToastProvider>` in `App.jsx`, CSS
+      in `index.css`). `useDaySave`'s `handleSave` now toasts "Day saved ✓"
+      on success and an error/offline toast on failure (the existing
+      in-button "Saved ✓" label swap on `DayCompleteOverlay`'s save button
+      stays too — the toast is the more-visible layer on top of it, not a
+      replacement). `SettingsScreen` toasts on password change and on each
+      reminder-email toggle. `DialogueRecapScreen.test.jsx` and
+      `ChronoBarScreen.test.jsx` needed a `<ToastProvider>` wrapper added
+      to their `renderScreen` helper, since `useDaySave` now calls
+      `useToast()`, which throws outside a provider (matching `useAuth`'s
+      existing behavior). Verified with lint, Prettier, `npm run build -w
+      client`, `npm test` (111 passing), and a live save-flow walkthrough
+      in Chrome (toggle reminders → toast; log a day → save → "Day saved
+      ✓" toast alongside the button's own "Saved ✓").
 - [ ] **Duration input is two bare number boxes** (`0 h` / `0 m` in
       `LogCardModeScreen`) — no steppers, easy to mistype. Redesign as one
       compact control (segmented stepper or slider).

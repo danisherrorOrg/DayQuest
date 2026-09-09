@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useToast } from "../../context/ToastContext.jsx";
 
 export default function SettingsScreen({ onBack }) {
   const { changePassword, deleteAccount, remindersEnabled, updateReminders } = useAuth();
+  const showToast = useToast();
 
   const [reminderSaving, setReminderSaving] = useState(false);
   const [reminderError, setReminderError] = useState(null);
@@ -31,6 +33,7 @@ export default function SettingsScreen({ onBack }) {
     try {
       await changePassword(currentPassword, newPassword);
       setPwSuccess("Password changed.");
+      showToast("Password changed ✓");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
@@ -44,8 +47,10 @@ export default function SettingsScreen({ onBack }) {
   async function handleToggleReminders() {
     setReminderError(null);
     setReminderSaving(true);
+    const next = !remindersEnabled;
     try {
-      await updateReminders(!remindersEnabled);
+      await updateReminders(next);
+      showToast(next ? "Reminder emails turned on" : "Reminder emails turned off");
     } catch (err) {
       setReminderError(err.message);
     } finally {

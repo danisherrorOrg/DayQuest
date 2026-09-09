@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { ToastProvider } from "./context/ToastContext.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import LoginForm from "./components/auth/LoginForm.jsx";
 import RegisterForm from "./components/auth/RegisterForm.jsx";
@@ -21,7 +22,12 @@ import { todayDateString } from "./game/date.js";
 
 // Maps a ModeSelectScreen pick ("cards" | "timeline" | "days" | "settings")
 // to the real path it now lives at.
-const MODE_PICK_PATH = { cards: "/log", timeline: "/timeline", days: "/days", settings: "/settings" };
+const MODE_PICK_PATH = {
+  cards: "/log",
+  timeline: "/timeline",
+  days: "/days",
+  settings: "/settings",
+};
 
 function GameApp() {
   const justSynced = usePendingSaveFlush();
@@ -107,7 +113,9 @@ function GameApp() {
         <Route path="settings" element={<SettingsScreen onBack={() => navigate("/")} />} />
         <Route
           path="log"
-          element={<LogCardModeScreen onBack={() => navigate("/")} onBuild={handleBuildFromLogCards} />}
+          element={
+            <LogCardModeScreen onBack={() => navigate("/")} onBuild={handleBuildFromLogCards} />
+          }
         />
         <Route
           path="timeline"
@@ -152,7 +160,9 @@ function GameApp() {
                 replay={run.replay}
                 reviewView="chrono"
                 onChangeReviewView={handleChangeReviewView}
-                onJumpToBuilder={!run.replay && run.mode === "builder" ? handleJumpToBuilder : undefined}
+                onJumpToBuilder={
+                  !run.replay && run.mode === "builder" ? handleJumpToBuilder : undefined
+                }
               />
             ) : (
               <Navigate to="/" replace />
@@ -167,23 +177,25 @@ function GameApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <OfflineBanner />
-      <Routes>
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
-        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
-        <Route path="/reset-password" element={<ResetPasswordForm />} />
-        <Route path="/verify-email" element={<VerifyEmailScreen />} />
-        <Route
-          path="/*"
-          element={
-            <RequireAuth>
-              <GameApp />
-            </RequireAuth>
-          }
-        />
-      </Routes>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <OfflineBanner />
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+          <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+          <Route path="/reset-password" element={<ResetPasswordForm />} />
+          <Route path="/verify-email" element={<VerifyEmailScreen />} />
+          <Route
+            path="/*"
+            element={
+              <RequireAuth>
+                <GameApp />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </ToastProvider>
   );
 }

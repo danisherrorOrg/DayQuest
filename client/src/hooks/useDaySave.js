@@ -2,6 +2,7 @@ import { useState } from "react";
 import { saveDay } from "../api/days.js";
 import { todayDateString } from "../game/date.js";
 import { setPendingSave, clearPendingSave } from "../api/offlineQueue.js";
+import { useToast } from "../context/ToastContext.jsx";
 
 const SAVE_LABELS = {
   idle: "Save This Day",
@@ -15,6 +16,7 @@ const SAVE_LABELS = {
 // payload shape and status handling only live in one place.
 export function useDaySave({ mode, cards, blocks, summaryText }) {
   const [saveStatus, setSaveStatus] = useState("idle");
+  const showToast = useToast();
 
   async function handleSave() {
     setSaveStatus("saving");
@@ -49,12 +51,17 @@ export function useDaySave({ mode, cards, blocks, summaryText }) {
       await saveDay(date, entry);
       clearPendingSave();
       setSaveStatus("saved");
+      showToast("Day saved ✓");
     } catch (err) {
       // Persisted so it survives a tab close/refresh — usePendingSaveFlush
       // retries it automatically once the connection comes back, even if
       // the user has already navigated away from this screen by then.
       if (err.isNetworkError) setPendingSave(date, entry);
       setSaveStatus(err.isNetworkError ? "offline" : "error");
+      showToast(
+        err.isNetworkError ? "Offline — we'll save it when you're back" : "Could not save",
+        "error",
+      );
     } finally {
       setTimeout(() => setSaveStatus("idle"), 1600);
     }

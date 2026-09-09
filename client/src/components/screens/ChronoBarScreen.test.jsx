@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ChronoBarScreen from "./ChronoBarScreen.jsx";
+import { ToastProvider } from "../../context/ToastContext.jsx";
 
 vi.mock("../../api/days.js", () => ({
   saveDay: vi.fn(() => Promise.resolve({})),
@@ -28,14 +29,16 @@ const blocks = [
 
 function renderScreen(props = {}) {
   return render(
-    <ChronoBarScreen
-      mode="builder"
-      cards={[]}
-      blocks={blocks}
-      date="2026-09-05"
-      onRestart={vi.fn()}
-      {...props}
-    />,
+    <ToastProvider>
+      <ChronoBarScreen
+        mode="builder"
+        cards={[]}
+        blocks={blocks}
+        date="2026-09-05"
+        onRestart={vi.fn()}
+        {...props}
+      />
+    </ToastProvider>,
   );
 }
 
