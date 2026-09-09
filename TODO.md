@@ -8,28 +8,41 @@ individual fixes. What's left is tracked below.
 
 ## Navigation / routing
 
-- [ ] **In-app screens aren't real routes — a refresh always drops you back
-      to mode-select.** Found during a manual UI pass (2026-09-05, temp
-      account register → verify → log card → build → save → My Days →
-      Settings → delete account — see git history/session notes for the
-      full walkthrough). `App.jsx`'s `<Routes>` only cover the auth screens
-      (`/login`, `/register`, etc.) plus a single catch-all `/` for the
-      entire logged-in app; everything inside it — mode-select, My Days,
-      Settings, Log Cards, Timeline Builder, the dialogue/chrono recap —
-      is just a `useState("screen")` value in `GameApp`, never reflected in
-      the URL. Confirmed two ways: navigating straight to `/days` bounces
-      through the `<Route path="*" element={<Navigate to="/" replace />}>`
-      catch-all back to mode-select instead of opening `MyDaysScreen`; and
-      clicking "My Days" (a `<button>`, not a `<Link>` — URL stays `/`)
-      then reloading the same URL also resets to mode-select, discarding
-      whatever screen the user was on. Same would apply mid-entry (Log
-      Cards/Timeline Builder) or mid-recap — a reload loses that screen's
-      state too, though the underlying data isn't lost since nothing is
-      saved until "Save This Day" is clicked. No fix attempted yet; likely
-      shape is giving each screen its own path under `/` (`/days`,
-      `/settings`, `/log`, `/timeline`) via nested `<Route>`s and swapping
-      the `useState("screen")` switch for `useNavigate`/`useParams`, but
-      that's a bigger refactor than this pass was scoped for.
+- [x] ~~**In-app screens aren't real routes — a refresh always drops you
+      back to mode-select.**~~ Fixed (2026-09-09): `GameApp` in `App.jsx`
+      now mounts a nested `<Routes>` under `/*` with a real path per screen
+      — `/` (mode-select), `/days`, `/settings`, `/log`, `/timeline`,
+      `/recap`, `/recap/chrono` — instead of a `useState("screen")` switch.
+      All the former `setScreen(...)` calls became `navigate(...)` calls.
+      `run` (the in-progress cards/blocks/date being reviewed) and
+      `timelineJump` stay as lifted state in `GameApp` since they're
+      ephemeral, non-serializable entry data — a reload mid-recap or
+      mid-timeline-jump still loses that in-memory state (same as before;
+      nothing is saved until "Save This Day"), but `/recap` and
+      `/recap/chrono` redirect to `/` rather than crashing if hit with no
+      `run` in memory (e.g. a raw refresh). Verified with `npm run lint`,
+      `npm run build -w client`, `npm test` (111 tests, all passing), and
+      (2026-09-09, in a session where the Atlas cluster was actually
+      reachable) a live Chrome walkthrough against a throwaway registered
+      account: clicking "My Days"/"Settings" now updates the URL to
+      `/days`/`/settings` and renders the right screen, instead of staying
+      on `/` with just internal state changing. A *full page reload* on
+      those routes wasn't confirmed live end-to-end — see the new
+      session-refresh item below, found during this same pass.
+- [ ] **A full page reload while logged in logs the user out**, landing on
+      `/login` instead of back on whatever screen they were on. Found
+      2026-09-09 while live-verifying the routing fix above: reloading
+      `/days` (or any in-app route) fires `AuthContext`'s startup
+      `POST /api/auth/refresh` (meant to silently trade the httpOnly
+      refresh cookie for a new access token — see the comment above that
+      call in `AuthContext.jsx`), which came back `401`, so `clearSession()`
+      ran and `RequireAuth` redirected to `/login`. Not caused by or fixed
+      by the routing change above — `RequireAuth.jsx`/`AuthContext.jsx`
+      weren't touched — and unconfirmed whether it's a real bug (e.g. the
+      refresh cookie's `SameSite`/`secure` flags not surviving a top-level
+      navigation the way an XHR does) or an artifact specific to the
+      Chrome-automation profile used for that pass. Worth reproducing in a
+      normal browser tab before treating it as a real bug.
 
 ## UI/UX polish
 
@@ -39,11 +52,25 @@ character, dialogue box, sky gradient) has real personality; everything
 around it currently reads as a plain, unstyled CRUD admin panel, and the
 two halves don't feel like the same product yet.
 
-- [ ] **Auth screens (Login/Register) have no branding** — just a heading,
-      two inputs, a button. No logo, tagline, or visual hint this is a
-      game about your day. Add a small logo/mark, a one-line tagline, and
-      maybe a sliver of the game's purple/gradient palette as a background
-      accent instead of flat cream.
+- [x] ~~**Auth screens (Login/Register) have no branding**~~ Fixed
+      (2026-09-09): added a shared `AuthLayout` (`client/src/components/
+      auth/AuthLayout.jsx`) — a "D" monogram mark, "Day Story" wordmark,
+      and a one-line tagline on the game's dark purple gradient
+      (`.authScreen`/`.authBrand` in `index.css`), with the existing cream
+      `.panel` floating below with rounded top corners so it reads as one
+      card rather than a hard color switch. Applied to all five auth
+      screens (Login, Register, Forgot/Reset Password, Verify Email), not
+      just Login/Register, since they all shared the same bare shell and
+      leaving the others flat would've looked inconsistent mid-flow.
+      Verified with lint, `npm run build -w client`, `npm test` (111
+      passing), and a live look in Chrome — including a real register →
+      click "My Days"/"Settings" smoke test against a throwaway account
+      (deleted after) that also re-confirmed the routing fix above:
+      client-side nav to `/days` and `/settings` render those screens with
+      the URL updated to match, not mode-select. (A *full page reload* on
+      those routes hit a separate, pre-existing issue — see new item
+      below — so that specific half of the routing fix wasn't confirmed
+      live, only by code review.)
 - [ ] **Native form controls clash with the custom theme** — the
       "Reminder emails are on" checkbox (`SettingsScreen`) and the category
       `<select>` (`LogCardModeScreen`) both render as unstyled browser

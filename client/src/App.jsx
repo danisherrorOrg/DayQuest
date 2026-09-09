@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import LoginForm from "./components/auth/LoginForm.jsx";
@@ -19,28 +19,30 @@ import ChronoBarScreen from "./components/screens/ChronoBarScreen.jsx";
 import { usePendingSaveFlush } from "./hooks/usePendingSaveFlush.js";
 import { todayDateString } from "./game/date.js";
 
+// Maps a ModeSelectScreen pick ("cards" | "timeline" | "days" | "settings")
+// to the real path it now lives at.
+const MODE_PICK_PATH = { cards: "/log", timeline: "/timeline", days: "/days", settings: "/settings" };
+
 function GameApp() {
   const justSynced = usePendingSaveFlush();
-  const [screen, setScreen] = useState("mode");
+  const navigate = useNavigate();
   const [run, setRun] = useState(null); // { mode, cards, blocks, replay? }
-  const [reviewView, setReviewView] = useState("dialogue");
   const [timelineJump, setTimelineJump] = useState(null); // { anchorMinutes } | null
 
   function handleBuildFromLogCards(cards) {
     setRun({ mode: "cards", cards, date: todayDateString() });
-    setScreen("recap");
+    navigate("/recap");
   }
 
   function handleBuildFromBuilderBlocks(blocks) {
     setRun({ mode: "builder", blocks, date: todayDateString() });
-    setScreen("recap");
+    navigate("/recap");
   }
 
   function handleRestart() {
     setRun(null);
     setTimelineJump(null);
-    setReviewView("dialogue");
-    setScreen("mode");
+    navigate("/");
   }
 
   // Opens a previously saved day (from MyDaysScreen) in the review screens,
@@ -54,15 +56,13 @@ function GameApp() {
       date: day.date,
       replay: true,
     });
-    setReviewView("dialogue");
-    setScreen("recap");
+    navigate("/recap");
   }
 
   function handleExitReplay() {
     setRun(null);
     setTimelineJump(null);
-    setReviewView("dialogue");
-    setScreen("days");
+    navigate("/days");
   }
 
   // The chrono bar's "tap empty space" shortcut: only offered in builder
@@ -70,15 +70,15 @@ function GameApp() {
   // be carried back into the builder and re-edited without losing anything.
   function handleJumpToBuilder(minutes) {
     setTimelineJump({ anchorMinutes: minutes });
-    setScreen("timeline");
+    navigate("/timeline");
   }
 
   function handleTimelineBack() {
     if (timelineJump) {
       setTimelineJump(null);
-      setScreen("recap");
+      navigate("/recap");
     } else {
-      setScreen("mode");
+      navigate("/");
     }
   }
 
@@ -87,51 +87,80 @@ function GameApp() {
     handleBuildFromBuilderBlocks(blocks);
   }
 
+  function handleChangeReviewView(view) {
+    navigate(view === "chrono" ? "/recap/chrono" : "/recap");
+  }
+
   return (
     <div id="app">
       {justSynced && <div className="syncBanner">✓ Back online — your saved day went through.</div>}
       <VerifyEmailBanner />
-      {screen === "mode" && <ModeSelectScreen onPick={setScreen} />}
-      {screen === "days" && (
-        <MyDaysScreen onBack={() => setScreen("mode")} onSelectDay={handleReplayDay} />
-      )}
-      {screen === "settings" && <SettingsScreen onBack={() => setScreen("mode")} />}
-      {screen === "cards" && (
-        <LogCardModeScreen onBack={() => setScreen("mode")} onBuild={handleBuildFromLogCards} />
-      )}
-      {screen === "timeline" && (
-        <TimelineBuilderScreen
-          onBack={handleTimelineBack}
-          onBuild={handleTimelineBuild}
-          initialBlocks={timelineJump && run?.mode === "builder" ? run.blocks : []}
-          initialAnchorMinutes={timelineJump ? timelineJump.anchorMinutes : null}
+      <Routes>
+        <Route
+          index
+          element={<ModeSelectScreen onPick={(screen) => navigate(MODE_PICK_PATH[screen])} />}
         />
-      )}
-      {screen === "recap" && run && reviewView === "dialogue" && (
-        <DialogueRecapScreen
-          mode={run.mode}
-          cards={run.cards}
-          blocks={run.blocks}
-          date={run.date}
-          onRestart={run.replay ? handleExitReplay : handleRestart}
-          replay={run.replay}
-          reviewView={reviewView}
-          onChangeReviewView={setReviewView}
+        <Route
+          path="days"
+          element={<MyDaysScreen onBack={() => navigate("/")} onSelectDay={handleReplayDay} />}
         />
-      )}
-      {screen === "recap" && run && reviewView === "chrono" && (
-        <ChronoBarScreen
-          mode={run.mode}
-          cards={run.cards}
-          blocks={run.blocks}
-          date={run.date}
-          onRestart={run.replay ? handleExitReplay : handleRestart}
-          replay={run.replay}
-          reviewView={reviewView}
-          onChangeReviewView={setReviewView}
-          onJumpToBuilder={!run.replay && run.mode === "builder" ? handleJumpToBuilder : undefined}
+        <Route path="settings" element={<SettingsScreen onBack={() => navigate("/")} />} />
+        <Route
+          path="log"
+          element={<LogCardModeScreen onBack={() => navigate("/")} onBuild={handleBuildFromLogCards} />}
         />
-      )}
+        <Route
+          path="timeline"
+          element={
+            <TimelineBuilderScreen
+              onBack={handleTimelineBack}
+              onBuild={handleTimelineBuild}
+              initialBlocks={timelineJump && run?.mode === "builder" ? run.blocks : []}
+              initialAnchorMinutes={timelineJump ? timelineJump.anchorMinutes : null}
+            />
+          }
+        />
+        <Route
+          path="recap"
+          element={
+            run ? (
+              <DialogueRecapScreen
+                mode={run.mode}
+                cards={run.cards}
+                blocks={run.blocks}
+                date={run.date}
+                onRestart={run.replay ? handleExitReplay : handleRestart}
+                replay={run.replay}
+                reviewView="dialogue"
+                onChangeReviewView={handleChangeReviewView}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="recap/chrono"
+          element={
+            run ? (
+              <ChronoBarScreen
+                mode={run.mode}
+                cards={run.cards}
+                blocks={run.blocks}
+                date={run.date}
+                onRestart={run.replay ? handleExitReplay : handleRestart}
+                replay={run.replay}
+                reviewView="chrono"
+                onChangeReviewView={handleChangeReviewView}
+                onJumpToBuilder={!run.replay && run.mode === "builder" ? handleJumpToBuilder : undefined}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }
@@ -147,14 +176,13 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPasswordForm />} />
         <Route path="/verify-email" element={<VerifyEmailScreen />} />
         <Route
-          path="/"
+          path="/*"
           element={
             <RequireAuth>
               <GameApp />
             </RequireAuth>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
   );
