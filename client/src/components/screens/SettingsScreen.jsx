@@ -123,13 +123,25 @@ export default function SettingsScreen({ onBack }) {
           <h3 style={{ marginTop: 24 }}>Reminders</h3>
           <p className="sub">A daily email if you haven&apos;t logged today yet.</p>
           {reminderError && <p className="authError">{reminderError}</p>}
-          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <label className="checkboxRow">
             <input
               type="checkbox"
+              className="checkboxInput"
               checked={remindersEnabled}
               disabled={reminderSaving}
               onChange={handleToggleReminders}
             />
+            <span className="checkboxBox" aria-hidden="true">
+              <svg viewBox="0 0 12 10" fill="none">
+                <path
+                  d="M1 5L4.5 8.5L11 1.5"
+                  stroke="#fff8ec"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
             <span className="sub" style={{ margin: 0 }}>
               {remindersEnabled ? "Reminder emails are on" : "Reminder emails are off"}
             </span>

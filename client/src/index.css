@@ -409,6 +409,73 @@ body,
   resize: vertical;
 }
 
+/* Custom dropdown arrow on every themed <select> (native ones clash with
+   the cream/serif design) — appearance:none drops the OS chrome, the SVG
+   background-image draws a chevron that matches the theme instead. */
+#logCardForm select,
+.builderPopupSheet select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237A5A42' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+/* ---- Custom checkbox ---- */
+.checkboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  cursor: pointer;
+}
+.checkboxInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.checkboxBox {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #e8d2b0;
+  background: #fffefb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.checkboxBox svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.checkboxInput:checked + .checkboxBox {
+  background: #c1502e;
+  border-color: #c1502e;
+}
+.checkboxInput:checked + .checkboxBox svg {
+  opacity: 1;
+}
+.checkboxInput:disabled + .checkboxBox {
+  opacity: 0.6;
+}
+.checkboxInput:focus-visible + .checkboxBox {
+  outline: 2px solid #c1502e;
+  outline-offset: 2px;
+}
+
 /* ---- Timeline builder (drag-select) ---- */
 .builderTotals {
   font-size: 12px;

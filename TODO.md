@@ -71,12 +71,24 @@ two halves don't feel like the same product yet.
       those routes hit a separate, pre-existing issue — see new item
       below — so that specific half of the routing fix wasn't confirmed
       live, only by code review.)
-- [ ] **Native form controls clash with the custom theme** — the
-      "Reminder emails are on" checkbox (`SettingsScreen`) and the category
-      `<select>` (`LogCardModeScreen`) both render as unstyled browser
-      defaults against an otherwise custom cream/serif design. Restyle both
-      to match (custom checkbox, custom dropdown) — cheapest fix with the
-      biggest consistency payoff.
+- [x] ~~**Native form controls clash with the custom theme**~~ Fixed
+      (2026-09-09): the reminders checkbox in `SettingsScreen` is now a
+      custom `.checkboxRow`/`.checkboxBox` (hidden native input, styled
+      box + checkmark SVG driven by `:checked`/`:disabled`/`:focus-visible`
+      via a CSS sibling selector — see `index.css`). Every themed
+      `<select>` (`#logCardForm select` in `LogCardModeScreen`, and
+      `.builderPopupSheet select` in `TimelineBuilderScreen`'s block-edit
+      popup, which had the identical native-arrow mismatch even though the
+      TODO only named the log-card one) gets `appearance: none` plus an
+      inline-SVG chevron background-image instead of the OS-default arrow
+      — no markup changes needed for the selects, just CSS, since they
+      already had matching border/radius/background from the existing
+      `#logCardForm select` / `.builderPopupSheet select` rules. Verified
+      with lint, Prettier, `npm run build -w client`, and `npm test` (111
+      passing); **not** verified visually in a browser — the Chrome
+      extension was disconnected for this pass (unlike the previous two
+      items, which did get a live look) — worth a quick manual glance at
+      Settings and Log Cards before calling this fully done.
 - [ ] **No visible confirmation that "Save This Day" worked** — clicking it
       gives no on-screen feedback (only visible via the network tab).
       Add a toast/banner on save success (and ideally on Settings actions —
